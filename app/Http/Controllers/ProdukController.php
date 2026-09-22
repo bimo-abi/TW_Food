@@ -6,55 +6,71 @@ use App\Models\Produk;
 
 class ProdukController extends Controller
 {
+    /**
+     * Menampilkan katalog produk public.
+     */
     public function index()
     {
-        $produk = Produk::all();
+        $produk = Produk::where('status_aktif', true)
+            ->with([
+                'varian' => function ($query) {
+                    $query->where('status_aktif', true)
+                        ->with([
+                            'daftarHarga' => function ($harga) {
+                                $harga->where('jenis_harga', 'ecer')
+                                    ->where('status_aktif', true);
+                            }
+                        ]);
+                }
+            ])
+            ->orderBy('nama_produk')
+            ->get();
 
         return view('produk.index', compact('produk'));
     }
 
+    /**
+     * Method create tidak digunakan untuk public website.
+     * CRUD produk dilakukan melalui admin.
+     */
     public function create()
     {
-        return view('produk.create');
+        abort(404);
     }
 
+    /**
+     * Method store tidak digunakan untuk public website.
+     * Penambahan produk dilakukan melalui admin.
+     */
     public function store()
     {
-        Produk::create([
-            'nama_produk' => request('nama_produk'),
-            'harga' => request('harga'),
-            'stok' => request('stok'),
-        ]);
-
-        return redirect('/produk');
+        abort(404);
     }
 
+    /**
+     * Method edit tidak digunakan untuk public website.
+     * Edit produk dilakukan melalui admin.
+     */
     public function edit($id)
     {
-        $produk = Produk::findOrFail($id);
-
-        return view('produk.edit', compact('produk'));
+        abort(404);
     }
 
+    /**
+     * Method update tidak digunakan untuk public website.
+     * Update produk dilakukan melalui admin.
+     */
     public function update($id)
     {
-        $produk = Produk::findOrFail($id);
-
-        $produk->update([
-            'nama_produk' => request('nama_produk'),
-            'harga' => request('harga'),
-            'stok' => request('stok'),
-        ]);
-
-        return redirect('/produk');
+        abort(404);
     }
 
+    /**
+     * Method destroy tidak digunakan untuk public website.
+     * Penghapusan produk dilakukan melalui admin.
+     */
     public function destroy($id)
     {
-        $produk = Produk::findOrFail($id);
-
-        $produk->delete();
-
-        return redirect('/produk');
+        abort(404);
     }
 }

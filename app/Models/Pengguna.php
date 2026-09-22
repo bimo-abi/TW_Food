@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Pengguna extends Model
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+class Pengguna extends Authenticatable
 {
+    use Notifiable;
+
     protected $table = 'pengguna';
 
     protected $primaryKey = 'id_pengguna';
@@ -21,9 +23,18 @@ class Pengguna extends Model
         'status_aktif',
     ];
 
+    protected $hidden = [
+        'kata_sandi',
+    ];
+
     protected $casts = [
         'status_aktif' => 'boolean',
     ];
+
+    public function getAuthPassword()
+    {
+        return $this->kata_sandi;
+    }
 
     public function alamat()
     {
@@ -55,7 +66,10 @@ class Pengguna extends Model
 
     public function notifikasi()
     {
-        return $this->hasMany(Notifikasi::class, 'id_pengguna');
+        return $this->hasMany(
+            Notifikasi::class,
+            'id_pengguna'
+        );
     }
 
     public function pengaturanMitra()

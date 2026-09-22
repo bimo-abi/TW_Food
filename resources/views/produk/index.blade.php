@@ -1,65 +1,138 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.public')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Produk - TWFood')
 
-    <title>Produk TWFOOD</title>
-</head>
+@section('content')
 
-<body>
 
-    <h1>Daftar Produk TWFOOD</h1>
-    <a href="/produk/create">
-        + Tambah Produk
-    </a>
+    {{-- =====================================================
+         HEADER
+    ====================================================== --}}
 
-    <br><br>
+    <section class="section">
 
-    <table border="1" cellpadding="10">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Produk</th>
-                <th>Harga</th>
-                <th>Stok</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
+        <div class="container">
 
-        <tbody>
-            @foreach ($produk as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->nama_produk }}</td>
-                    <td>
-                        Rp {{ number_format($item->harga, 0, ',', '.') }}
-                    </td>
-                    <td>{{ $item->stok }}</td>
-                    <td>
+            <div class="section-title">
 
-                        <a href="/produk/{{ $item->id }}/edit">
-                            Edit
-                        </a>
+                <h1>
+                    Produk TWFood
+                </h1>
 
-                        <form action="/produk/{{ $item->id }}" method="POST" style="display: inline;">
+                <p>
+                    Kenali berbagai produk
+                    olahan TWFood.
+                </p>
 
-                            @csrf
-                            @method('DELETE')
+            </div>
 
-                            <button type="submit" onclick="return confirm('Yakin ingin menghapus produk ini?')">
-                                Hapus
-                            </button>
 
-                        </form>
+            {{-- =================================================
+                 PRODUK
+            ================================================== --}}
 
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+            <div class="products">
 
-</body>
+                @forelse ($produk as $item)
 
-</html>
+                    <div class="product-card">
+
+
+                        {{-- FOTO PRODUK --}}
+
+                        @if ($item->foto_produk)
+                            <img src="{{ asset('storage/' . $item->foto_produk) }}"
+                                alt="{{ $item->nama_produk }}" class="product-image">
+                        @else
+                            <div class="product-image"></div>
+                        @endif
+
+
+                        <div class="product-content">
+
+
+                            {{-- NAMA PRODUK --}}
+
+                            <h3>
+                                {{ $item->nama_produk }}
+                            </h3>
+
+
+                            {{-- DESKRIPSI --}}
+
+                            <p>
+                                {{ $item->deskripsi ?? 'Produk TWFood.' }}
+                            </p>
+
+
+                            {{-- VARIAN --}}
+
+                            @forelse ($item->varian as $varian)
+                                <div
+                                    style="
+                                        margin-top:20px;
+                                        padding-top:15px;
+                                        border-top:1px solid #eee;
+                                    ">
+
+                                    <strong>
+                                        {{ $varian->nama_varian }}
+                                    </strong>
+
+
+                                    @forelse ($varian->daftarHarga
+                                            as $harga)
+                                        <p>
+
+                                            Rp
+                                            {{ number_format($harga->harga, 0, ',', '.') }}
+
+                                            /
+                                            {{ $varian->satuan_jual }}
+
+                                        </p>
+
+                                    @empty
+
+                                        <p>
+                                            Harga belum tersedia.
+                                        </p>
+                                    @endforelse
+
+                                </div>
+
+                            @empty
+
+                                <p>
+                                    Varian belum tersedia.
+                                </p>
+                            @endforelse
+
+
+                            {{-- DOWNLOAD APP --}}
+
+                            <a href="#" class="button">
+                                Download Aplikasi
+                            </a>
+
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <p>
+                        Belum ada produk.
+                    </p>
+
+                @endforelse
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+@endsection

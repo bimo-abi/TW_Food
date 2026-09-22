@@ -11,10 +11,7 @@ class TwfoodProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // =========================================================
-        // 1. KALDU JAMUR TIRAM DAN SHITAKE
-        // =========================================================
-
+        //KALDU JAMUR TIRAM DAN SHITAKE
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Kaldu Jamur Tiram dan Shitake'
@@ -65,10 +62,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-
-        // =========================================================
-        // 2. KALDU JAMUR TIRAM MPASI
-        // =========================================================
+        //KALDU JAMUR TIRAM MPASI
 
         $produk = Produk::updateOrCreate(
             [
@@ -120,11 +114,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-
-        // =========================================================
-        // 3. JAMUR TIRAM KRISPI
-        // =========================================================
-
+        //JAMUR TIRAM KRISPI
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Jamur Tiram Krispi'
@@ -175,11 +165,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-
-        // =========================================================
         // 4. KECAP JAMUR TIRAM
-        // =========================================================
-
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Kecap Jamur Tiram'
@@ -191,10 +177,8 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-        // -------------------------
-        // Varian M
-        // -------------------------
 
+        // Varian M
         $varianM = VarianProduk::updateOrCreate(
             [
                 'id_produk' => $produk->id_produk,
@@ -232,10 +216,8 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-        // -------------------------
-        // Varian P
-        // -------------------------
 
+        // Varian P
         $varianP = VarianProduk::updateOrCreate(
             [
                 'id_produk' => $produk->id_produk,
@@ -273,10 +255,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-        // -------------------------
         // Varian A
-        // -------------------------
-
         $varianA = VarianProduk::updateOrCreate(
             [
                 'id_produk' => $produk->id_produk,
@@ -314,11 +293,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-
-        // =========================================================
-        // 5. MIE INSTAN JAMUR TIRAM
-        // =========================================================
-
+        //MIE INSTAN JAMUR TIRAM
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Mie Instan Jamur Tiram'
@@ -370,10 +345,7 @@ class TwfoodProductSeeder extends Seeder
         );
 
 
-        // =========================================================
-        // 6. STIK JANTUNG PISANG
-        // =========================================================
-
+        //STIK JANTUNG PISANG
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Stik Jantung Pisang'
@@ -424,11 +396,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-
-        // =========================================================
-        // 7. ABON JAMUR TIRAM
-        // =========================================================
-
+        // ABON JAMUR TIRAM
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Abon Jamur Tiram'
@@ -479,11 +447,7 @@ class TwfoodProductSeeder extends Seeder
             ]
         );
 
-
-        // =========================================================
-        // 8. KERUPUK JAMUR TIRAM
-        // =========================================================
-
+        //KERUPUK JAMUR TIRAM
         $produk = Produk::updateOrCreate(
             [
                 'nama_produk' => 'Kerupuk Jamur Tiram'

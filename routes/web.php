@@ -12,6 +12,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ResepController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\KontakController;
+use App\Http\Controllers\AdminPesananController;
 
 //login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])
@@ -26,6 +27,18 @@ Route::post('/admin/logout', [LoginController::class, 'logout'])
 //admin
 Route::get('/admin', [AdminController::class, 'dashboard'])
     ->name('admin.dashboard')
+    ->middleware('admin');
+
+Route::get('/admin/pesanan', [AdminPesananController::class, 'index'])
+    ->name('admin.pesanan.index')
+    ->middleware('admin');
+
+Route::get('/admin/pesanan/{id}', [AdminPesananController::class, 'show'])
+    ->name('admin.pesanan.show')
+    ->middleware('admin');
+
+Route::put('/admin/pesanan/{id}/status', [AdminPesananController::class, 'update'])
+    ->name('admin.pesanan.update-status')
     ->middleware('admin');
 
 //admin produk
@@ -184,16 +197,6 @@ Route::put(
 )
     ->name('admin.stok.update')
     ->middleware('admin');
-
-//website public
-Route::get('/', [HomeController::class, 'index'])
-    ->name('home');
-    
-Route::get('/produk', [ProdukController::class, 'index'])
-    ->name('produk.public');
-
-Route::get('/produk/{id}', [ProdukController::class, 'show'])
-    ->name('produk.detail');
 
 //public website
 Route::get('/', [HomeController::class, 'index'])

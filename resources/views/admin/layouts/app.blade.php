@@ -168,7 +168,7 @@
                     Produk
                 </a>
 
-                <a href="#">
+                <a href="{{ route('admin.pesanan.index') }}">
                     Pesanan
                 </a>
 

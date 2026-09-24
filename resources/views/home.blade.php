@@ -5,7 +5,7 @@
 @section('content')
 
 
-//HERO
+    {{-- hero --}}
 
     <section class="hero">
 
@@ -36,7 +36,7 @@
 
 
 
-//KENALI PRODUK KAMI
+    {{-- produk kami --}}
 
 
     <section class="section">
@@ -66,8 +66,8 @@
                         {{-- FOTO PRODUK --}}
 
                         @if ($item->foto_produk)
-                            <img src="{{ asset('storage/' . $item->foto_produk) }}"
-                                alt="{{ $item->nama_produk }}" class="product-image">
+                            <img src="{{ asset('storage/' . $item->foto_produk) }}" alt="{{ $item->nama_produk }}"
+                                class="product-image">
                         @else
                             <div class="product-image"></div>
                         @endif
@@ -84,7 +84,7 @@
                             </p>
 
 
-                            <a href="{{ route('produk.public') }}" class="button">
+                            <a href="{{ route('produk.detail', $item->id_produk) }}" class="button">
                                 Lihat Detail
                             </a>
 

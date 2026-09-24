@@ -29,6 +29,25 @@ class ProdukController extends Controller
         return view('produk.index', compact('produk'));
     }
 
+    public function show($id)
+    {
+        $produk = Produk::where('status_aktif', true)
+            ->with([
+                'varian' => function ($query) {
+                    $query->where('status_aktif', true)
+                        ->with([
+                            'daftarHarga' => function ($harga) {
+                                $harga->where('jenis_harga', 'ecer')
+                                    ->where('status_aktif', true);
+                            }
+                        ]);
+                }
+            ])
+            ->findOrFail($id);
+
+        return view('produk.show', compact('produk'));
+    }
+
     /**
      * Method create tidak digunakan untuk public website.
      * CRUD produk dilakukan melalui admin.

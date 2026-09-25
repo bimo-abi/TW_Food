@@ -22,12 +22,20 @@ class DetailPesanan extends Model
 
     public function pesanan()
     {
-        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+        return $this->belongsTo(
+            Pesanan::class,
+            'id_pesanan',
+            'id_pesanan'
+        );
     }
 
     public function varian()
     {
-        return $this->belongsTo(VarianProduk::class, 'id_varian');
+        return $this->belongsTo(
+            VarianProduk::class,
+            'id_varian',
+            'id_varian'
+        );
     }
 
     public function detailRetur()

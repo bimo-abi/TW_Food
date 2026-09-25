@@ -30,30 +30,55 @@ class Pesanan extends Model
 
     public function pengguna()
     {
-        return $this->belongsTo(Pengguna::class, 'id_pengguna');
+        return $this->belongsTo(
+            Pengguna::class,
+            'id_pengguna',
+            'id_pengguna'
+        );
     }
 
     public function alamat()
     {
-        return $this->belongsTo(Alamat::class, 'id_alamat');
+        return $this->belongsTo(
+            Alamat::class,
+            'id_alamat',
+            'id_alamat'
+        );
     }
 
     public function outlet()
     {
-        return $this->belongsTo(Outlet::class, 'id_outlet');
+        return $this->belongsTo(
+            Outlet::class,
+            'id_outlet',
+            'id_outlet'
+        );
     }
 
-    public function detail()
+    public function detailPesanan()
     {
-        return $this->hasMany(DetailPesanan::class, 'id_pesanan');
+        return $this->hasMany(
+            DetailPesanan::class,
+            'id_pesanan',
+            'id_pesanan'
+        );
     }
+
     public function pembayaran()
     {
-        return $this->hasMany(Pembayaran::class, 'id_pesanan');
+        return $this->hasMany(
+            Pembayaran::class,
+            'id_pesanan',
+            'id_pesanan'
+        );
     }
 
     public function retur()
     {
-        return $this->hasMany(Retur::class, 'id_pesanan');
+        return $this->hasMany(
+            Retur::class,
+            'id_pesanan',
+            'id_pesanan'
+        );
     }
 }

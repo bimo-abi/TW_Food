@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             TwfoodOutletSeeder::class,
             TwfoodUserSeeder::class,
             TwfoodResepSeeder::class,
+            TwfoodPesananSeeder::class,
         ]);
     }
 }

@@ -41,6 +41,10 @@ Route::put('/admin/pesanan/{id}/status', [AdminPesananController::class, 'update
     ->name('admin.pesanan.update-status')
     ->middleware('admin');
 
+Route::put('/admin/pesanan/{id}/pengiriman', [AdminPesananController::class, 'updatePengiriman'])
+    ->name('admin.pesanan.update-pengiriman')
+    ->middleware('admin');
+
 //admin produk
 Route::get('/admin/produk', [AdminProdukController::class, 'index'])
     ->name('admin.produk.index')

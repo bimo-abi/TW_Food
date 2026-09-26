@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 
@@ -43,19 +44,8 @@ class AdminPesananController extends Controller
         $pesanan = Pesanan::findOrFail($id);
 
         $request->validate([
-            'status_pesanan' => 'required|in:
-            pesanan_diterima,
-            sedang_diproses,
-            pesanan_siap,
-            menunggu_pengiriman,
-            dalam_pengiriman,
-            diterima,
-            siap_diambil,
-            pesanan_diambil,
-            selesai,
-            dibatalkan',
+            'status_pesanan' => 'required|in:pesanan_diterima,sedang_diproses,pesanan_siap,menunggu_pengiriman,dalam_pengiriman,diterima,siap_diambil,pesanan_diambil,selesai,dibatalkan',
         ]);
-
         $statusBaru = $request->status_pesanan;
         $statusSekarang = $pesanan->status_pesanan;
 
@@ -101,5 +91,37 @@ class AdminPesananController extends Controller
         return redirect()
             ->route('admin.pesanan.show', $pesanan->id_pesanan)
             ->with('success', 'Status pesanan berhasil diperbarui.');
+    }
+
+    public function updatePengiriman(Request $request, $id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+
+        // Hanya pesanan delivery yang boleh memiliki informasi pengiriman
+        if ($pesanan->jenis_pesanan !== 'delivery') {
+            return back()->withErrors([
+                'pengiriman' => 'Informasi pengiriman hanya dapat diisi untuk pesanan delivery.'
+            ]);
+        }
+
+        // Kurir harus sudah ditentukan oleh sistem
+        if (!in_array($pesanan->kurir, ['gosend', 'jnt'])) {
+            return back()->withErrors([
+                'pengiriman' => 'Kurir pesanan belum ditentukan dengan benar.'
+            ]);
+        }
+
+        $data = $request->validate([
+            'nomor_resi' => 'nullable|string|max:100',
+            'tautan_pelacakan' => 'nullable|url|max:255',
+        ]);
+
+        $pesanan->nomor_resi = $data['nomor_resi'] ?? null;
+        $pesanan->tautan_pelacakan = $data['tautan_pelacakan'] ?? null;
+        $pesanan->save();
+
+        return redirect()
+            ->route('admin.pesanan.show', $pesanan->id_pesanan)
+            ->with('success', 'Informasi pengiriman berhasil disimpan.');
     }
 }

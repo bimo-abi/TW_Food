@@ -28,6 +28,7 @@
                             <th>Pelanggan</th>
                             <th>Total</th>
                             <th>Pembayaran</th>
+                            <th>Pengiriman</th>
                             <th>Status Pesanan</th>
                             <th>Aksi</th>
                         </tr>
@@ -52,6 +53,34 @@
 
                                 <td>
                                     {{ ucwords(str_replace('_', ' ', $item->status_pembayaran)) }}
+                                </td>
+
+                                <td>
+                                    @if ($item->jenis_pesanan === 'pickup')
+                                        Pickup
+                                    @elseif ($item->jenis_pesanan === 'delivery')
+                                        @if ($item->kurir === 'gosend')
+                                            GoSend
+                                        @elseif ($item->kurir === 'jnt')
+                                            J&T
+                                        @else
+                                            Delivery
+                                        @endif
+
+                                        <br>
+
+                                        @if ($item->nomor_resi)
+                                            <small>
+                                                Resi: {{ $item->nomor_resi }}
+                                            </small>
+                                        @else
+                                            <small>
+                                                Resi: Belum diisi
+                                            </small>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
                                 </td>
 
                                 <td>

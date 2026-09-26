@@ -61,22 +61,34 @@
                                     @elseif ($item->jenis_pesanan === 'delivery')
                                         @if ($item->kurir === 'gosend')
                                             GoSend
+
+                                            <br>
+
+                                            @if ($item->tautan_pelacakan)
+                                                <small>
+                                                    Tracking: Tersedia
+                                                </small>
+                                            @else
+                                                <small>
+                                                    Tracking: Belum diisi
+                                                </small>
+                                            @endif
                                         @elseif ($item->kurir === 'jnt')
                                             J&T
+
+                                            <br>
+
+                                            @if ($item->nomor_resi)
+                                                <small>
+                                                    Resi: {{ $item->nomor_resi }}
+                                                </small>
+                                            @else
+                                                <small>
+                                                    Resi: Belum diisi
+                                                </small>
+                                            @endif
                                         @else
                                             Delivery
-                                        @endif
-
-                                        <br>
-
-                                        @if ($item->nomor_resi)
-                                            <small>
-                                                Resi: {{ $item->nomor_resi }}
-                                            </small>
-                                        @else
-                                            <small>
-                                                Resi: Belum diisi
-                                            </small>
                                         @endif
                                     @else
                                         -

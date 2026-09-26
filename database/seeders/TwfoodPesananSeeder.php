@@ -129,7 +129,7 @@ class TwfoodPesananSeeder extends Seeder
                 'total_pesanan' => $subtotalDelivery,
                 'status_pembayaran' => 'lunas',
                 'status_pesanan' => 'pesanan_diterima',
-                'kurir' => null,
+                'kurir' => 'gosend',
                 'nomor_resi' => null,
                 'tautan_pelacakan' => null,
                 'catatan' => 'Pesanan dummy untuk testing delivery.',

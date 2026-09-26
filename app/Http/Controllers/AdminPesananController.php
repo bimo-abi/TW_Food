@@ -49,6 +49,44 @@ class AdminPesananController extends Controller
         $statusBaru = $request->status_pesanan;
         $statusSekarang = $pesanan->status_pesanan;
 
+        // Nomor resi wajib diisi sebelum pesanan mulai dikirim
+        // Validasi informasi tracking sebelum pesanan mulai dikirim
+        if (
+            $statusSekarang === 'menunggu_pengiriman' &&
+            $statusBaru === 'dalam_pengiriman' &&
+            $pesanan->jenis_pesanan === 'delivery'
+        ) {
+            // GoSend menggunakan tautan tracking
+            if (
+                $pesanan->kurir === 'gosend' &&
+                empty($pesanan->tautan_pelacakan)
+            ) {
+                return back()->withErrors([
+                    'status_pesanan' =>
+                    'Tautan tracking wajib diisi sebelum pesanan GoSend mulai dikirim.'
+                ]);
+            }
+
+            // J&T menggunakan nomor resi
+            if (
+                $pesanan->kurir === 'jnt' &&
+                empty($pesanan->nomor_resi)
+            ) {
+                return back()->withErrors([
+                    'status_pesanan' =>
+                    'Nomor resi wajib diisi sebelum pesanan J&T mulai dikirim.'
+                ]);
+            }
+
+            // Kurir harus valid
+            if (!in_array($pesanan->kurir, ['gosend', 'jnt'])) {
+                return back()->withErrors([
+                    'status_pesanan' =>
+                    'Kurir pesanan belum ditentukan dengan benar.'
+                ]);
+            }
+        }
+
         // Alur status delivery
         $alurDelivery = [
             'pesanan_diterima' => ['sedang_diproses', 'dibatalkan'],

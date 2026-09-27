@@ -29,6 +29,12 @@ return new class extends Migration
 
             $table->string('foto_profil', 255)->nullable();
 
+            $table->enum('status_verifikasi', [
+                'menunggu_verifikasi',
+                'disetujui',
+                'ditolak'
+            ])->nullable();
+
             $table->boolean('status_aktif')->default(true);
 
             $table->timestamps();

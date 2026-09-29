@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\Api\OutletController;
+use App\Http\Controllers\Api\AlamatController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -25,3 +26,19 @@ Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::get('/resep', [ResepController::class, 'index']);
 Route::get('/resep/{id}', [ResepController::class, 'show']);
 Route::get('/outlet', [OutletController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/alamat', [AlamatController::class, 'index']);
+
+    Route::post('/alamat', [AlamatController::class, 'store']);
+
+    Route::put(
+        '/alamat/{idAlamat}',
+        [AlamatController::class, 'update']
+    );
+
+    Route::delete(
+        '/alamat/{idAlamat}',
+        [AlamatController::class, 'destroy']
+    );
+});

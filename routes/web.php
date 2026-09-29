@@ -209,6 +209,9 @@ Route::get('/', [HomeController::class, 'index'])
 Route::get('/produk', [ProdukController::class, 'index'])
     ->name('produk.public');
 
+Route::get('/produk/{id}', [ProdukController::class, 'show'])
+    ->name('produk.detail');
+
 Route::get('/resep', [ResepController::class, 'index'])
     ->name('resep.public');
 

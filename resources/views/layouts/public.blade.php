@@ -285,7 +285,7 @@
         <div class="logo">
 
             <a href="{{ route('home') }}">
-                TWFOOD
+                TWFood
             </a>
 
         </div>

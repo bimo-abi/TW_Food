@@ -30,7 +30,7 @@
                             <th>Pembayaran</th>
                             <th>Pengiriman</th>
                             <th>Status Pesanan</th>
-                            <th>Aksi</th>
+                            <th style="text-align: center">Aksi</th>
                         </tr>
                     </thead>
 
@@ -100,9 +100,16 @@
                                 </td>
 
                                 <td>
-                                    <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}" class="button">
-                                        Detail
-                                    </a>
+
+                                    <div class="crud-btn-Produk">
+
+
+                                        <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}" class="button">
+                                            <button type="button">
+                                                Detail
+                                            </button>
+                                        </a>
+                                    </div>
                                 </td>
 
                             </tr>

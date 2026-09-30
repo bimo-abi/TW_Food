@@ -67,7 +67,7 @@
             style="
             background: #f8d7da;
             color: #842029;
-            padding: 12px;  
+            padding: 12px;
             margin-bottom: 20px;
             border-radius: 5px;
         ">
@@ -128,7 +128,7 @@
                         Status
                     </th>
 
-                    <th>
+                    <th style="text-align: center">
                         Aksi
                     </th>
 
@@ -193,49 +193,53 @@
 
 
                         <td>
+                            <div class="crud-btn-Produk">
+                                <a href="{{ route('admin.produk.edit', $item->id_produk) }}">
+                                    <button type="button">
+                                        Edit
+                                    </button>
+                                </a>
+                                <br>
+                                <a href="{{ route('admin.varian.index', $item->id_produk) }}">
+                                    <button type="button">
+                                        Varian
+                                    </button>
+                                </a>
+                                <br>
+                                <form action="{{ route('admin.produk.toggle-status', $item->id_produk) }}" method="POST"
+                                    style="display: inline;">
 
-                            <a href="{{ route('admin.produk.edit', $item->id_produk) }}">
-                                Edit
-                            </a>
-                            <br>
-                            <a href="{{ route('admin.varian.index', $item->id_produk) }}">
-                                Varian
-                            </a>
-                            <br>
-                            <form action="{{ route('admin.produk.toggle-status', $item->id_produk) }}" method="POST"
-                                style="display: inline;">
+                                    @csrf
 
-                                @csrf
+                                    @method('PATCH')
 
-                                @method('PATCH')
+                                    <button type="submit">
+                                        @if ($item->status_aktif)
+                                            Nonaktifkan
+                                        @else
+                                            Aktifkan
+                                        @endif
+                                    </button>
 
-                                <button type="submit">
-                                    @if ($item->status_aktif)
-                                        Nonaktifkan
-                                    @else
-                                        Aktifkan
-                                    @endif
-                                </button>
-
-                            </form>
+                                </form>
 
 
-                            <br>
+                                <br>
 
 
-                            <form action="{{ route('admin.produk.destroy', $item->id_produk) }}" method="POST"
-                                style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                                <form action="{{ route('admin.produk.destroy', $item->id_produk) }}" method="POST"
+                                    style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
 
-                                @csrf
+                                    @csrf
 
-                                @method('DELETE')
+                                    @method('DELETE')
 
-                                <button type="submit">
-                                    Hapus
-                                </button>
+                                    <button type="submit">
+                                        Hapus
+                                    </button>
 
-                            </form>
-
+                                </form>
+                            </div>
                         </td>
 
                     </tr>

@@ -9,7 +9,8 @@
 
 @section('content')
 
-    <div style="
+    <div
+        style="
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -39,10 +40,8 @@
         </div>
 
 
-        <a href="{{ route(
-        'admin.harga.create',
-        $varian->id_varian
-    ) }}" style="
+        <a href="{{ route('admin.harga.create', $varian->id_varian) }}"
+            style="
                     background: #198754;
                     color: white;
                     padding: 10px 15px;
@@ -56,8 +55,8 @@
 
 
     @if (session('success'))
-
-        <div style="
+        <div
+            style="
                     background: #d1e7dd;
                     color: #0f5132;
                     padding: 12px;
@@ -68,13 +67,13 @@
             {{ session('success') }}
 
         </div>
-
     @endif
 
 
     @if ($errors->any())
 
-        <div style="
+        <div
+            style="
                     background: #f8d7da;
                     color: #842029;
                     padding: 12px;
@@ -83,11 +82,9 @@
                 ">
 
             @foreach ($errors->all() as $error)
-
                 <div>
                     {{ $error }}
                 </div>
-
             @endforeach
 
         </div>
@@ -108,7 +105,7 @@
                     <th>Harga</th>
                     <th>Minimal Pembelian</th>
                     <th>Status</th>
-                    <th>Aksi</th>
+                    <th style="text-align: center">Aksi</th>
 
                 </tr>
 
@@ -118,122 +115,114 @@
             <tbody>
 
                 @forelse ($harga as $item)
+                    <tr>
 
-                            <tr>
-
-                                <td>
-                                    {{ $loop->iteration }}
-                                </td>
-
-
-                                <td>
-
-                                    @if ($item->jenis_harga === 'ecer')
-
-                                        Ecer
-
-                                    @else
-
-                                        Grosir
-
-                                    @endif
-
-                                </td>
+                        <td>
+                            {{ $loop->iteration }}
+                        </td>
 
 
-                                <td>
+                        <td>
 
-                                    Rp
-                                    {{ number_format(
-                        $item->harga,
-                        0,
-                        ',',
-                        '.'
-                    ) }}
+                            @if ($item->jenis_harga === 'ecer')
+                                Ecer
+                            @else
+                                Grosir
+                            @endif
 
-                                </td>
+                        </td>
 
 
-                                <td>
+                        <td>
 
-                                    {{ $item->minimal_pembelian }}
+                            Rp
+                            {{ number_format($item->harga, 0, ',', '.') }}
 
-                                    {{ $item->satuan_minimal ?? '' }}
-
-                                </td>
-
-
-                                <td>
-
-                                    @if ($item->status_aktif)
-                                        Aktif
-                                    @else
-                                        Tidak Aktif
-                                    @endif
-
-                                </td>
+                        </td>
 
 
-                                <td>
+                        <td>
 
-                                    <a href="{{ route(
-                        'admin.harga.edit',
-                        $item->id_daftar_harga
-                    ) }}">
+                            {{ $item->minimal_pembelian }}
+
+                            {{ $item->satuan_minimal ?? '' }}
+
+                        </td>
+
+
+                        <td>
+
+                            @if ($item->status_aktif)
+                                Aktif
+                            @else
+                                Tidak Aktif
+                            @endif
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="crud-btn-Produk">
+
+
+                                <a
+                                    href="{{ route('admin.harga.edit', $item->id_daftar_harga) }}">
+                                    <button type="button">
                                         Edit
-                                    </a>
+                                    </button>
+                                </a>
 
 
-                                    <br>
+                                <br>
 
 
-                                    <form action="{{ route(
-                        'admin.harga.toggle-status',
-                        $item->id_daftar_harga
-                    ) }}" method="POST" style="display: inline;">
+                                <form
+                                    action="{{ route('admin.harga.toggle-status', $item->id_daftar_harga) }}"
+                                    method="POST" style="display: inline;">
 
-                                        @csrf
+                                    @csrf
 
-                                        @method('PATCH')
+                                    @method('PATCH')
 
-                                        <button type="submit">
+                                    <button type="submit">
 
-                                            @if ($item->status_aktif)
-                                                Nonaktifkan
-                                            @else
-                                                Aktifkan
-                                            @endif
+                                        @if ($item->status_aktif)
+                                            Nonaktifkan
+                                        @else
+                                            Aktifkan
+                                        @endif
 
-                                        </button>
+                                    </button>
 
-                                    </form>
-
-
-                                    <br>
+                                </form>
 
 
-                                    <form action="{{ route(
-                        'admin.harga.destroy',
-                        $item->id_daftar_harga
-                    ) }}" method="POST" style="display: inline;" onsubmit="
+                                <br>
+
+
+                                <form
+                                    action="{{ route('admin.harga.destroy', $item->id_daftar_harga) }}"
+                                    method="POST" style="display: inline;"
+                                    onsubmit="
                                                     return confirm(
                                                         'Yakin ingin menghapus harga ini?'
                                                     )
                                                 ">
 
-                                        @csrf
+                                    @csrf
 
-                                        @method('DELETE')
+                                    @method('DELETE')
 
-                                        <button type="submit">
-                                            Hapus
-                                        </button>
+                                    <button type="submit">
+                                        Hapus
+                                    </button>
 
-                                    </form>
+                                </form>
+                            </div>
+                        </td>
 
-                                </td>
-
-                            </tr>
+                    </tr>
 
                 @empty
 
@@ -244,7 +233,6 @@
                         </td>
 
                     </tr>
-
                 @endforelse
 
             </tbody>

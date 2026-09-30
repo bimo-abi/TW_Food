@@ -18,7 +18,8 @@
 
     @if ($errors->any())
 
-        <div style="
+        <div
+            style="
                     background: #f8d7da;
                     color: #842029;
                     padding: 12px;
@@ -27,11 +28,9 @@
                 ">
 
             @foreach ($errors->all() as $error)
-
                 <div>
                     {{ $error }}
                 </div>
-
             @endforeach
 
         </div>
@@ -42,8 +41,8 @@
     {{-- Pesan error --}}
 
     @if (session('error'))
-
-        <div style="
+        <div
+            style="
                     background: #f8d7da;
                     color: #842029;
                     padding: 12px;
@@ -54,16 +53,13 @@
             {{ session('error') }}
 
         </div>
-
     @endif
 
 
     <div class="card">
 
-        <form action="{{ route(
-        'admin.resep.update',
-        $resep->id_resep
-    ) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.resep.update', $resep->id_resep) }}" method="POST"
+            enctype="multipart/form-data">
 
             @csrf
 
@@ -80,10 +76,9 @@
 
                 <br>
 
-                <input type="text" name="judul" value="{{ old(
-        'judul',
-        $resep->judul
-    ) }}" placeholder="Contoh: Tumis Jamur Tiram" required maxlength="100" style="
+                <input type="text" name="judul" value="{{ old('judul', $resep->judul) }}"
+                    placeholder="Contoh: Tumis Jamur Tiram" required maxlength="100"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">
@@ -101,13 +96,11 @@
 
                 <br>
 
-                <textarea name="deskripsi" rows="5" maxlength="5000" placeholder="Masukkan deskripsi resep" style="
+                <textarea name="deskripsi" rows="5" maxlength="5000" placeholder="Masukkan deskripsi resep"
+                    style="
                             width: 100%;
                             padding: 10px;
-                        ">{{ old(
-        'deskripsi',
-        $resep->deskripsi
-    ) }}</textarea>
+                        ">{{ old('deskripsi', $resep->deskripsi) }}</textarea>
 
             </div>
 
@@ -123,21 +116,17 @@
                 <br>
 
                 @if ($resep->foto)
-
-                            <img src="{{ asset(
-                        'storage/' . $resep->foto
-                    ) }}" alt="{{ $resep->judul }}" width="150" height="150" style="
+                    <img src="{{ asset('storage/' . $resep->foto) }}"
+                        alt="{{ $resep->judul }}" width="150" height="150"
+                        style="
                                             object-fit: cover;
                                             border-radius: 5px;
                                             margin-top: 10px;
                                         ">
-
                 @else
-
                     <p>
                         Belum ada foto.
                     </p>
-
                 @endif
 
             </div>
@@ -173,13 +162,11 @@
 
                 <br>
 
-                <textarea name="bahan" rows="8" maxlength="10000" placeholder="Tuliskan bahan-bahan yang diperlukan" style="
+                <textarea name="bahan" rows="8" maxlength="10000" placeholder="Tuliskan bahan-bahan yang diperlukan"
+                    style="
                             width: 100%;
                             padding: 10px;
-                        ">{{ old(
-        'bahan',
-        $resep->bahan
-    ) }}</textarea>
+                        ">{{ old('bahan', $resep->bahan) }}</textarea>
 
             </div>
 
@@ -195,13 +182,11 @@
                 <br>
 
                 <textarea name="langkah_pembuatan" rows="10" maxlength="10000"
-                    placeholder="Tuliskan langkah-langkah pembuatan resep" style="
+                    placeholder="Tuliskan langkah-langkah pembuatan resep"
+                    style="
                             width: 100%;
                             padding: 10px;
-                        ">{{ old(
-        'langkah_pembuatan',
-        $resep->langkah_pembuatan
-    ) }}</textarea>
+                        ">{{ old('langkah_pembuatan', $resep->langkah_pembuatan) }}</textarea>
 
             </div>
 
@@ -216,10 +201,10 @@
 
                 <br>
 
-                <input type="number" name="waktu_memasak" value="{{ old(
-        'waktu_memasak',
-        $resep->waktu_memasak
-    ) }}" min="1" max="1440" placeholder="Contoh: 30" style="
+                <input type="number" name="waktu_memasak"
+                    value="{{ old('waktu_memasak', $resep->waktu_memasak) }}" min="1"
+                    max="1440" placeholder="Contoh: 30"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">
@@ -235,7 +220,9 @@
 
 
             <a href="{{ route('admin.resep.index') }}">
-                Kembali
+                <button type="button">
+                    Kembali
+                </button>
             </a>
 
         </form>

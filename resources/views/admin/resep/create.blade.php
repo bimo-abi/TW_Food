@@ -18,7 +18,8 @@
 
     @if ($errors->any())
 
-        <div style="
+        <div
+            style="
                     background: #f8d7da;
                     color: #842029;
                     padding: 12px;
@@ -27,11 +28,9 @@
                 ">
 
             @foreach ($errors->all() as $error)
-
                 <div>
                     {{ $error }}
                 </div>
-
             @endforeach
 
         </div>
@@ -42,8 +41,8 @@
     {{-- Pesan error --}}
 
     @if (session('error'))
-
-        <div style="
+        <div
+            style="
                     background: #f8d7da;
                     color: #842029;
                     padding: 12px;
@@ -54,7 +53,6 @@
             {{ session('error') }}
 
         </div>
-
     @endif
 
 
@@ -75,8 +73,9 @@
 
                 <br>
 
-                <input type="text" name="judul" value="{{ old('judul') }}" placeholder="Contoh: Tumis Jamur Tiram" required
-                    maxlength="100" style="
+                <input type="text" name="judul" value="{{ old('judul') }}" placeholder="Contoh: Tumis Jamur Tiram"
+                    required maxlength="100"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">
@@ -94,7 +93,8 @@
 
                 <br>
 
-                <textarea name="deskripsi" rows="5" maxlength="5000" placeholder="Masukkan deskripsi resep" style="
+                <textarea name="deskripsi" rows="5" maxlength="5000" placeholder="Masukkan deskripsi resep"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">{{ old('deskripsi') }}</textarea>
@@ -114,7 +114,7 @@
 
                 <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp">
 
-                <p>
+                <p style="color: rgb(111, 111, 111); font-size: 12px;">
                     Format: JPG, JPEG, PNG, WEBP.
                     Maksimal 2 MB.
                 </p>
@@ -132,7 +132,8 @@
 
                 <br>
 
-                <textarea name="bahan" rows="8" maxlength="10000" placeholder="Tuliskan bahan-bahan yang diperlukan" style="
+                <textarea name="bahan" rows="8" maxlength="10000" placeholder="Tuliskan bahan-bahan yang diperlukan"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">{{ old('bahan') }}</textarea>
@@ -151,7 +152,8 @@
                 <br>
 
                 <textarea name="langkah_pembuatan" rows="10" maxlength="10000"
-                    placeholder="Tuliskan langkah-langkah pembuatan resep" style="
+                    placeholder="Tuliskan langkah-langkah pembuatan resep"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">{{ old('langkah_pembuatan') }}</textarea>
@@ -170,7 +172,8 @@
                 <br>
 
                 <input type="number" name="waktu_memasak" value="{{ old('waktu_memasak') }}" min="1" max="1440"
-                    placeholder="Contoh: 30" style="
+                    placeholder="Contoh: 30"
+                    style="
                             width: 100%;
                             padding: 10px;
                         ">
@@ -186,7 +189,9 @@
 
 
             <a href="{{ route('admin.resep.index') }}">
-                Kembali
+                <button type="button">
+                    Kembali
+                </button>
             </a>
 
         </form>

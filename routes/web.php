@@ -16,6 +16,9 @@ use App\Http\Controllers\AdminPesananController;
 use App\Http\Controllers\AdminResepController;
 use App\Http\Controllers\AdminResepProdukController;
 
+//Dashboard
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
 //login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])
     ->name('admin.login');

@@ -139,6 +139,18 @@
         th {
             background: #f5f5f5;
         }
+
+        a,
+        a:visited {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .crud-btn-Produk {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
     </style>
 
 </head>
@@ -153,9 +165,11 @@
 
         <aside class="sidebar">
 
-            <h2>
-                TWFood
-            </h2>
+            <a href="{{ route('home') }}">
+                <h2>
+                    TWFood
+                </h2>
+            </a>
 
 
             <nav class="sidebar-menu">

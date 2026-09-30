@@ -103,6 +103,7 @@
                         $varian->stok
                     ) }}"
                     min="0"
+                    max="99"
                     required
                     style="
                         width: 100%;

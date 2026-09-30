@@ -15,19 +15,20 @@ return new class extends Migration
 
             $table->text('alamat');
 
-            $table->string('nomor_telepon', 20)->nullable();
+            $table->string('nomor_telepon', 20)
+                ->nullable();
 
-            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('latitude', 10, 8)
+                ->nullable();
 
-            $table->decimal('longitude', 11, 8)->nullable();
+            $table->decimal('longitude', 11, 8)
+                ->nullable();
 
-            $table->time('jam_buka')->nullable();
+            $table->text('deskripsi')
+                ->nullable();
 
-            $table->time('jam_tutup')->nullable();
-
-            $table->text('deskripsi')->nullable();
-
-            $table->string('foto', 255)->nullable();
+            $table->string('foto', 255)
+                ->nullable();
 
             $table->timestamps();
         });

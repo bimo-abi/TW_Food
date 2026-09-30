@@ -16,8 +16,6 @@ class Outlet extends Model
         'nomor_telepon',
         'latitude',
         'longitude',
-        'jam_buka',
-        'jam_tutup',
         'deskripsi',
         'foto',
     ];
@@ -25,12 +23,19 @@ class Outlet extends Model
     protected $casts = [
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
-        'jam_buka' => 'datetime:H:i',
-        'jam_tutup' => 'datetime:H:i',
     ];
 
     public function pesanan()
     {
         return $this->hasMany(Pesanan::class, 'id_outlet');
+    }
+
+    public function jamOperasional()
+    {
+        return $this->hasMany(
+            JamOperasionalOutlet::class,
+            'id_outlet',
+            'id_outlet'
+        );
     }
 }

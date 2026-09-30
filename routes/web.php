@@ -9,11 +9,12 @@ use App\Http\Controllers\AdminVarianProdukController;
 use App\Http\Controllers\AdminDaftarHargaController;
 use App\Http\Controllers\AdminStokController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ResepController;
+use App\Http\Controllers\OutletController;
+use App\Http\Controllers\KontakController;
+use App\Http\Controllers\AdminPesananController;
 
-// ==========================
-// LOGIN ADMIN
-// ==========================
-
+//login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])
     ->name('admin.login');
 
@@ -23,19 +24,28 @@ Route::post('/admin/login', [LoginController::class, 'login'])
 Route::post('/admin/logout', [LoginController::class, 'logout'])
     ->name('admin.logout');
 
-
-// ==========================
-// ADMIN
-// ==========================
-
+//admin
 Route::get('/admin', [AdminController::class, 'dashboard'])
     ->name('admin.dashboard')
     ->middleware('admin');
 
-// ==========================
-// ADMIN - PRODUK
-// ==========================
+Route::get('/admin/pesanan', [AdminPesananController::class, 'index'])
+    ->name('admin.pesanan.index')
+    ->middleware('admin');
 
+Route::get('/admin/pesanan/{id}', [AdminPesananController::class, 'show'])
+    ->name('admin.pesanan.show')
+    ->middleware('admin');
+
+Route::put('/admin/pesanan/{id}/status', [AdminPesananController::class, 'update'])
+    ->name('admin.pesanan.update-status')
+    ->middleware('admin');
+
+Route::put('/admin/pesanan/{id}/pengiriman', [AdminPesananController::class, 'updatePengiriman'])
+    ->name('admin.pesanan.update-pengiriman')
+    ->middleware('admin');
+
+//admin produk
 Route::get('/admin/produk', [AdminProdukController::class, 'index'])
     ->name('admin.produk.index')
     ->middleware('admin');
@@ -64,10 +74,7 @@ Route::delete('/admin/produk/{id}', [AdminProdukController::class, 'destroy'])
     ->name('admin.produk.destroy')
     ->middleware('admin');
 
-// ==========================
-// ADMIN - VARIAN PRODUK
-// ==========================
-
+//varian produk
 Route::get(
     '/admin/produk/{idProduk}/varian',
     [AdminVarianProdukController::class, 'index']
@@ -123,10 +130,7 @@ Route::delete(
     ->name('admin.varian.destroy')
     ->middleware('admin');
 
-// ==========================
-// ADMIN - DAFTAR HARGA
-// ==========================
-
+//admin daftar harga
 Route::get(
     '/admin/varian/{idVarian}/harga',
     [AdminDaftarHargaController::class, 'index']
@@ -182,10 +186,7 @@ Route::delete(
     ->name('admin.harga.destroy')
     ->middleware('admin');
 
-// ==========================
-// ADMIN - STOK & PRE-ORDER
-// ==========================
-
+//admin stok dan pre order
 Route::get(
     '/admin/varian/{idVarian}/stok',
     [AdminStokController::class, 'edit']
@@ -201,30 +202,21 @@ Route::put(
     ->name('admin.stok.update')
     ->middleware('admin');
 
-//website public
-Route::get('/', [HomeController::class, 'index'])
-    ->name('home');
-Route::get('/produk', [ProdukController::class, 'index'])
-    ->name('produk.public');
-
-// ==========================
-// PUBLIC WEBSITE
-// ==========================
-
+//public website
 Route::get('/', [HomeController::class, 'index'])
     ->name('home');
 
 Route::get('/produk', [ProdukController::class, 'index'])
     ->name('produk.public');
 
-Route::get('/resep', function () {
-    return 'Halaman Resep';
-})->name('resep.public');
+Route::get('/resep', [ResepController::class, 'index'])
+    ->name('resep.public');
 
-Route::get('/outlet', function () {
-    return 'Halaman Outlet';
-})->name('outlet.public');
+Route::get('/resep/{id}', [ResepController::class, 'show'])
+    ->name('resep.detail');
 
-Route::get('/kontak', function () {
-    return 'Halaman Kontak';
-})->name('kontak.public');
+Route::get('/outlet', [OutletController::class, 'index'])
+    ->name('outlet.public');
+
+Route::get('/kontak', [KontakController::class, 'index'])
+    ->name('kontak.public');

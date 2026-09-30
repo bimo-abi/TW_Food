@@ -24,8 +24,6 @@ Route::post('/admin/login', [LoginController::class, 'login'])
 Route::post('/admin/logout', [LoginController::class, 'logout'])
     ->name('admin.logout');
 
-// Jaga-jaga: kalau ada yang akses /admin/dashboard, arahkan ke /admin
-Route::redirect('/admin/dashboard', '/admin');
 
 //pakai middleware
 Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
@@ -35,7 +33,7 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         ->name('dashboard.home');
 
     // Pesanan
-    Route::get('/pesanan', [AdminPesananController::class, 'dashboard'])
+    Route::get('/pesanan', [AdminPesananController::class, 'index'])
         ->name('pesanan.index');
 
     Route::get('/pesanan/{id}', [AdminPesananController::class, 'show'])
@@ -121,11 +119,7 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         ->name('stok.update');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Website Publik
-|--------------------------------------------------------------------------
-*/
+//website publik
 Route::get('/', [HomeController::class, 'index'])
     ->name('home');
 

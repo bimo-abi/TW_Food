@@ -104,6 +104,7 @@
                     ) }}"
                     min="0"
                     max="99"
+                    oninvalid="this.setCustomValidity('Stok tidak diperbolehkan melebihi 99.')"
                     required
                     style="
                         width: 100%;

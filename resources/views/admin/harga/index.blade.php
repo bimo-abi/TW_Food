@@ -10,11 +10,11 @@
 @section('content')
 
     <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    ">
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        ">
 
         <div>
 
@@ -39,19 +39,16 @@
         </div>
 
 
-        <a
-            href="{{ route(
-                'admin.harga.create',
-                $varian->id_varian
-            ) }}"
-            style="
-                background: #198754;
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                text-decoration: none;
-            "
-        >
+        <a href="{{ route(
+        'admin.harga.create',
+        $varian->id_varian
+    ) }}" style="
+                    background: #198754;
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    text-decoration: none;
+                ">
             + Tambah Harga
         </a>
 
@@ -61,12 +58,12 @@
     @if (session('success'))
 
         <div style="
-            background: #d1e7dd;
-            color: #0f5132;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
+                    background: #d1e7dd;
+                    color: #0f5132;
+                    padding: 12px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                ">
 
             {{ session('success') }}
 
@@ -78,12 +75,12 @@
     @if ($errors->any())
 
         <div style="
-            background: #f8d7da;
-            color: #842029;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
+                    background: #f8d7da;
+                    color: #842029;
+                    padding: 12px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                ">
 
             @foreach ($errors->all() as $error)
 
@@ -122,132 +119,121 @@
 
                 @forelse ($harga as $item)
 
-                    <tr>
+                            <tr>
 
-                        <td>
-                            {{ $loop->iteration }}
-                        </td>
-
-
-                        <td>
-
-                            @if ($item->jenis_harga === 'ecer')
-
-                                Ecer
-
-                            @else
-
-                                Grosir
-
-                            @endif
-
-                        </td>
+                                <td>
+                                    {{ $loop->iteration }}
+                                </td>
 
 
-                        <td>
+                                <td>
 
-                            Rp
-                            {{ number_format(
-                                $item->harga,
-                                0,
-                                ',',
-                                '.'
-                            ) }}
+                                    @if ($item->jenis_harga === 'ecer')
 
-                        </td>
+                                        Ecer
 
-
-                        <td>
-
-                            {{ $item->minimal_pembelian }}
-
-                            {{ $item->satuan_minimal ?? '' }}
-
-                        </td>
-
-
-                        <td>
-
-                            @if ($item->status_aktif)
-                                Aktif
-                            @else
-                                Tidak Aktif
-                            @endif
-
-                        </td>
-
-
-                        <td>
-
-                            <a
-                                href="{{ route(
-                                    'admin.harga.edit',
-                                    $item->id_daftar_harga
-                                ) }}"
-                            >
-                                Edit
-                            </a>
-
-
-                            <br>
-
-
-                            <form
-                                action="{{ route(
-                                    'admin.harga.toggle-status',
-                                    $item->id_daftar_harga
-                                ) }}"
-                                method="POST"
-                                style="display: inline;"
-                            >
-
-                                @csrf
-
-                                @method('PATCH')
-
-                                <button type="submit">
-
-                                    @if ($item->status_aktif)
-                                        Nonaktifkan
                                     @else
-                                        Aktifkan
+
+                                        Grosir
+
                                     @endif
 
-                                </button>
-
-                            </form>
+                                </td>
 
 
-                            <br>
+                                <td>
+
+                                    Rp
+                                    {{ number_format(
+                        $item->harga,
+                        0,
+                        ',',
+                        '.'
+                    ) }}
+
+                                </td>
 
 
-                            <form
-                                action="{{ route(
-                                    'admin.harga.destroy',
-                                    $item->id_daftar_harga
-                                ) }}"
-                                method="POST"
-                                style="display: inline;"
-                                onsubmit="
-                                    return confirm(
-                                        'Yakin ingin menghapus harga ini?'
-                                    )
-                                "
-                            >
+                                <td>
 
-                                @csrf
+                                    {{ $item->minimal_pembelian }}
 
-                                @method('DELETE')
+                                    {{ $item->satuan_minimal ?? '' }}
 
-                                <button type="submit">
-                                    Hapus
-                                </button>
+                                </td>
 
-                            </form>
 
-                        </td>
+                                <td>
 
-                    </tr>
+                                    @if ($item->status_aktif)
+                                        Aktif
+                                    @else
+                                        Tidak Aktif
+                                    @endif
+
+                                </td>
+
+
+                                <td>
+
+                                    <a href="{{ route(
+                        'admin.harga.edit',
+                        $item->id_daftar_harga
+                    ) }}">
+                                        Edit
+                                    </a>
+
+
+                                    <br>
+
+
+                                    <form action="{{ route(
+                        'admin.harga.toggle-status',
+                        $item->id_daftar_harga
+                    ) }}" method="POST" style="display: inline;">
+
+                                        @csrf
+
+                                        @method('PATCH')
+
+                                        <button type="submit">
+
+                                            @if ($item->status_aktif)
+                                                Nonaktifkan
+                                            @else
+                                                Aktifkan
+                                            @endif
+
+                                        </button>
+
+                                    </form>
+
+
+                                    <br>
+
+
+                                    <form action="{{ route(
+                        'admin.harga.destroy',
+                        $item->id_daftar_harga
+                    ) }}" method="POST" style="display: inline;" onsubmit="
+                                                    return confirm(
+                                                        'Yakin ingin menghapus harga ini?'
+                                                    )
+                                                ">
+
+                                        @csrf
+
+                                        @method('DELETE')
+
+                                        <button type="submit">
+                                            Hapus
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
 
                 @empty
 
@@ -271,12 +257,7 @@
     <br>
 
 
-    <a
-        href="{{ route(
-            'admin.varian.index',
-            $varian->id_varian
-        ) }}"
-    >
+    <a href="{{ route('admin.varian.index', $varian->id_produk) }}">
         ← Kembali ke Varian
     </a>
 

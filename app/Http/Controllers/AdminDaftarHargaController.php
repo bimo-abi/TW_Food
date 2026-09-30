@@ -24,85 +24,159 @@ class AdminDaftarHargaController extends Controller
             ->orderBy('jenis_harga')
             ->get();
 
-        return view('admin.harga.index', compact(
-            'varian',
-            'harga'
-        ));
+        return view(
+            'admin.harga.index',
+            compact(
+                'varian',
+                'harga'
+            )
+        );
     }
 
 
     /**
-     * Form tambah harga.
+     * Menampilkan form tambah harga.
      */
     public function create($idVarian)
     {
         $varian = VarianProduk::with('produk')
             ->findOrFail($idVarian);
 
-        return view('admin.harga.create', compact(
-            'varian'
-        ));
+        return view(
+            'admin.harga.create',
+            compact('varian')
+        );
     }
 
 
     /**
      * Menyimpan harga baru.
      */
-    public function store(Request $request, $idVarian)
-    {
+    public function store(
+        Request $request,
+        $idVarian
+    ) {
         $varian = VarianProduk::findOrFail($idVarian);
 
-        $data = $request->validate([
-            'jenis_harga' => [
-                'required',
-                'in:ecer,grosir',
-                Rule::unique('daftar_harga', 'jenis_harga')
-                    ->where(function ($query) use ($idVarian) {
+        // Validasi data.
+        $data = $request->validate(
+            [
+                'jenis_harga' => [
+                    'required',
+                    'in:ecer,grosir',
+
+                    Rule::unique(
+                        'daftar_harga',
+                        'jenis_harga'
+                    )->where(function ($query) use ($idVarian) {
                         return $query->where(
                             'id_varian',
                             $idVarian
                         );
                     }),
-            ],
+                ],
 
-            'harga' => [
-                'required',
-                'integer',
-                'min:0',
-            ],
+                'harga' => [
+                    'required',
+                    'regex:/^[0-9]+$/',
+                    'integer',
+                    'min:100',
+                    'max:10000000',
+                ],
 
-            'minimal_pembelian' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
+                'minimal_pembelian' => [
+                    'required',
+                    'regex:/^[0-9]+$/',
+                    'integer',
+                    'min:1',
+                    'max:1000000',
+                ],
 
-            'satuan_minimal' => [
-                'nullable',
-                'string',
-                'max:20',
+                'satuan_minimal' => [
+                    'nullable',
+                    'string',
+                    'max:20',
+                ],
             ],
-        ]);
+            [
+                'jenis_harga.required' =>
+                'Jenis harga wajib dipilih.',
+
+                'jenis_harga.in' =>
+                'Jenis harga hanya boleh ecer atau grosir.',
+
+                'jenis_harga.unique' =>
+                'Jenis harga tersebut sudah ada pada varian ini.',
+
+                'harga.required' =>
+                'Harga wajib diisi.',
+
+                'harga.regex' =>
+                'Harga hanya boleh berisi angka.',
+
+                'harga.integer' =>
+                'Harga harus berupa angka bulat.',
+
+                'harga.min' =>
+                'Harga minimal Rp100.',
+
+                'harga.max' =>
+                'Harga maksimal Rp10.000.000.',
+
+                'minimal_pembelian.required' =>
+                'Minimal pembelian wajib diisi.',
+
+                'minimal_pembelian.regex' =>
+                'Minimal pembelian hanya boleh berisi angka.',
+
+                'minimal_pembelian.integer' =>
+                'Minimal pembelian harus berupa angka bulat.',
+
+                'minimal_pembelian.min' =>
+                'Minimal pembelian minimal 1.',
+
+                'minimal_pembelian.max' =>
+                'Minimal pembelian maksimal 1.000.000.',
+
+                'satuan_minimal.string' =>
+                'Satuan minimal harus berupa teks.',
+
+                'satuan_minimal.max' =>
+                'Satuan minimal maksimal 20 karakter.',
+            ]
+        );
 
         $data['id_varian'] = $varian->id_varian;
         $data['status_aktif'] = true;
 
-        DaftarHarga::create($data);
+        try {
+            DaftarHarga::create($data);
 
-        return redirect()
-            ->route(
-                'admin.harga.index',
-                $varian->id_varian
-            )
-            ->with(
-                'success',
-                'Daftar harga berhasil ditambahkan.'
-            );
+            return redirect()
+                ->route(
+                    'admin.harga.index',
+                    $varian->id_varian
+                )
+                ->with(
+                    'success',
+                    'Daftar harga berhasil ditambahkan.'
+                );
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Daftar harga gagal ditambahkan. Silakan coba lagi.'
+                );
+        }
     }
 
 
     /**
-     * Form edit harga.
+     * Menampilkan form edit harga.
      */
     public function edit($idHarga)
     {
@@ -110,72 +184,143 @@ class AdminDaftarHargaController extends Controller
             'varian.produk'
         )->findOrFail($idHarga);
 
-        return view('admin.harga.edit', compact(
-            'harga'
-        ));
+        return view(
+            'admin.harga.edit',
+            compact('harga')
+        );
     }
 
 
     /**
-     * Update harga.
+     * Mengupdate harga.
      */
-    public function update(Request $request, $idHarga)
-    {
+    public function update(
+        Request $request,
+        $idHarga
+    ) {
         $harga = DaftarHarga::findOrFail($idHarga);
 
-        $data = $request->validate([
-            'jenis_harga' => [
-                'required',
-                'in:ecer,grosir',
+        // Validasi data.
+        $data = $request->validate(
+            [
+                'jenis_harga' => [
+                    'required',
+                    'in:ecer,grosir',
 
-                Rule::unique('daftar_harga', 'jenis_harga')
-                    ->where(function ($query) use ($harga) {
-                        return $query->where(
-                            'id_varian',
-                            $harga->id_varian
-                        );
-                    })
-                    ->ignore(
-                        $harga->id_daftar_harga,
-                        'id_daftar_harga'
-                    ),
+                    Rule::unique(
+                        'daftar_harga',
+                        'jenis_harga'
+                    )
+                        ->where(function ($query) use ($harga) {
+                            return $query->where(
+                                'id_varian',
+                                $harga->id_varian
+                            );
+                        })
+                        ->ignore(
+                            $harga->id_daftar_harga,
+                            'id_daftar_harga'
+                        ),
+                ],
+
+                'harga' => [
+                    'required',
+                    'regex:/^[0-9]+$/',
+                    'integer',
+                    'min:100',
+                    'max:10000000',
+                ],
+
+                'minimal_pembelian' => [
+                    'required',
+                    'regex:/^[0-9]+$/',
+                    'integer',
+                    'min:1',
+                    'max:1000000',
+                ],
+
+                'satuan_minimal' => [
+                    'nullable',
+                    'string',
+                    'max:20',
+                ],
             ],
+            [
+                'jenis_harga.required' =>
+                'Jenis harga wajib dipilih.',
 
-            'harga' => [
-                'required',
-                'integer',
-                'min:0',
-            ],
+                'jenis_harga.in' =>
+                'Jenis harga hanya boleh ecer atau grosir.',
 
-            'minimal_pembelian' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
+                'jenis_harga.unique' =>
+                'Jenis harga tersebut sudah ada pada varian ini.',
 
-            'satuan_minimal' => [
-                'nullable',
-                'string',
-                'max:20',
-            ],
-        ]);
+                'harga.required' =>
+                'Harga wajib diisi.',
 
-        $harga->update($data);
+                'harga.regex' =>
+                'Harga hanya boleh berisi angka.',
 
-        return redirect()
-            ->route(
-                'admin.harga.index',
-                $harga->id_varian
-            )
-            ->with(
-                'success',
-                'Daftar harga berhasil diperbarui.'
-            );
+                'harga.integer' =>
+                'Harga harus berupa angka bulat.',
+
+                'harga.min' =>
+                'Harga minimal Rp100.',
+
+                'harga.max' =>
+                'Harga maksimal Rp10.000.000.',
+
+                'minimal_pembelian.required' =>
+                'Minimal pembelian wajib diisi.',
+
+                'minimal_pembelian.regex' =>
+                'Minimal pembelian hanya boleh berisi angka.',
+
+                'minimal_pembelian.integer' =>
+                'Minimal pembelian harus berupa angka bulat.',
+
+                'minimal_pembelian.min' =>
+                'Minimal pembelian minimal 1.',
+
+                'minimal_pembelian.max' =>
+                'Minimal pembelian maksimal 1.000.000.',
+
+                'satuan_minimal.string' =>
+                'Satuan minimal harus berupa teks.',
+
+                'satuan_minimal.max' =>
+                'Satuan minimal maksimal 20 karakter.',
+            ]
+        );
+
+        try {
+            $harga->update($data);
+
+            return redirect()
+                ->route(
+                    'admin.harga.index',
+                    $harga->id_varian
+                )
+                ->with(
+                    'success',
+                    'Daftar harga berhasil diperbarui.'
+                );
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Daftar harga gagal diperbarui. Silakan coba lagi.'
+                );
+        }
     }
 
 
     /**
-     * Hapus harga.
+     * Menghapus harga.
      */
     public function destroy($idHarga)
     {
@@ -183,34 +328,55 @@ class AdminDaftarHargaController extends Controller
 
         $idVarian = $harga->id_varian;
 
-        $harga->delete();
+        try {
+            $harga->delete();
 
-        return redirect()
-            ->route(
-                'admin.harga.index',
-                $idVarian
-            )
-            ->with(
-                'success',
-                'Daftar harga berhasil dihapus.'
+            return redirect()
+                ->route(
+                    'admin.harga.index',
+                    $idVarian
+                )
+                ->with(
+                    'success',
+                    'Daftar harga berhasil dihapus.'
+                );
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return back()->with(
+                'error',
+                'Daftar harga gagal dihapus. Silakan coba lagi.'
             );
+        }
     }
 
 
     /**
-     * Aktifkan / nonaktifkan harga.
+     * Mengaktifkan / menonaktifkan harga.
      */
     public function toggleStatus($idHarga)
     {
         $harga = DaftarHarga::findOrFail($idHarga);
 
-        $harga->update([
-            'status_aktif' => !$harga->status_aktif,
-        ]);
+        try {
+            $harga->update([
+                'status_aktif' => !$harga->status_aktif,
+            ]);
 
-        return back()->with(
-            'success',
-            'Status harga berhasil diperbarui.'
-        );
+            return back()->with(
+                'success',
+                'Status harga berhasil diperbarui.'
+            );
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            return back()->with(
+                'error',
+                'Status harga gagal diperbarui. Silakan coba lagi.'
+            );
+        }
     }
 }
+

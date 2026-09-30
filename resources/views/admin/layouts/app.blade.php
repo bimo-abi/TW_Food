@@ -168,6 +168,10 @@
                     Produk
                 </a>
 
+                <a href="{{ route('admin.resep.index') }}">
+                    Resep
+                </a>
+
                 <a href="{{ route('admin.pesanan.index') }}">
                     Pesanan
                 </a>

@@ -13,6 +13,8 @@ use App\Http\Controllers\ResepController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\KontakController;
 use App\Http\Controllers\AdminPesananController;
+use App\Http\Controllers\AdminResepController;
+use App\Http\Controllers\AdminResepProdukController;
 
 //login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])
@@ -200,6 +202,79 @@ Route::put(
     [AdminStokController::class, 'update']
 )
     ->name('admin.stok.update')
+    ->middleware('admin');
+
+//admin resep
+
+Route::get(
+    '/admin/resep',
+    [AdminResepController::class, 'index']
+)
+    ->name('admin.resep.index')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/resep/create',
+    [AdminResepController::class, 'create']
+)
+    ->name('admin.resep.create')
+    ->middleware('admin');
+
+
+Route::post(
+    '/admin/resep',
+    [AdminResepController::class, 'store']
+)
+    ->name('admin.resep.store')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/resep/{id}/edit',
+    [AdminResepController::class, 'edit']
+)
+    ->name('admin.resep.edit')
+    ->middleware('admin');
+
+
+Route::put(
+    '/admin/resep/{id}',
+    [AdminResepController::class, 'update']
+)
+    ->name('admin.resep.update')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/resep/{id}',
+    [AdminResepController::class, 'destroy']
+)
+    ->name('admin.resep.destroy')
+    ->middleware('admin');
+
+// admin resep produk
+Route::get(
+    '/admin/resep/{idResep}/produk',
+    [AdminResepProdukController::class, 'index']
+)
+    ->name('admin.resep.produk.index')
+    ->middleware('admin');
+
+
+Route::post(
+    '/admin/resep/{idResep}/produk',
+    [AdminResepProdukController::class, 'store']
+)
+    ->name('admin.resep.produk.store')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/resep-produk/{idResepProduk}',
+    [AdminResepProdukController::class, 'destroy']
+)
+    ->name('admin.resep.produk.destroy')
     ->middleware('admin');
 
 //public website

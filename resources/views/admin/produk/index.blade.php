@@ -61,6 +61,20 @@
         </div>
     @endif
 
+    {{-- Pesan error --}}
+    @if (session('error'))
+        <div
+            style="
+            background: #f8d7da;
+            color: #842029;
+            padding: 12px;  
+            margin-bottom: 20px;
+            border-radius: 5px;
+        ">
+            {{ session('error') }}
+        </div>
+    @endif
+
 
     {{-- Error validasi --}}
 

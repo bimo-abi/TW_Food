@@ -160,7 +160,7 @@
 
             <nav class="sidebar-menu">
 
-                <a href="{{ route('admin.dashboard') }}">
+                <a href="{{ route('admin.dashboard.home') }}">
                     Dashboard
                 </a>
 

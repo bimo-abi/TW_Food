@@ -148,6 +148,7 @@
 
 
                         <td>
+                            <div class="produk-foto-container">
 
                             @if ($item->foto_produk)
                                 <img src="{{ asset('storage/' . $item->foto_produk) }}" alt="{{ $item->nama_produk }}"
@@ -159,7 +160,8 @@
                             @else
                                 Tidak ada foto
                             @endif
-
+                            
+                            </div>
                         </td>
 
 

@@ -317,7 +317,7 @@
                 Kontak
             </a>
 
-            <a href="#">
+            <a href="https://play.google.com/">
                 Download Aplikasi
             </a>
 
@@ -342,7 +342,7 @@
         <div class="container">
 
             <strong>
-                TWFOOD
+                TWFood
             </strong>
 
             <p>

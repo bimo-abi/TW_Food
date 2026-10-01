@@ -151,7 +151,13 @@
             gap: 8px;
             justify-content: center;
         }
+
+        .produk-foto-container{
+            display: flex;
+
+        }
     </style>
+
 
 </head>
 

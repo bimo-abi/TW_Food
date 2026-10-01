@@ -164,7 +164,9 @@
         'admin.harga.index',
         $harga->id_varian
     ) }}">
+     <button type="button">
                 Kembali
+            </button>
             </a>
 
         </form>

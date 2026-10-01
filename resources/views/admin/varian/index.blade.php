@@ -245,7 +245,9 @@
 
 
     <a href="{{ route('admin.produk.index') }}">
+        <button type="button">
         ← Kembali ke Produk
+        </button>
     </a>
 
 @endsection

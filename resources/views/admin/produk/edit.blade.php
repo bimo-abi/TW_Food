@@ -139,7 +139,9 @@
             <a
                 href="{{ route('admin.produk.index') }}"
             >
+            <button type="button">
                 Kembali
+            </button>
             </a>
 
         </form>

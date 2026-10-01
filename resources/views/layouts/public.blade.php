@@ -5,10 +5,7 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         @yield('title', 'TWFood - Lezat dan Sehat')
@@ -16,6 +13,14 @@
 
 
     <style>
+
+        :root{
+            --text-light: #FFF5F1;
+            --text-dark: #3A001E;
+            --main-color: #E01F20;
+            --main-dark: #8F0E0E;
+
+        }
 
         * {
             box-sizing: border-box;
@@ -36,10 +41,11 @@
         nav {
             padding: 20px 40px;
             border-bottom: 1px solid #ddd;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: var(--main-color);
+            color: var(--text-light);
         }
 
         .logo {
@@ -60,7 +66,7 @@
 
         .nav-menu a {
             text-decoration: none;
-            color: #333;
+            color: inherit;
         }
 
         .nav-menu a:hover {
@@ -111,8 +117,8 @@
 
             padding: 12px 20px;
 
-            background: #333;
-            color: white;
+            background: var(--main-color);
+            color: var(--text-light);
 
             text-decoration: none;
 
@@ -120,6 +126,7 @@
         }
 
         .button:hover {
+            background-color: var(--main-dark);
             opacity: 0.85;
         }
 
@@ -256,6 +263,7 @@
             .nav-menu {
                 flex-wrap: wrap;
                 justify-content: center;
+                color: inherit
             }
 
             .products {
@@ -271,7 +279,6 @@
             }
 
         }
-
     </style>
 
 </head>

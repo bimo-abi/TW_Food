@@ -22,10 +22,15 @@ class Pesanan extends Model
         'total_pesanan',
         'status_pembayaran',
         'status_pesanan',
+        'diterima_pada',
         'kurir',
         'nomor_resi',
         'tautan_pelacakan',
         'catatan',
+    ];
+
+    protected $casts = [
+        'diterima_pada' => 'datetime',
     ];
 
     public function pengguna()

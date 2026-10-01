@@ -251,7 +251,7 @@
                         @endif
                     </div>
 
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <strong>Nomor Resi:</strong>
 
                         @if ($pesanan->nomor_resi)
@@ -275,7 +275,36 @@
                                 Belum diisi
                             </span>
                         @endif
-                    </div>
+                    </div> --}}
+                    @if ($pesanan->kurir === 'gosend')
+
+                        <div class="mb-3">
+                            <strong>Tautan Pelacakan:</strong>
+
+                            @if ($pesanan->tautan_pelacakan)
+                                <a href="{{ $pesanan->tautan_pelacakan }}" target="_blank" rel="noopener noreferrer">
+                                    Lihat Tracking GoSend
+                                </a>
+                            @else
+                                <span class="text-muted">
+                                    Belum diisi
+                                </span>
+                            @endif
+                        </div>
+                    @elseif ($pesanan->kurir === 'jnt')
+                        <div class="mb-3">
+                            <strong>Nomor Resi:</strong>
+
+                            @if ($pesanan->nomor_resi)
+                                {{ $pesanan->nomor_resi }}
+                            @else
+                                <span class="text-muted">
+                                    Belum diisi
+                                </span>
+                            @endif
+                        </div>
+
+                    @endif
 
                     <hr>
 
@@ -283,7 +312,7 @@
                         @csrf
                         @method('PUT')
 
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="nomor_resi" class="form-label">
                                 Nomor Resi
                             </label>
@@ -300,7 +329,36 @@
                             <input type="url" name="tautan_pelacakan" id="tautan_pelacakan" class="form-control"
                                 value="{{ old('tautan_pelacakan', $pesanan->tautan_pelacakan) }}"
                                 placeholder="https://...">
-                        </div>
+                        </div> --}}
+                        @if ($pesanan->kurir === 'gosend')
+                            <div class="mb-3">
+                                <label for="tautan_pelacakan" class="form-label">
+                                    Tautan Pelacakan GoSend
+                                </label>
+
+                                <input type="url" name="tautan_pelacakan" id="tautan_pelacakan" class="form-control"
+                                    value="{{ old('tautan_pelacakan', $pesanan->tautan_pelacakan) }}"
+                                    placeholder="Masukkan link tracking GoSend">
+
+                                <small class="text-muted">
+                                    Masukkan tautan tracking yang diberikan oleh GoSend.
+                                </small>
+                            </div>
+                        @elseif ($pesanan->kurir === 'jnt')
+                            <div class="mb-3">
+                                <label for="nomor_resi" class="form-label">
+                                    Nomor Resi J&T
+                                </label>
+
+                                <input type="text" name="nomor_resi" id="nomor_resi" class="form-control"
+                                    value="{{ old('nomor_resi', $pesanan->nomor_resi) }}"
+                                    placeholder="Masukkan nomor resi J&T">
+
+                                <small class="text-muted">
+                                    Masukkan nomor resi/AWB yang diberikan oleh J&T.
+                                </small>
+                            </div>
+                        @endif
 
                         <button type="submit" class="btn btn-primary">
                             Simpan Informasi Pengiriman

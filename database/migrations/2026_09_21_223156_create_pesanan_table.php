@@ -57,6 +57,8 @@ return new class extends Migration
                 'dibatalkan'
             ])->default('pesanan_diterima');
 
+            $table->timestamp('diterima_pada')->nullable();
+
             $table->enum('kurir', [
                 'gosend',
                 'jnt'

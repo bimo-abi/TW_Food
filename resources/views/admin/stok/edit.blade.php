@@ -103,6 +103,8 @@
                         $varian->stok
                     ) }}"
                     min="0"
+                    max="1000000"
+                    oninvalid="this.setCustomValidity('Stok tidak diperbolehkan melebihi 99.')"
                     required
                     style="
                         width: 100%;

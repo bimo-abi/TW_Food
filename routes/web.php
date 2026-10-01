@@ -13,8 +13,13 @@ use App\Http\Controllers\ResepController;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\KontakController;
 use App\Http\Controllers\AdminPesananController;
+use App\Http\Controllers\AdminResepController;
+use App\Http\Controllers\AdminResepProdukController;
 
-//login admin (tanpa middleware)
+//Dashboard
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+//login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])
     ->name('admin.login');
 
@@ -24,107 +29,266 @@ Route::post('/admin/login', [LoginController::class, 'login'])
 Route::post('/admin/logout', [LoginController::class, 'logout'])
     ->name('admin.logout');
 
+//admin
+Route::get('/admin', [AdminController::class, 'dashboard'])
+    ->name('admin.dashboard')
+    ->middleware('admin');
 
-//pakai middleware
-Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+Route::get('/admin/pesanan', [AdminPesananController::class, 'index'])
+    ->name('admin.pesanan.index')
+    ->middleware('admin');
 
-    // Dashboard  -> URL: /admin | nama: admin.dashboard.home
-    Route::get('/', [AdminController::class, 'dashboard'])
-        ->name('dashboard.home');
+Route::get('/admin/pesanan/{id}', [AdminPesananController::class, 'show'])
+    ->name('admin.pesanan.show')
+    ->middleware('admin');
 
-    // Pesanan
-    Route::get('/pesanan', [AdminPesananController::class, 'index'])
-        ->name('pesanan.index');
+Route::put('/admin/pesanan/{id}/status', [AdminPesananController::class, 'update'])
+    ->name('admin.pesanan.update-status')
+    ->middleware('admin');
 
-    Route::get('/pesanan/{id}', [AdminPesananController::class, 'show'])
-        ->name('pesanan.show');
+Route::put('/admin/pesanan/{id}/pengiriman', [AdminPesananController::class, 'updatePengiriman'])
+    ->name('admin.pesanan.update-pengiriman')
+    ->middleware('admin');
 
-    Route::put('/pesanan/{id}/status', [AdminPesananController::class, 'update'])
-        ->name('pesanan.update-status');
+//admin produk
+Route::get('/admin/produk', [AdminProdukController::class, 'index'])
+    ->name('admin.produk.index')
+    ->middleware('admin');
 
-    Route::put('/pesanan/{id}/pengiriman', [AdminPesananController::class, 'updatePengiriman'])
-        ->name('pesanan.update-pengiriman');
+Route::get('/admin/produk/create', [AdminProdukController::class, 'create'])
+    ->name('admin.produk.create')
+    ->middleware('admin');
 
-    // Produk
-    Route::get('/produk', [AdminProdukController::class, 'index'])
-        ->name('produk.index');
+Route::post('/admin/produk', [AdminProdukController::class, 'store'])
+    ->name('admin.produk.store')
+    ->middleware('admin');
 
-    Route::get('/produk/create', [AdminProdukController::class, 'create'])
-        ->name('produk.create');
+Route::get('/admin/produk/{id}/edit', [AdminProdukController::class, 'edit'])
+    ->name('admin.produk.edit')
+    ->middleware('admin');
 
-    Route::post('/produk', [AdminProdukController::class, 'store'])
-        ->name('produk.store');
+Route::put('/admin/produk/{id}', [AdminProdukController::class, 'update'])
+    ->name('admin.produk.update')
+    ->middleware('admin');
 
-    Route::get('/produk/{id}/edit', [AdminProdukController::class, 'edit'])
-        ->name('produk.edit');
+Route::patch('/admin/produk/{id}/toggle-status', [AdminProdukController::class, 'toggleStatus'])
+    ->name('admin.produk.toggle-status')
+    ->middleware('admin');
 
-    Route::put('/produk/{id}', [AdminProdukController::class, 'update'])
-        ->name('produk.update');
+Route::delete('/admin/produk/{id}', [AdminProdukController::class, 'destroy'])
+    ->name('admin.produk.destroy')
+    ->middleware('admin');
 
-    Route::patch('/produk/{id}/toggle-status', [AdminProdukController::class, 'toggleStatus'])
-        ->name('produk.toggle-status');
+//varian produk
+Route::get(
+    '/admin/produk/{idProduk}/varian',
+    [AdminVarianProdukController::class, 'index']
+)
+    ->name('admin.varian.index')
+    ->middleware('admin');
 
-    Route::delete('/produk/{id}', [AdminProdukController::class, 'destroy'])
-        ->name('produk.destroy');
 
-    // Varian produk
-    Route::get('/produk/{idProduk}/varian', [AdminVarianProdukController::class, 'index'])
-        ->name('varian.index');
+Route::get(
+    '/admin/produk/{idProduk}/varian/create',
+    [AdminVarianProdukController::class, 'create']
+)
+    ->name('admin.varian.create')
+    ->middleware('admin');
 
-    Route::get('/produk/{idProduk}/varian/create', [AdminVarianProdukController::class, 'create'])
-        ->name('varian.create');
 
-    Route::post('/produk/{idProduk}/varian', [AdminVarianProdukController::class, 'store'])
-        ->name('varian.store');
+Route::post(
+    '/admin/produk/{idProduk}/varian',
+    [AdminVarianProdukController::class, 'store']
+)
+    ->name('admin.varian.store')
+    ->middleware('admin');
 
-    Route::get('/varian/{idVarian}/edit', [AdminVarianProdukController::class, 'edit'])
-        ->name('varian.edit');
 
-    Route::put('/varian/{idVarian}', [AdminVarianProdukController::class, 'update'])
-        ->name('varian.update');
+Route::get(
+    '/admin/varian/{idVarian}/edit',
+    [AdminVarianProdukController::class, 'edit']
+)
+    ->name('admin.varian.edit')
+    ->middleware('admin');
 
-    Route::patch('/varian/{idVarian}/toggle-status', [AdminVarianProdukController::class, 'toggleStatus'])
-        ->name('varian.toggle-status');
 
-    Route::delete('/varian/{idVarian}', [AdminVarianProdukController::class, 'destroy'])
-        ->name('varian.destroy');
+Route::put(
+    '/admin/varian/{idVarian}',
+    [AdminVarianProdukController::class, 'update']
+)
+    ->name('admin.varian.update')
+    ->middleware('admin');
 
-    // Daftar harga
-    Route::get('/varian/{idVarian}/harga', [AdminDaftarHargaController::class, 'index'])
-        ->name('harga.index');
 
-    Route::get('/varian/{idVarian}/harga/create', [AdminDaftarHargaController::class, 'create'])
-        ->name('harga.create');
+Route::patch(
+    '/admin/varian/{idVarian}/toggle-status',
+    [AdminVarianProdukController::class, 'toggleStatus']
+)
+    ->name('admin.varian.toggle-status')
+    ->middleware('admin');
 
-    Route::post('/varian/{idVarian}/harga', [AdminDaftarHargaController::class, 'store'])
-        ->name('harga.store');
 
-    Route::get('/harga/{idHarga}/edit', [AdminDaftarHargaController::class, 'edit'])
-        ->name('harga.edit');
+Route::delete(
+    '/admin/varian/{idVarian}',
+    [AdminVarianProdukController::class, 'destroy']
+)
+    ->name('admin.varian.destroy')
+    ->middleware('admin');
 
-    Route::put('/harga/{idHarga}', [AdminDaftarHargaController::class, 'update'])
-        ->name('harga.update');
+//admin daftar harga
+Route::get(
+    '/admin/varian/{idVarian}/harga',
+    [AdminDaftarHargaController::class, 'index']
+)
+    ->name('admin.harga.index')
+    ->middleware('admin');
 
-    Route::patch('/harga/{idHarga}/toggle-status', [AdminDaftarHargaController::class, 'toggleStatus'])
-        ->name('harga.toggle-status');
 
-    Route::delete('/harga/{idHarga}', [AdminDaftarHargaController::class, 'destroy'])
-        ->name('harga.destroy');
+Route::get(
+    '/admin/varian/{idVarian}/harga/create',
+    [AdminDaftarHargaController::class, 'create']
+)
+    ->name('admin.harga.create')
+    ->middleware('admin');
 
-    // Stok dan pre order
-    Route::get('/varian/{idVarian}/stok', [AdminStokController::class, 'edit'])
-        ->name('stok.edit');
 
-    Route::put('/varian/{idVarian}/stok', [AdminStokController::class, 'update'])
-        ->name('stok.update');
-});
+Route::post(
+    '/admin/varian/{idVarian}/harga',
+    [AdminDaftarHargaController::class, 'store']
+)
+    ->name('admin.harga.store')
+    ->middleware('admin');
 
-//website publik
+
+Route::get(
+    '/admin/harga/{idHarga}/edit',
+    [AdminDaftarHargaController::class, 'edit']
+)
+    ->name('admin.harga.edit')
+    ->middleware('admin');
+
+
+Route::put(
+    '/admin/harga/{idHarga}',
+    [AdminDaftarHargaController::class, 'update']
+)
+    ->name('admin.harga.update')
+    ->middleware('admin');
+
+
+Route::patch(
+    '/admin/harga/{idHarga}/toggle-status',
+    [AdminDaftarHargaController::class, 'toggleStatus']
+)
+    ->name('admin.harga.toggle-status')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/harga/{idHarga}',
+    [AdminDaftarHargaController::class, 'destroy']
+)
+    ->name('admin.harga.destroy')
+    ->middleware('admin');
+
+//admin stok dan pre order
+Route::get(
+    '/admin/varian/{idVarian}/stok',
+    [AdminStokController::class, 'edit']
+)
+    ->name('admin.stok.edit')
+    ->middleware('admin');
+
+
+Route::put(
+    '/admin/varian/{idVarian}/stok',
+    [AdminStokController::class, 'update']
+)
+    ->name('admin.stok.update')
+    ->middleware('admin');
+
+//admin resep
+
+Route::get(
+    '/admin/resep',
+    [AdminResepController::class, 'index']
+)
+    ->name('admin.resep.index')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/resep/create',
+    [AdminResepController::class, 'create']
+)
+    ->name('admin.resep.create')
+    ->middleware('admin');
+
+
+Route::post(
+    '/admin/resep',
+    [AdminResepController::class, 'store']
+)
+    ->name('admin.resep.store')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/resep/{id}/edit',
+    [AdminResepController::class, 'edit']
+)
+    ->name('admin.resep.edit')
+    ->middleware('admin');
+
+
+Route::put(
+    '/admin/resep/{id}',
+    [AdminResepController::class, 'update']
+)
+    ->name('admin.resep.update')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/resep/{id}',
+    [AdminResepController::class, 'destroy']
+)
+    ->name('admin.resep.destroy')
+    ->middleware('admin');
+
+// admin resep produk
+Route::get(
+    '/admin/resep/{idResep}/produk',
+    [AdminResepProdukController::class, 'index']
+)
+    ->name('admin.resep.produk.index')
+    ->middleware('admin');
+
+
+Route::post(
+    '/admin/resep/{idResep}/produk',
+    [AdminResepProdukController::class, 'store']
+)
+    ->name('admin.resep.produk.store')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/resep-produk/{idResepProduk}',
+    [AdminResepProdukController::class, 'destroy']
+)
+    ->name('admin.resep.produk.destroy')
+    ->middleware('admin');
+
+//public website
 Route::get('/', [HomeController::class, 'index'])
     ->name('home');
 
 Route::get('/produk', [ProdukController::class, 'index'])
     ->name('produk.public');
+
+Route::get('/produk/{id}', [ProdukController::class, 'show'])
+    ->name('produk.detail');
 
 Route::get('/resep', [ResepController::class, 'index'])
     ->name('resep.public');

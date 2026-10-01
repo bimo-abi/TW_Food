@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'TWFood - Lezat dan Sehat')
+@section('title', 'TWFood')
 
 @section('content')
 

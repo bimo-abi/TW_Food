@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
 class Pengguna extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     protected $table = 'pengguna';
 
@@ -21,6 +23,7 @@ class Pengguna extends Authenticatable
         'jenis_pelanggan',
         'foto_profil',
         'status_aktif',
+        'status_verifikasi',
     ];
 
     protected $hidden = [
@@ -76,6 +79,15 @@ class Pengguna extends Authenticatable
     {
         return $this->hasOne(
             PengaturanMitra::class,
+            'id_pengguna'
+        );
+    }
+
+    public function dokumenMitra()
+    {
+        return $this->hasMany(
+            DokumenMitra::class,
+            'id_pengguna',
             'id_pengguna'
         );
     }

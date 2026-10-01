@@ -14,7 +14,6 @@ class Retur extends Model
         'id_pesanan',
         'nomor_retur',
         'alasan_retur',
-        'bukti_retur',
         'status_retur',
         'catatan_mitra',
         'status_pengembalian_dana',
@@ -28,11 +27,26 @@ class Retur extends Model
 
     public function pesanan()
     {
-        return $this->belongsTo(Pesanan::class, 'id_pesanan');
+        return $this->belongsTo(
+            Pesanan::class,
+            'id_pesanan'
+        );
     }
 
-    public function detail()
+    public function detailRetur()
     {
-        return $this->hasMany(DetailRetur::class, 'id_retur');
+        return $this->hasMany(
+            DetailRetur::class,
+            'id_retur'
+        );
+    }
+
+    public function buktiRetur()
+    {
+        return $this->hasMany(
+            BuktiRetur::class,
+            'id_retur',
+            'id_retur'
+        );
     }
 }

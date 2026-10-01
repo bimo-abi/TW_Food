@@ -95,48 +95,24 @@
             </div>
 
 
-            <div style="margin-bottom: 15px;">
+           <div style="margin-bottom: 15px;">
 
-                <label>
-                    Satuan Jual
-                </label>
+    <label>
+        Satuan Jual
+    </label>
 
-                <br>
+    <br>
 
-                <select
-                    name="satuan_jual"
-                    required
-                    style="width: 100%; padding: 10px;"
-                >
+    <input
+        type="text"
+        name="satuan_jual"
+        value="{{ old('satuan_jual') }}"
+        placeholder="Contoh: pc, pack, kg"
+        required
+        style="width: 100%; padding: 10px;"
+    >
 
-                    <option value="">
-                        -- Pilih Satuan --
-                    </option>
-
-                    <option
-                        value="pc"
-                        {{ old('satuan_jual') == 'pc' ? 'selected' : '' }}
-                    >
-                        pc
-                    </option>
-
-                    <option
-                        value="pack"
-                        {{ old('satuan_jual') == 'pack' ? 'selected' : '' }}
-                    >
-                        pack
-                    </option>
-
-                    <option
-                        value="kg"
-                        {{ old('satuan_jual') == 'kg' ? 'selected' : '' }}
-                    >
-                        kg
-                    </option>
-
-                </select>
-
-            </div>
+</div>
 
 
             <div style="margin-bottom: 15px;">
@@ -186,11 +162,12 @@
                 <br>
 
                 <input
-                    type="date"
-                    name="tanggal_mulai_pre_order"
-                    value="{{ old('tanggal_mulai_pre_order') }}"
-                    style="padding: 10px;"
-                >
+    type="date"
+    name="tanggal_mulai_pre_order"
+    value="{{ old('tanggal_mulai_pre_order') }}"
+    min="{{ date('Y-m-d') }}"
+    style="padding: 10px;"
+>
 
             </div>
 
@@ -204,11 +181,12 @@
                 <br>
 
                 <input
-                    type="date"
-                    name="tanggal_selesai_pre_order"
-                    value="{{ old('tanggal_selesai_pre_order') }}"
-                    style="padding: 10px;"
-                >
+    type="date"
+    name="tanggal_selesai_pre_order"
+    value="{{ old('tanggal_selesai_pre_order') }}"
+    min="{{ date('Y-m-d') }}"
+    style="padding: 10px;"
+>
 
             </div>
 
@@ -222,11 +200,12 @@
                 <br>
 
                 <input
-                    type="date"
-                    name="estimasi_tersedia"
-                    value="{{ old('estimasi_tersedia') }}"
-                    style="padding: 10px;"
-                >
+    type="date"
+    name="tanggal_selesai_pre_order"
+    value="{{ old('tanggal_selesai_pre_order') }}"
+    min="{{ date('Y-m-d') }}"
+    style="padding: 10px;"
+>
 
             </div>
 

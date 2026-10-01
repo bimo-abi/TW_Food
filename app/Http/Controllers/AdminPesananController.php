@@ -124,6 +124,13 @@ class AdminPesananController extends Controller
         }
 
         $pesanan->status_pesanan = $statusBaru;
+
+        if (
+            $statusSekarang !== 'diterima' &&
+            $statusBaru === 'diterima'
+        ) {
+            $pesanan->diterima_pada = now();
+        }
         $pesanan->save();
 
         return redirect()

@@ -30,12 +30,4 @@ class JamOperasionalOutlet extends Model
             'id_outlet'
         );
     }
-    public function jamOperasional()
-{
-    return $this->hasMany(
-        JamOperasionalOutlet::class,
-        'id_outlet',
-        'id_outlet'
-    );
-}
 }

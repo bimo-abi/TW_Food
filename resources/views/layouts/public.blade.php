@@ -165,6 +165,10 @@
         }
 
         .product-image {
+            display: block;
+            align-content: center;
+            align-items: center;
+            text-align: center;
             width: 100%;
             height: 220px;
             object-fit: cover;
@@ -285,7 +289,7 @@
         <div class="logo">
 
             <a href="{{ route('home') }}">
-                TWFOOD
+                TWFood
             </a>
 
         </div>

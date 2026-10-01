@@ -30,7 +30,7 @@
                             <th>Pembayaran</th>
                             <th>Pengiriman</th>
                             <th>Status Pesanan</th>
-                            <th>Aksi</th>
+                            <th style="text-align: center">Aksi</th>
                         </tr>
                     </thead>
 
@@ -61,22 +61,34 @@
                                     @elseif ($item->jenis_pesanan === 'delivery')
                                         @if ($item->kurir === 'gosend')
                                             GoSend
+
+                                            <br>
+
+                                            @if ($item->tautan_pelacakan)
+                                                <small>
+                                                    Tracking: Tersedia
+                                                </small>
+                                            @else
+                                                <small>
+                                                    Tracking: Belum diisi
+                                                </small>
+                                            @endif
                                         @elseif ($item->kurir === 'jnt')
                                             J&T
+
+                                            <br>
+
+                                            @if ($item->nomor_resi)
+                                                <small>
+                                                    Resi: {{ $item->nomor_resi }}
+                                                </small>
+                                            @else
+                                                <small>
+                                                    Resi: Belum diisi
+                                                </small>
+                                            @endif
                                         @else
                                             Delivery
-                                        @endif
-
-                                        <br>
-
-                                        @if ($item->nomor_resi)
-                                            <small>
-                                                Resi: {{ $item->nomor_resi }}
-                                            </small>
-                                        @else
-                                            <small>
-                                                Resi: Belum diisi
-                                            </small>
                                         @endif
                                     @else
                                         -
@@ -88,9 +100,16 @@
                                 </td>
 
                                 <td>
-                                    <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}" class="button">
-                                        Detail
-                                    </a>
+
+                                    <div class="crud-btn-Produk">
+
+
+                                        <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}" class="button">
+                                            <button type="button">
+                                                Detail
+                                            </button>
+                                        </a>
+                                    </div>
                                 </td>
 
                             </tr>

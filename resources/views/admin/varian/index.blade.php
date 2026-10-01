@@ -88,7 +88,7 @@
                     <th>Stok</th>
                     <th>Pre-Order</th>
                     <th>Status</th>
-                    <th>Aksi</th>
+                    <th style="text-align: center">Aksi</th>
 
                 </tr>
 
@@ -153,21 +153,28 @@
 
 
                         <td>
+                            <div class="crud-btn-Produk">
 
                             <a href="{{ route('admin.harga.index', $item->id_varian) }}">
-                                Harga
+                                <button type="button">
+                                    Harga
+                                </button>
                             </a>
 
                             <br>
 
                             <a href="{{ route('admin.varian.edit', $item->id_varian) }}">
-                                Edit
+                                <button type="button">
+                                    Edit
+                                </button>
                             </a>
 
                             <br>
 
                             <a href="{{ route('admin.stok.edit', $item->id_varian) }}">
-                                Stok & Pre-Order
+                                <button type="button">
+                                    Stok & Pre-order
+                                </button>
                             </a>
 
                             <br>
@@ -211,7 +218,7 @@
                                 </button>
 
                             </form>
-
+                            </div>
                         </td>
 
                     </tr>

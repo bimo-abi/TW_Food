@@ -77,10 +77,19 @@
 
                 <br>
 
-                <input type="number" name="berat_gram" value="{{ old(
+               <input
+    type="number"
+    name="berat_gram"
+    value="{{ old(
         'berat_gram',
         $varian->berat_gram
-    ) }}" min="0" style="width: 100%; padding: 10px;">
+    ) }}"
+    min="0"
+    max="65535"
+    oninvalid="this.setCustomValidity('Berat maksimal 65.535 gram.')"
+    oninput="this.setCustomValidity('')"
+    style="width: 100%; padding: 10px;"
+>
 
             </div>
 

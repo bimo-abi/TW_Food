@@ -31,12 +31,12 @@
     @if ($errors->any())
 
         <div style="
-            background: #f8d7da;
-            color: #842029;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
+                                    background: #f8d7da;
+                                    color: #842029;
+                                    padding: 12px;
+                                    margin-bottom: 20px;
+                                    border-radius: 5px;
+                                ">
 
             @foreach ($errors->all() as $error)
 
@@ -53,13 +53,10 @@
 
     <div class="card">
 
-        <form
-            action="{{ route(
-                'admin.harga.store',
-                $varian->id_varian
-            ) }}"
-            method="POST"
-        >
+        <form action="{{ route(
+        'admin.harga.store',
+        $varian->id_varian
+    ) }}" method="POST">
 
             @csrf
 
@@ -72,14 +69,10 @@
 
                 <br>
 
-                <select
-                    name="jenis_harga"
-                    required
-                    style="
-                        width: 100%;
-                        padding: 10px;
-                    "
-                >
+                <select name="jenis_harga" required style="
+                                    width: 100%;
+                                    padding: 10px;
+                                ">
 
                     <option value="">
                         -- Pilih Jenis Harga --
@@ -106,18 +99,12 @@
 
                 <br>
 
-                <input
-                    type="number"
-                    name="harga"
-                    value="{{ old('harga') }}"
-                    min="0"
-                    required
-                    placeholder="Contoh: 12000"
-                    style="
-                        width: 100%;
-                        padding: 10px;
-                    "
-                >
+                <input type="number" name="harga" value="{{ old('harga') }}" min="100" max="16777215"
+                    oninvalid="this.setCustomValidity('Harga harus antara Rp100 dan Rp16.777.215.')"
+                    oninput="this.setCustomValidity('')" required placeholder="Contoh: 12000" style="
+                    width: 100%;
+                    padding: 10px;
+                ">
 
             </div>
 
@@ -130,20 +117,14 @@
 
                 <br>
 
-                <input
-                    type="number"
-                    name="minimal_pembelian"
-                    value="{{ old(
-                        'minimal_pembelian',
-                        1
-                    ) }}"
-                    min="1"
-                    required
-                    style="
-                        width: 100%;
-                        padding: 10px;
-                    "
-                >
+                <input type="number" name="minimal_pembelian" value="{{ old(
+        'minimal_pembelian',
+        1
+    ) }}" min="1" max="65535" oninvalid="this.setCustomValidity('Minimal pembelian harus antara 1 dan 65.535.')"
+                    oninput="this.setCustomValidity('')" required style="
+                width: 100%;
+                padding: 10px;
+            ">
 
             </div>
 
@@ -156,16 +137,20 @@
 
                 <br>
 
-                <input
-                    type="text"
-                    name="satuan_minimal"
-                    value="{{ old('satuan_minimal') }}"
-                    placeholder="Contoh: pc, doz, kg"
-                    style="
-                        width: 100%;
-                        padding: 10px;
-                    "
-                >
+               <input
+    type="text"
+    name="satuan_minimal"
+    value="{{ old('satuan_minimal') }}"
+    pattern="[\p{L}]+"
+    title="Satuan minimal hanya boleh berisi huruf."
+    placeholder="Contoh: pcs, doz, kg"
+    oninput="this.setCustomValidity('')"
+    oninvalid="this.setCustomValidity('Satuan minimal hanya boleh berisi huruf.')"
+    style="
+        width: 100%;
+        padding: 10px;
+    "
+>
 
             </div>
 
@@ -175,12 +160,10 @@
             </button>
 
 
-            <a
-                href="{{ route(
-                    'admin.harga.index',
-                    $varian->id_varian
-                ) }}"
-            >
+            <a href="{{ route(
+        'admin.harga.index',
+        $varian->id_varian
+    ) }}">
                 Kembali
             </a>
 

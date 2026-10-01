@@ -26,16 +26,13 @@ class AdminDaftarHargaController extends Controller
 
         return view(
             'admin.harga.index',
-            compact(
-                'varian',
-                'harga'
-            )
+            compact('varian', 'harga')
         );
     }
 
 
     /**
-     * Menampilkan form tambah harga.
+     * Form tambah harga.
      */
     public function create($idVarian)
     {
@@ -52,28 +49,23 @@ class AdminDaftarHargaController extends Controller
     /**
      * Menyimpan harga baru.
      */
-    public function store(
-        Request $request,
-        $idVarian
-    ) {
+    public function store(Request $request, $idVarian)
+    {
         $varian = VarianProduk::findOrFail($idVarian);
 
-        // Validasi data.
         $data = $request->validate(
             [
                 'jenis_harga' => [
                     'required',
                     'in:ecer,grosir',
 
-                    Rule::unique(
-                        'daftar_harga',
-                        'jenis_harga'
-                    )->where(function ($query) use ($idVarian) {
-                        return $query->where(
-                            'id_varian',
-                            $idVarian
-                        );
-                    }),
+                    Rule::unique('daftar_harga', 'jenis_harga')
+                        ->where(function ($query) use ($idVarian) {
+                            return $query->where(
+                                'id_varian',
+                                $idVarian
+                            );
+                        }),
                 ],
 
                 'harga' => [
@@ -81,7 +73,7 @@ class AdminDaftarHargaController extends Controller
                     'regex:/^[0-9]+$/',
                     'integer',
                     'min:100',
-                    'max:10000000',
+                    'max:16777215',
                 ],
 
                 'minimal_pembelian' => [
@@ -89,13 +81,14 @@ class AdminDaftarHargaController extends Controller
                     'regex:/^[0-9]+$/',
                     'integer',
                     'min:1',
-                    'max:1000000',
+                    'max:65535',
                 ],
 
                 'satuan_minimal' => [
                     'nullable',
                     'string',
                     'max:20',
+                    'regex:/^[\pL]+$/u',
                 ],
             ],
             [
@@ -106,7 +99,7 @@ class AdminDaftarHargaController extends Controller
                 'Jenis harga hanya boleh ecer atau grosir.',
 
                 'jenis_harga.unique' =>
-                'Jenis harga tersebut sudah ada pada varian ini.',
+                'Jenis harga tersebut sudah digunakan pada varian ini.',
 
                 'harga.required' =>
                 'Harga wajib diisi.',
@@ -115,13 +108,13 @@ class AdminDaftarHargaController extends Controller
                 'Harga hanya boleh berisi angka.',
 
                 'harga.integer' =>
-                'Harga harus berupa angka bulat.',
+                'Harga harus berupa bilangan bulat.',
 
                 'harga.min' =>
                 'Harga minimal Rp100.',
 
                 'harga.max' =>
-                'Harga maksimal Rp10.000.000.',
+                'Harga maksimal Rp16.777.215.',
 
                 'minimal_pembelian.required' =>
                 'Minimal pembelian wajib diisi.',
@@ -130,19 +123,17 @@ class AdminDaftarHargaController extends Controller
                 'Minimal pembelian hanya boleh berisi angka.',
 
                 'minimal_pembelian.integer' =>
-                'Minimal pembelian harus berupa angka bulat.',
+                'Minimal pembelian harus berupa bilangan bulat.',
 
                 'minimal_pembelian.min' =>
                 'Minimal pembelian minimal 1.',
 
                 'minimal_pembelian.max' =>
-                'Minimal pembelian maksimal 1.000.000.',
-
-                'satuan_minimal.string' =>
-                'Satuan minimal harus berupa teks.',
+                'Minimal pembelian maksimal 65.535.',
 
                 'satuan_minimal.max' =>
                 'Satuan minimal maksimal 20 karakter.',
+                'satuan_minimal.regex' => 'Satuan minimal hanya boleh berisi huruf.',
             ]
         );
 
@@ -162,21 +153,20 @@ class AdminDaftarHargaController extends Controller
                     'Daftar harga berhasil ditambahkan.'
                 );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()
                 ->withInput()
                 ->with(
                     'error',
-                    'Daftar harga gagal ditambahkan. Silakan coba lagi.'
+                    'Daftar harga gagal ditambahkan. Terjadi kesalahan saat menyimpan data.'
                 );
         }
     }
 
 
     /**
-     * Menampilkan form edit harga.
+     * Form edit harga.
      */
     public function edit($idHarga)
     {
@@ -192,25 +182,19 @@ class AdminDaftarHargaController extends Controller
 
 
     /**
-     * Mengupdate harga.
+     * Update harga.
      */
-    public function update(
-        Request $request,
-        $idHarga
-    ) {
+    public function update(Request $request, $idHarga)
+    {
         $harga = DaftarHarga::findOrFail($idHarga);
 
-        // Validasi data.
         $data = $request->validate(
             [
                 'jenis_harga' => [
                     'required',
                     'in:ecer,grosir',
 
-                    Rule::unique(
-                        'daftar_harga',
-                        'jenis_harga'
-                    )
+                    Rule::unique('daftar_harga', 'jenis_harga')
                         ->where(function ($query) use ($harga) {
                             return $query->where(
                                 'id_varian',
@@ -228,7 +212,7 @@ class AdminDaftarHargaController extends Controller
                     'regex:/^[0-9]+$/',
                     'integer',
                     'min:100',
-                    'max:10000000',
+                    'max:16777215',
                 ],
 
                 'minimal_pembelian' => [
@@ -236,13 +220,14 @@ class AdminDaftarHargaController extends Controller
                     'regex:/^[0-9]+$/',
                     'integer',
                     'min:1',
-                    'max:1000000',
+                    'max:65535',
                 ],
 
                 'satuan_minimal' => [
                     'nullable',
                     'string',
                     'max:20',
+                    'regex:/^[\pL]+$/u',
                 ],
             ],
             [
@@ -253,7 +238,7 @@ class AdminDaftarHargaController extends Controller
                 'Jenis harga hanya boleh ecer atau grosir.',
 
                 'jenis_harga.unique' =>
-                'Jenis harga tersebut sudah ada pada varian ini.',
+                'Jenis harga tersebut sudah digunakan pada varian ini.',
 
                 'harga.required' =>
                 'Harga wajib diisi.',
@@ -262,13 +247,13 @@ class AdminDaftarHargaController extends Controller
                 'Harga hanya boleh berisi angka.',
 
                 'harga.integer' =>
-                'Harga harus berupa angka bulat.',
+                'Harga harus berupa bilangan bulat.',
 
                 'harga.min' =>
                 'Harga minimal Rp100.',
 
                 'harga.max' =>
-                'Harga maksimal Rp10.000.000.',
+                'Harga maksimal Rp16.777.215.',
 
                 'minimal_pembelian.required' =>
                 'Minimal pembelian wajib diisi.',
@@ -277,19 +262,17 @@ class AdminDaftarHargaController extends Controller
                 'Minimal pembelian hanya boleh berisi angka.',
 
                 'minimal_pembelian.integer' =>
-                'Minimal pembelian harus berupa angka bulat.',
+                'Minimal pembelian harus berupa bilangan bulat.',
 
                 'minimal_pembelian.min' =>
                 'Minimal pembelian minimal 1.',
 
                 'minimal_pembelian.max' =>
-                'Minimal pembelian maksimal 1.000.000.',
-
-                'satuan_minimal.string' =>
-                'Satuan minimal harus berupa teks.',
+                'Minimal pembelian maksimal 65.535.',
 
                 'satuan_minimal.max' =>
                 'Satuan minimal maksimal 20 karakter.',
+                'satuan_minimal.regex' => 'Satuan minimal hanya boleh berisi huruf.',
             ]
         );
 
@@ -306,21 +289,20 @@ class AdminDaftarHargaController extends Controller
                     'Daftar harga berhasil diperbarui.'
                 );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()
                 ->withInput()
                 ->with(
                     'error',
-                    'Daftar harga gagal diperbarui. Silakan coba lagi.'
+                    'Daftar harga gagal diperbarui. Terjadi kesalahan saat menyimpan perubahan.'
                 );
         }
     }
 
 
     /**
-     * Menghapus harga.
+     * Hapus harga.
      */
     public function destroy($idHarga)
     {
@@ -341,19 +323,18 @@ class AdminDaftarHargaController extends Controller
                     'Daftar harga berhasil dihapus.'
                 );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()->with(
                 'error',
-                'Daftar harga gagal dihapus. Silakan coba lagi.'
+                'Daftar harga gagal dihapus. Terjadi kesalahan saat menghapus data.'
             );
         }
     }
 
 
     /**
-     * Mengaktifkan / menonaktifkan harga.
+     * Aktifkan / nonaktifkan harga.
      */
     public function toggleStatus($idHarga)
     {
@@ -369,14 +350,12 @@ class AdminDaftarHargaController extends Controller
                 'Status harga berhasil diperbarui.'
             );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()->with(
                 'error',
-                'Status harga gagal diperbarui. Silakan coba lagi.'
+                'Status harga gagal diperbarui. Terjadi kesalahan saat mengubah status.'
             );
         }
     }
 }
-

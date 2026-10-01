@@ -84,13 +84,16 @@
                 <br>
 
                 <input
-                    type="number"
-                    name="berat_gram"
-                    value="{{ old('berat_gram') }}"
-                    min="0"
-                    placeholder="Contoh: 185"
-                    style="width: 100%; padding: 10px;"
-                >
+    type="number"
+    name="berat_gram"
+    value="{{ old('berat_gram') }}"
+    min="0"
+    max="65535"
+    oninvalid="this.setCustomValidity('Berat maksimal 65.535 gram.')"
+    oninput="this.setCustomValidity('')"
+    placeholder="Contoh: 185"
+    style="width: 100%; padding: 10px;"
+>
 
             </div>
 
@@ -124,13 +127,16 @@
                 <br>
 
                 <input
-                    type="number"
-                    name="stok"
-                    value="{{ old('stok', 0) }}"
-                    min="0"
-                    required
-                    style="width: 100%; padding: 10px;"
-                >
+    type="number"
+    name="stok"
+    value="{{ old('stok', 0) }}"
+    min="0"
+    max="16777215"
+    oninvalid="this.setCustomValidity('Stok maksimal 16.777.215.')"
+    oninput="this.setCustomValidity('')"
+    required
+    style="width: 100%; padding: 10px;"
+>
 
             </div>
 

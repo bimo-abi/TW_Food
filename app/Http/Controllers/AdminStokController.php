@@ -35,7 +35,7 @@ class AdminStokController extends Controller
                     'required',
                     'integer',
                     'min:0',
-                    'max:1000000',
+                    'max:16777215',
                 ],
 
                 'tersedia_pre_order' => [
@@ -44,21 +44,18 @@ class AdminStokController extends Controller
                 ],
 
                 'tanggal_mulai_pre_order' => [
-                    'required_if:tersedia_pre_order,1',
                     'nullable',
                     'date',
                     'after_or_equal:today',
                 ],
 
                 'tanggal_selesai_pre_order' => [
-                    'required_if:tersedia_pre_order,1',
                     'nullable',
                     'date',
                     'after:tanggal_mulai_pre_order',
                 ],
 
                 'estimasi_tersedia' => [
-                    'required_if:tersedia_pre_order,1',
                     'nullable',
                     'date',
                     'after:tanggal_selesai_pre_order',
@@ -75,13 +72,7 @@ class AdminStokController extends Controller
                 'Stok tidak boleh kurang dari 0.',
 
                 'stok.max' =>
-                'Stok maksimal 1.000.000 unit.',
-
-                'tersedia_pre_order.boolean' =>
-                'Status pre-order tidak valid.',
-
-                'tanggal_mulai_pre_order.required_if' =>
-                'Tanggal mulai pre-order wajib diisi jika pre-order aktif.',
+                'Stok maksimal 16.777.215.',
 
                 'tanggal_mulai_pre_order.date' =>
                 'Tanggal mulai pre-order tidak valid.',
@@ -89,17 +80,11 @@ class AdminStokController extends Controller
                 'tanggal_mulai_pre_order.after_or_equal' =>
                 'Tanggal mulai pre-order tidak boleh sebelum hari ini.',
 
-                'tanggal_selesai_pre_order.required_if' =>
-                'Tanggal selesai pre-order wajib diisi jika pre-order aktif.',
-
                 'tanggal_selesai_pre_order.date' =>
                 'Tanggal selesai pre-order tidak valid.',
 
                 'tanggal_selesai_pre_order.after' =>
-                'Tanggal selesai harus setelah tanggal mulai pre-order.',
-
-                'estimasi_tersedia.required_if' =>
-                'Estimasi tersedia wajib diisi jika pre-order aktif.',
+                'Tanggal selesai pre-order harus setelah tanggal mulai.',
 
                 'estimasi_tersedia.date' =>
                 'Estimasi tersedia tidak valid.',
@@ -112,16 +97,33 @@ class AdminStokController extends Controller
         $data['tersedia_pre_order'] =
             $request->boolean('tersedia_pre_order');
 
-        $varian->update($data);
+        if (!$data['tersedia_pre_order']) {
+            $data['tanggal_mulai_pre_order'] = null;
+            $data['tanggal_selesai_pre_order'] = null;
+            $data['estimasi_tersedia'] = null;
+        }
 
-        return redirect()
-            ->route(
-                'admin.stok.edit',
-                $varian->id_varian
-            )
-            ->with(
-                'success',
-                'Stok dan pengaturan pre-order berhasil diperbarui.'
-            );
+        try {
+            $varian->update($data);
+
+            return redirect()
+                ->route(
+                    'admin.stok.edit',
+                    $varian->id_varian
+                )
+                ->with(
+                    'success',
+                    'Stok dan pengaturan pre-order berhasil diperbarui.'
+                );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Stok dan pengaturan pre-order gagal diperbarui. Terjadi kesalahan saat menyimpan perubahan.'
+                );
+        }
     }
 }

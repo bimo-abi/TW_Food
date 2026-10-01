@@ -25,10 +25,7 @@ class AdminVarianProdukController extends Controller
 
         return view(
             'admin.varian.index',
-            compact(
-                'produk',
-                'varian'
-            )
+            compact('produk', 'varian')
         );
     }
 
@@ -50,32 +47,10 @@ class AdminVarianProdukController extends Controller
     /**
      * Menyimpan varian baru.
      */
-    public function store(
-        Request $request,
-        $idProduk
-    ) {
+    public function store(Request $request, $idProduk)
+    {
         $produk = Produk::findOrFail($idProduk);
 
-        // Membersihkan spasi berlebih.
-        $request->merge([
-            'nama_varian' => is_string($request->nama_varian)
-                ? preg_replace(
-                    '/\s+/',
-                    ' ',
-                    trim($request->nama_varian)
-                )
-                : $request->nama_varian,
-
-            'satuan_jual' => is_string($request->satuan_jual)
-                ? preg_replace(
-                    '/\s+/',
-                    ' ',
-                    trim($request->satuan_jual)
-                )
-                : $request->satuan_jual,
-        ]);
-
-        // Validasi data.
         $data = $request->validate(
             [
                 'nama_varian' => [
@@ -83,38 +58,35 @@ class AdminVarianProdukController extends Controller
                     'string',
                     'min:1',
                     'max:100',
-                    'regex:/^[\p{L}\p{N}\s]+$/u',
-
-                    Rule::unique(
-                        'varian_produk',
-                        'nama_varian'
-                    )->where(function ($query) use ($idProduk) {
-                        return $query->where(
-                            'id_produk',
-                            $idProduk
-                        );
-                    }),
+                    'regex:/^[\pL\pN\s]+$/u',
+                    Rule::unique('varian_produk', 'nama_varian')
+                        ->where(function ($query) use ($idProduk) {
+                            return $query->where(
+                                'id_produk',
+                                $idProduk
+                            );
+                        }),
                 ],
 
                 'berat_gram' => [
                     'nullable',
                     'integer',
-                    'min:1',
-                    'max:100000',
+                    'min:0',
+                    'max:65535',
                 ],
 
                 'satuan_jual' => [
                     'required',
                     'string',
                     'max:20',
-                    'regex:/^[\p{L}\s]+$/u',
+                    'regex:/^[\pL\s]+$/u',
                 ],
 
                 'stok' => [
                     'required',
                     'integer',
                     'min:0',
-                    'max:1000000',
+                    'max:16777215',
                 ],
 
                 'tersedia_pre_order' => [
@@ -123,21 +95,18 @@ class AdminVarianProdukController extends Controller
                 ],
 
                 'tanggal_mulai_pre_order' => [
-                    'required_if:tersedia_pre_order,1',
                     'nullable',
                     'date',
                     'after_or_equal:today',
                 ],
 
                 'tanggal_selesai_pre_order' => [
-                    'required_if:tersedia_pre_order,1',
                     'nullable',
                     'date',
                     'after:tanggal_mulai_pre_order',
                 ],
 
                 'estimasi_tersedia' => [
-                    'required_if:tersedia_pre_order,1',
                     'nullable',
                     'date',
                     'after:tanggal_selesai_pre_order',
@@ -147,9 +116,6 @@ class AdminVarianProdukController extends Controller
                 'nama_varian.required' =>
                 'Nama varian wajib diisi.',
 
-                'nama_varian.string' =>
-                'Nama varian harus berupa teks.',
-
                 'nama_varian.min' =>
                 'Nama varian minimal 1 karakter.',
 
@@ -157,7 +123,7 @@ class AdminVarianProdukController extends Controller
                 'Nama varian maksimal 100 karakter.',
 
                 'nama_varian.regex' =>
-                'Nama varian hanya boleh berisi huruf, angka, dan spasi. Simbol tidak diperbolehkan.',
+                'Nama varian hanya boleh berisi huruf, angka, dan spasi.',
 
                 'nama_varian.unique' =>
                 'Nama varian tersebut sudah digunakan pada produk ini.',
@@ -166,16 +132,13 @@ class AdminVarianProdukController extends Controller
                 'Berat harus berupa angka bulat.',
 
                 'berat_gram.min' =>
-                'Berat minimal 1 gram.',
+                'Berat tidak boleh kurang dari 0 gram.',
 
                 'berat_gram.max' =>
-                'Berat maksimal 100.000 gram.',
+                'Berat maksimal 65.535 gram.',
 
                 'satuan_jual.required' =>
                 'Satuan jual wajib diisi.',
-
-                'satuan_jual.string' =>
-                'Satuan jual harus berupa teks.',
 
                 'satuan_jual.max' =>
                 'Satuan jual maksimal 20 karakter.',
@@ -193,34 +156,13 @@ class AdminVarianProdukController extends Controller
                 'Stok tidak boleh kurang dari 0.',
 
                 'stok.max' =>
-                'Stok maksimal 1.000.000 unit.',
-
-                'tersedia_pre_order.boolean' =>
-                'Status pre-order tidak valid.',
-
-                'tanggal_mulai_pre_order.required_if' =>
-                'Tanggal mulai pre-order wajib diisi jika pre-order aktif.',
-
-                'tanggal_mulai_pre_order.date' =>
-                'Tanggal mulai pre-order tidak valid.',
+                'Stok maksimal 16.777.215.',
 
                 'tanggal_mulai_pre_order.after_or_equal' =>
                 'Tanggal mulai pre-order tidak boleh sebelum hari ini.',
 
-                'tanggal_selesai_pre_order.required_if' =>
-                'Tanggal selesai pre-order wajib diisi jika pre-order aktif.',
-
-                'tanggal_selesai_pre_order.date' =>
-                'Tanggal selesai pre-order tidak valid.',
-
                 'tanggal_selesai_pre_order.after' =>
-                'Tanggal selesai harus setelah tanggal mulai pre-order.',
-
-                'estimasi_tersedia.required_if' =>
-                'Estimasi tersedia wajib diisi jika pre-order aktif.',
-
-                'estimasi_tersedia.date' =>
-                'Estimasi tersedia tidak valid.',
+                'Tanggal selesai pre-order harus setelah tanggal mulai.',
 
                 'estimasi_tersedia.after' =>
                 'Estimasi tersedia harus setelah tanggal selesai pre-order.',
@@ -232,14 +174,13 @@ class AdminVarianProdukController extends Controller
         $data['tersedia_pre_order'] =
             $request->boolean('tersedia_pre_order');
 
-        // Jika pre-order tidak aktif, kosongkan tanggal.
+        $data['status_aktif'] = true;
+
         if (!$data['tersedia_pre_order']) {
             $data['tanggal_mulai_pre_order'] = null;
             $data['tanggal_selesai_pre_order'] = null;
             $data['estimasi_tersedia'] = null;
         }
-
-        $data['status_aktif'] = true;
 
         try {
             VarianProduk::create($data);
@@ -254,14 +195,13 @@ class AdminVarianProdukController extends Controller
                     'Varian produk berhasil ditambahkan.'
                 );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()
                 ->withInput()
                 ->with(
                     'error',
-                    'Varian produk gagal ditambahkan. Silakan coba lagi.'
+                    'Varian produk gagal ditambahkan. Terjadi kesalahan saat menyimpan data.'
                 );
         }
     }
@@ -285,32 +225,10 @@ class AdminVarianProdukController extends Controller
     /**
      * Mengupdate varian.
      */
-    public function update(
-        Request $request,
-        $idVarian
-    ) {
+    public function update(Request $request, $idVarian)
+    {
         $varian = VarianProduk::findOrFail($idVarian);
 
-        // Membersihkan spasi berlebih.
-        $request->merge([
-            'nama_varian' => is_string($request->nama_varian)
-                ? preg_replace(
-                    '/\s+/',
-                    ' ',
-                    trim($request->nama_varian)
-                )
-                : $request->nama_varian,
-
-            'satuan_jual' => is_string($request->satuan_jual)
-                ? preg_replace(
-                    '/\s+/',
-                    ' ',
-                    trim($request->satuan_jual)
-                )
-                : $request->satuan_jual,
-        ]);
-
-        // Validasi data.
         $data = $request->validate(
             [
                 'nama_varian' => [
@@ -318,12 +236,8 @@ class AdminVarianProdukController extends Controller
                     'string',
                     'min:1',
                     'max:100',
-                    'regex:/^[\p{L}\p{N}\s]+$/u',
-
-                    Rule::unique(
-                        'varian_produk',
-                        'nama_varian'
-                    )
+                    'regex:/^[\pL\pN\s]+$/u',
+                    Rule::unique('varian_produk', 'nama_varian')
                         ->where(function ($query) use ($varian) {
                             return $query->where(
                                 'id_produk',
@@ -339,49 +253,20 @@ class AdminVarianProdukController extends Controller
                 'berat_gram' => [
                     'nullable',
                     'integer',
-                    'min:1',
-                    'max:100000',
+                    'min:0',
+                    'max:65535',
                 ],
 
                 'satuan_jual' => [
                     'required',
                     'string',
                     'max:20',
-                    'regex:/^[\p{L}\s]+$/u',
-                ],
-
-                'tersedia_pre_order' => [
-                    'nullable',
-                    'boolean',
-                ],
-
-                'tanggal_mulai_pre_order' => [
-                    'required_if:tersedia_pre_order,1',
-                    'nullable',
-                    'date',
-                    'after_or_equal:today',
-                ],
-
-                'tanggal_selesai_pre_order' => [
-                    'required_if:tersedia_pre_order,1',
-                    'nullable',
-                    'date',
-                    'after:tanggal_mulai_pre_order',
-                ],
-
-                'estimasi_tersedia' => [
-                    'required_if:tersedia_pre_order,1',
-                    'nullable',
-                    'date',
-                    'after:tanggal_selesai_pre_order',
+                    'regex:/^[\pL\s]+$/u',
                 ],
             ],
             [
                 'nama_varian.required' =>
                 'Nama varian wajib diisi.',
-
-                'nama_varian.string' =>
-                'Nama varian harus berupa teks.',
 
                 'nama_varian.min' =>
                 'Nama varian minimal 1 karakter.',
@@ -390,7 +275,7 @@ class AdminVarianProdukController extends Controller
                 'Nama varian maksimal 100 karakter.',
 
                 'nama_varian.regex' =>
-                'Nama varian hanya boleh berisi huruf, angka, dan spasi. Simbol tidak diperbolehkan.',
+                'Nama varian hanya boleh berisi huruf, angka, dan spasi.',
 
                 'nama_varian.unique' =>
                 'Nama varian tersebut sudah digunakan pada produk ini.',
@@ -399,76 +284,21 @@ class AdminVarianProdukController extends Controller
                 'Berat harus berupa angka bulat.',
 
                 'berat_gram.min' =>
-                'Berat minimal 1 gram.',
+                'Berat tidak boleh kurang dari 0 gram.',
 
                 'berat_gram.max' =>
-                'Berat maksimal 100.000 gram.',
+                'Berat maksimal 65.535 gram.',
 
                 'satuan_jual.required' =>
                 'Satuan jual wajib diisi.',
-
-                'satuan_jual.string' =>
-                'Satuan jual harus berupa teks.',
 
                 'satuan_jual.max' =>
                 'Satuan jual maksimal 20 karakter.',
 
                 'satuan_jual.regex' =>
                 'Satuan jual hanya boleh berisi huruf dan spasi.',
-
-                'stok.required' =>
-                'Stok wajib diisi.',
-
-                'stok.integer' =>
-                'Stok harus berupa angka bulat.',
-
-                'stok.min' =>
-                'Stok tidak boleh kurang dari 0.',
-
-                'stok.max' =>
-                'Stok maksimal 1.000.000 unit.',
-
-                'tersedia_pre_order.boolean' =>
-                'Status pre-order tidak valid.',
-
-                'tanggal_mulai_pre_order.required_if' =>
-                'Tanggal mulai pre-order wajib diisi jika pre-order aktif.',
-
-                'tanggal_mulai_pre_order.date' =>
-                'Tanggal mulai pre-order tidak valid.',
-
-                'tanggal_mulai_pre_order.after_or_equal' =>
-                'Tanggal mulai pre-order tidak boleh sebelum hari ini.',
-
-                'tanggal_selesai_pre_order.required_if' =>
-                'Tanggal selesai pre-order wajib diisi jika pre-order aktif.',
-
-                'tanggal_selesai_pre_order.date' =>
-                'Tanggal selesai pre-order tidak valid.',
-
-                'tanggal_selesai_pre_order.after' =>
-                'Tanggal selesai harus setelah tanggal mulai pre-order.',
-
-                'estimasi_tersedia.required_if' =>
-                'Estimasi tersedia wajib diisi jika pre-order aktif.',
-
-                'estimasi_tersedia.date' =>
-                'Estimasi tersedia tidak valid.',
-
-                'estimasi_tersedia.after' =>
-                'Estimasi tersedia harus setelah tanggal selesai pre-order.',
             ]
         );
-
-        $data['tersedia_pre_order'] =
-            $request->boolean('tersedia_pre_order');
-
-        // Jika pre-order tidak aktif, kosongkan tanggal.
-        if (!$data['tersedia_pre_order']) {
-            $data['tanggal_mulai_pre_order'] = null;
-            $data['tanggal_selesai_pre_order'] = null;
-            $data['estimasi_tersedia'] = null;
-        }
 
         try {
             $varian->update($data);
@@ -483,14 +313,13 @@ class AdminVarianProdukController extends Controller
                     'Varian produk berhasil diperbarui.'
                 );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()
                 ->withInput()
                 ->with(
                     'error',
-                    'Varian produk gagal diperbarui. Silakan coba lagi.'
+                    'Varian produk gagal diperbarui. Terjadi kesalahan saat menyimpan perubahan.'
                 );
         }
     }
@@ -503,7 +332,6 @@ class AdminVarianProdukController extends Controller
     {
         $varian = VarianProduk::findOrFail($idVarian);
 
-        // Jangan hapus varian yang sudah digunakan dalam pesanan.
         if ($varian->detailPesanan()->exists()) {
             return back()->with(
                 'error',
@@ -511,17 +339,9 @@ class AdminVarianProdukController extends Controller
             );
         }
 
-        // Jangan hapus varian yang masih memiliki daftar harga.
-        if ($varian->daftarHarga()->exists()) {
-            return back()->with(
-                'error',
-                'Varian tidak dapat dihapus karena masih memiliki daftar harga.'
-            );
-        }
+        $idProduk = $varian->id_produk;
 
         try {
-            $idProduk = $varian->id_produk;
-
             $varian->delete();
 
             return redirect()
@@ -534,12 +354,11 @@ class AdminVarianProdukController extends Controller
                     'Varian produk berhasil dihapus.'
                 );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()->with(
                 'error',
-                'Varian produk gagal dihapus. Silakan coba lagi.'
+                'Varian produk gagal dihapus. Terjadi kesalahan saat menghapus data.'
             );
         }
     }
@@ -562,12 +381,11 @@ class AdminVarianProdukController extends Controller
                 'Status varian berhasil diperbarui.'
             );
         } catch (\Throwable $e) {
-
             report($e);
 
             return back()->with(
                 'error',
-                'Status varian gagal diperbarui. Silakan coba lagi.'
+                'Status varian gagal diperbarui. Terjadi kesalahan saat mengubah status.'
             );
         }
     }

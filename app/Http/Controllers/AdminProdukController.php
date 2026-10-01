@@ -174,11 +174,12 @@ class AdminProdukController extends Controller
                             'id_produk'
                         ),
                 ],
+
                 'deskripsi' => [
                     'nullable',
                     'string',
                     'max:5000',
-                    'regex:/^[\p{L}\p{N}\s.\-]+$/u',
+                    'regex:/^[\p{L}\p{N}\s]+$/u',
                 ],
 
                 'foto_produk' => [
@@ -208,7 +209,7 @@ class AdminProdukController extends Controller
                 'Deskripsi maksimal 5.000 karakter.',
 
                 'deskripsi.regex' =>
-                'Deskripsi hanya boleh berisi huruf, angka, dan spasi. Simbol tidak diperbolehkan kecuali (.(titik) dan -(strip)).',
+                'Deskripsi hanya boleh berisi huruf, angka, dan spasi. Simbol tidak diperbolehkan.',
 
                 'foto_produk.image' =>
                 'File yang dipilih harus berupa gambar.',

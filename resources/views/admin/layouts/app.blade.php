@@ -174,7 +174,7 @@
 
             <nav class="sidebar-menu">
 
-                <a href="{{ route('admin.dashboard.home') }}">
+                <a href="{{ route('admin.dashboard') }}">
                     Dashboard
                 </a>
 

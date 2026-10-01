@@ -9,23 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up(): void
-{
-    Schema::table('pengguna', function (Blueprint $table) {
-        if (!Schema::hasColumn('pengguna', 'remember_token')) {
-            $table->rememberToken();
-        }
-    });
-}
+    public function up(): void
+    {
+        Schema::table('pengguna', function (Blueprint $table) {
+            if (!Schema::hasColumn('pengguna', 'remember_token')) {
+                $table->rememberToken();
+            }
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
-public function down(): void
-{
-    Schema::table('pengguna', function (Blueprint $table) {
-        if (Schema::hasColumn('pengguna', 'remember_token')) {
-            $table->dropColumn('remember_token');
-        }
-    });
-}
+    public function down(): void
+    {
+        Schema::table('pengguna', function (Blueprint $table) {
+            if (Schema::hasColumn('pengguna', 'remember_token')) {
+                $table->dropColumn('remember_token');
+            }
+        });
+    }
+};

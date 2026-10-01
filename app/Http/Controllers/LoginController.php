@@ -27,7 +27,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             // Direct ke halaman dashboard admin
-            return redirect()->intended(route('admin.dashboard.home'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()->withErrors([

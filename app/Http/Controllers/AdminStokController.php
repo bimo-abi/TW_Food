@@ -44,19 +44,19 @@ class AdminStokController extends Controller
                 ],
 
                 'tanggal_mulai_pre_order' => [
-                    'nullable',
+                    'required_if:tersedia_pre_order,1',
                     'date',
                     'after_or_equal:today',
                 ],
 
                 'tanggal_selesai_pre_order' => [
-                    'nullable',
+                    'required_if:tersedia_pre_order,1',
                     'date',
                     'after:tanggal_mulai_pre_order',
                 ],
 
                 'estimasi_tersedia' => [
-                    'nullable',
+                    'required_if:tersedia_pre_order,1',
                     'date',
                     'after:tanggal_selesai_pre_order',
                 ],
@@ -66,7 +66,7 @@ class AdminStokController extends Controller
                 'Stok wajib diisi.',
 
                 'stok.integer' =>
-                'Stok harus berupa angka bulat.',
+                'Stok harus berupa angka.',
 
                 'stok.min' =>
                 'Stok tidak boleh kurang dari 0.',
@@ -74,25 +74,35 @@ class AdminStokController extends Controller
                 'stok.max' =>
                 'Stok maksimal 16.777.215.',
 
+                'tanggal_mulai_pre_order.required_if' =>
+                'Tanggal mulai Pre-Order wajib diisi jika Pre-Order diaktifkan.',
+
                 'tanggal_mulai_pre_order.date' =>
-                'Tanggal mulai pre-order tidak valid.',
+                'Tanggal mulai Pre-Order tidak valid.',
 
                 'tanggal_mulai_pre_order.after_or_equal' =>
-                'Tanggal mulai pre-order tidak boleh sebelum hari ini.',
+                'Tanggal mulai Pre-Order tidak boleh sebelum hari ini.',
+
+                'tanggal_selesai_pre_order.required_if' =>
+                'Tanggal selesai Pre-Order wajib diisi jika Pre-Order diaktifkan.',
 
                 'tanggal_selesai_pre_order.date' =>
-                'Tanggal selesai pre-order tidak valid.',
+                'Tanggal selesai Pre-Order tidak valid.',
 
                 'tanggal_selesai_pre_order.after' =>
-                'Tanggal selesai pre-order harus setelah tanggal mulai.',
+                'Tanggal selesai harus setelah tanggal mulai Pre-Order.',
+
+                'estimasi_tersedia.required_if' =>
+                'Estimasi tersedia wajib diisi jika Pre-Order diaktifkan.',
 
                 'estimasi_tersedia.date' =>
                 'Estimasi tersedia tidak valid.',
 
                 'estimasi_tersedia.after' =>
-                'Estimasi tersedia harus setelah tanggal selesai pre-order.',
+                'Estimasi tersedia harus setelah tanggal selesai Pre-Order.',
             ]
         );
+
 
         $data['tersedia_pre_order'] =
             $request->boolean('tersedia_pre_order');

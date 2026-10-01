@@ -26,6 +26,9 @@ Route::get('/admin/login', [LoginController::class, 'showLogin'])
 Route::post('/admin/login', [LoginController::class, 'login'])
     ->name('admin.login.process');
 
+Route::post('/admin/register', [LoginController::class, 'register'])
+    ->name('admin.register.process');
+
 Route::post('/admin/logout', [LoginController::class, 'logout'])
     ->name('admin.logout');
 

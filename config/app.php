@@ -2,6 +2,8 @@
 
 return [
 
+    'kode_daftar_admin' => env('KODE_DAFTAR_ADMIN'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

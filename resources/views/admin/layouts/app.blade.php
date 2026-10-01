@@ -146,18 +146,21 @@
             text-decoration: none
         }
 
+
+        /* Setiap button di Setiap CRUD Table*/
         .crud-btn-Produk {
             display: flex;
             gap: 8px;
             justify-content: center;
         }
 
+        /* Sizing photo on Produk */
         .produk-foto-container{
             display: flex;
 
         }
 
-        
+
     </style>
 
 

@@ -201,6 +201,10 @@
                     Pesanan
                 </a>
 
+                <a href="{{ route('admin.outlet.index') }}">
+                    Outlet
+                </a>
+
                 <a href="#">
                     Pelanggan
                 </a>
@@ -215,10 +219,6 @@
 
                 <a href="#">
                     Konten Beranda
-                </a>
-
-                <a href="#">
-                    Outlet
                 </a>
 
             </nav>

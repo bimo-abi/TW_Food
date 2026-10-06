@@ -7,7 +7,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminProdukController;
 use App\Http\Controllers\AdminVarianProdukController;
 use App\Http\Controllers\AdminDaftarHargaController;
-use App\Http\Controllers\AdminStokController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ResepController;
 use App\Http\Controllers\OutletController;
@@ -15,6 +14,8 @@ use App\Http\Controllers\KontakController;
 use App\Http\Controllers\AdminPesananController;
 use App\Http\Controllers\AdminResepController;
 use App\Http\Controllers\AdminResepProdukController;
+use App\Http\Controllers\AdminOutletController;
+use App\Http\Controllers\AdminJamOperasionalOutletController;
 
 //Dashboard
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -191,22 +192,6 @@ Route::delete(
     ->name('admin.harga.destroy')
     ->middleware('admin');
 
-//admin stok dan pre order
-Route::get(
-    '/admin/varian/{idVarian}/stok',
-    [AdminStokController::class, 'edit']
-)
-    ->name('admin.stok.edit')
-    ->middleware('admin');
-
-
-Route::put(
-    '/admin/varian/{idVarian}/stok',
-    [AdminStokController::class, 'update']
-)
-    ->name('admin.stok.update')
-    ->middleware('admin');
-
 //admin resep
 
 Route::get(
@@ -278,6 +263,102 @@ Route::delete(
     [AdminResepProdukController::class, 'destroy']
 )
     ->name('admin.resep.produk.destroy')
+    ->middleware('admin');
+
+//admin outlet
+Route::get(
+    '/admin/outlet',
+    [AdminOutletController::class, 'index']
+)
+    ->name('admin.outlet.index')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/outlet/create',
+    [AdminOutletController::class, 'create']
+)
+    ->name('admin.outlet.create')
+    ->middleware('admin');
+
+
+Route::post(
+    '/admin/outlet',
+    [AdminOutletController::class, 'store']
+)
+    ->name('admin.outlet.store')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/outlet/{idOutlet}/edit',
+    [AdminOutletController::class, 'edit']
+)
+    ->name('admin.outlet.edit')
+    ->middleware('admin');
+
+
+Route::put(
+    '/admin/outlet/{idOutlet}',
+    [AdminOutletController::class, 'update']
+)
+    ->name('admin.outlet.update')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/outlet/{idOutlet}',
+    [AdminOutletController::class, 'destroy']
+)
+    ->name('admin.outlet.destroy')
+    ->middleware('admin');
+
+//admin jam operasional outlet
+Route::get(
+    '/admin/outlet/{idOutlet}/jam-operasional',
+    [AdminJamOperasionalOutletController::class, 'index']
+)
+    ->name('admin.jam-operasional.index')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/outlet/{idOutlet}/jam-operasional/create',
+    [AdminJamOperasionalOutletController::class, 'create']
+)
+    ->name('admin.jam-operasional.create')
+    ->middleware('admin');
+
+
+Route::post(
+    '/admin/outlet/{idOutlet}/jam-operasional',
+    [AdminJamOperasionalOutletController::class, 'store']
+)
+    ->name('admin.jam-operasional.store')
+    ->middleware('admin');
+
+
+Route::get(
+    '/admin/jam-operasional/{idJamOperasional}/edit',
+    [AdminJamOperasionalOutletController::class, 'edit']
+)
+    ->name('admin.jam-operasional.edit')
+    ->middleware('admin');
+
+
+Route::put(
+    '/admin/jam-operasional/{idJamOperasional}',
+    [AdminJamOperasionalOutletController::class, 'update']
+)
+    ->name('admin.jam-operasional.update')
+    ->middleware('admin');
+
+
+Route::delete(
+    '/admin/jam-operasional/{idJamOperasional}',
+    [AdminJamOperasionalOutletController::class, 'destroy']
+)
+    ->name('admin.jam-operasional.destroy')
     ->middleware('admin');
 
 //public website

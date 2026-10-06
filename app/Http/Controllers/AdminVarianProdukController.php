@@ -96,18 +96,27 @@ class AdminVarianProdukController extends Controller
 
                 'tanggal_mulai_pre_order' => [
                     'nullable',
+                    Rule::requiredIf(
+                        $request->boolean('tersedia_pre_order')
+                    ),
                     'date',
                     'after_or_equal:today',
                 ],
 
                 'tanggal_selesai_pre_order' => [
                     'nullable',
+                    Rule::requiredIf(
+                        $request->boolean('tersedia_pre_order')
+                    ),
                     'date',
                     'after:tanggal_mulai_pre_order',
                 ],
 
                 'estimasi_tersedia' => [
                     'nullable',
+                    Rule::requiredIf(
+                        $request->boolean('tersedia_pre_order')
+                    ),
                     'date',
                     'after:tanggal_selesai_pre_order',
                 ],
@@ -158,14 +167,14 @@ class AdminVarianProdukController extends Controller
                 'stok.max' =>
                 'Stok maksimal 16.777.215.',
 
-                'tanggal_mulai_pre_order.after_or_equal' =>
-                'Tanggal mulai pre-order tidak boleh sebelum hari ini.',
+                'tanggal_mulai_pre_order.required' =>
+                'Tanggal mulai pre-order wajib diisi jika Pre-Order diaktifkan.',
 
-                'tanggal_selesai_pre_order.after' =>
-                'Tanggal selesai pre-order harus setelah tanggal mulai.',
+                'tanggal_selesai_pre_order.required' =>
+                'Tanggal selesai pre-order wajib diisi jika Pre-Order diaktifkan.',
 
-                'estimasi_tersedia.after' =>
-                'Estimasi tersedia harus setelah tanggal selesai pre-order.',
+                'estimasi_tersedia.required' =>
+                'Estimasi tersedia wajib diisi jika Pre-Order diaktifkan.',
             ]
         );
 
@@ -222,12 +231,26 @@ class AdminVarianProdukController extends Controller
     }
 
 
+
+
     /**
      * Mengupdate varian.
      */
     public function update(Request $request, $idVarian)
     {
         $varian = VarianProduk::findOrFail($idVarian);
+
+        $preOrderAktif = $request->boolean('tersedia_pre_order');
+
+        // Jika Pre-Order tidak aktif,
+        // abaikan seluruh data tanggal Pre-Order.
+        if (!$preOrderAktif) {
+            $request->merge([
+                'tanggal_mulai_pre_order' => null,
+                'tanggal_selesai_pre_order' => null,
+                'estimasi_tersedia' => null,
+            ]);
+        }
 
         $data = $request->validate(
             [
@@ -237,7 +260,11 @@ class AdminVarianProdukController extends Controller
                     'min:1',
                     'max:100',
                     'regex:/^[\pL\pN\s]+$/u',
-                    Rule::unique('varian_produk', 'nama_varian')
+
+                    Rule::unique(
+                        'varian_produk',
+                        'nama_varian'
+                    )
                         ->where(function ($query) use ($varian) {
                             return $query->where(
                                 'id_produk',
@@ -262,6 +289,39 @@ class AdminVarianProdukController extends Controller
                     'string',
                     'max:20',
                     'regex:/^[\pL\s]+$/u',
+                ],
+
+                'stok' => [
+                    'required',
+                    'integer',
+                    'min:0',
+                    'max:16777215',
+                ],
+
+                'tersedia_pre_order' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'tanggal_mulai_pre_order' => [
+                    'nullable',
+                    Rule::requiredIf($preOrderAktif),
+                    'date',
+                    'after_or_equal:today',
+                ],
+
+                'tanggal_selesai_pre_order' => [
+                    'nullable',
+                    Rule::requiredIf($preOrderAktif),
+                    'date',
+                    'after:tanggal_mulai_pre_order',
+                ],
+
+                'estimasi_tersedia' => [
+                    'nullable',
+                    Rule::requiredIf($preOrderAktif),
+                    'date',
+                    'after:tanggal_selesai_pre_order',
                 ],
             ],
             [
@@ -297,8 +357,56 @@ class AdminVarianProdukController extends Controller
 
                 'satuan_jual.regex' =>
                 'Satuan jual hanya boleh berisi huruf dan spasi.',
+
+                'stok.required' =>
+                'Stok wajib diisi.',
+
+                'stok.integer' =>
+                'Stok harus berupa angka bulat.',
+
+                'stok.min' =>
+                'Stok tidak boleh kurang dari 0.',
+
+                'stok.max' =>
+                'Stok maksimal 16.777.215.',
+
+                'tanggal_mulai_pre_order.required' =>
+                'Tanggal mulai Pre-Order wajib diisi jika Pre-Order diaktifkan.',
+
+                'tanggal_mulai_pre_order.date' =>
+                'Tanggal mulai Pre-Order tidak valid.',
+
+                'tanggal_mulai_pre_order.after_or_equal' =>
+                'Tanggal mulai Pre-Order tidak boleh sebelum hari ini.',
+
+                'tanggal_selesai_pre_order.required' =>
+                'Tanggal selesai Pre-Order wajib diisi jika Pre-Order diaktifkan.',
+
+                'tanggal_selesai_pre_order.date' =>
+                'Tanggal selesai Pre-Order tidak valid.',
+
+                'tanggal_selesai_pre_order.after' =>
+                'Tanggal selesai Pre-Order harus setelah tanggal mulai.',
+
+                'estimasi_tersedia.required' =>
+                'Estimasi tersedia wajib diisi jika Pre-Order diaktifkan.',
+
+                'estimasi_tersedia.date' =>
+                'Estimasi tersedia tidak valid.',
+
+                'estimasi_tersedia.after' =>
+                'Estimasi tersedia harus setelah tanggal selesai Pre-Order.',
             ]
         );
+
+        $data['tersedia_pre_order'] = $preOrderAktif;
+
+        // Jika Pre-Order OFF, pastikan tanggal benar-benar kosong.
+        if (!$preOrderAktif) {
+            $data['tanggal_mulai_pre_order'] = null;
+            $data['tanggal_selesai_pre_order'] = null;
+            $data['estimasi_tersedia'] = null;
+        }
 
         try {
             $varian->update($data);
@@ -313,6 +421,7 @@ class AdminVarianProdukController extends Controller
                     'Varian produk berhasil diperbarui.'
                 );
         } catch (\Throwable $e) {
+
             report($e);
 
             return back()

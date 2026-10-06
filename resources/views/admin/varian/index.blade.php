@@ -9,13 +9,12 @@
 
 @section('content')
 
-    <div
-        style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    ">
+    <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        ">
 
         <div>
 
@@ -31,14 +30,13 @@
         </div>
 
 
-        <a href="{{ route('admin.varian.create', $produk->id_produk) }}"
-            style="
-                background: #198754;
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                text-decoration: none;
-            ">
+        <a href="{{ route('admin.varian.create', $produk->id_produk) }}" style="
+                    background: #198754;
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 5px;
+                    text-decoration: none;
+                ">
             + Tambah Varian
         </a>
 
@@ -46,28 +44,26 @@
 
 
     @if (session('success'))
-        <div
-            style="
-            background: #d1e7dd;
-            color: #0f5132;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
+        <div style="
+                    background: #d1e7dd;
+                    color: #0f5132;
+                    padding: 12px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                ">
             {{ session('success') }}
         </div>
     @endif
 
 
     @if (session('error'))
-        <div
-            style="
-            background: #f8d7da;
-            color: #842029;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
+        <div style="
+                    background: #f8d7da;
+                    color: #842029;
+                    padding: 12px;
+                    margin-bottom: 20px;
+                    border-radius: 5px;
+                ">
             {{ session('error') }}
         </div>
     @endif
@@ -155,69 +151,60 @@
                         <td>
                             <div class="crud-btn-Produk">
 
-                            <a href="{{ route('admin.harga.index', $item->id_varian) }}">
-                                <button type="button">
-                                    Harga
-                                </button>
-                            </a>
+                                <a href="{{ route('admin.harga.index', $item->id_varian) }}">
+                                    <button type="button">
+                                        Harga
+                                    </button>
+                                </a>
 
-                            <br>
+                                <br>
 
-                            <a href="{{ route('admin.varian.edit', $item->id_varian) }}">
-                                <button type="button">
-                                    Edit
-                                </button>
-                            </a>
+                                <a href="{{ route('admin.varian.edit', $item->id_varian) }}">
+                                    <button type="button">
+                                        Edit
+                                    </button>
+                                </a>
 
-                            <br>
-
-                            <a href="{{ route('admin.stok.edit', $item->id_varian) }}">
-                                <button type="button">
-                                    Stok & Pre-order
-                                </button>
-                            </a>
-
-                            <br>
+                                <br>
 
 
-                            <form action="{{ route('admin.varian.toggle-status', $item->id_varian) }}" method="POST"
-                                style="display: inline;">
+                                <form action="{{ route('admin.varian.toggle-status', $item->id_varian) }}" method="POST"
+                                    style="display: inline;">
 
-                                @csrf
-                                @method('PATCH')
+                                    @csrf
+                                    @method('PATCH')
 
-                                <button type="submit">
+                                    <button type="submit">
 
-                                    @if ($item->status_aktif)
-                                        Nonaktifkan
-                                    @else
-                                        Aktifkan
-                                    @endif
+                                        @if ($item->status_aktif)
+                                            Nonaktifkan
+                                        @else
+                                            Aktifkan
+                                        @endif
 
-                                </button>
+                                    </button>
 
-                            </form>
-
-
-                            <br>
+                                </form>
 
 
-                            <form action="{{ route('admin.varian.destroy', $item->id_varian) }}" method="POST"
-                                style="display: inline;"
-                                onsubmit="
-                                    return confirm(
-                                        'Yakin ingin menghapus varian ini?'
-                                    )
-                                ">
+                                <br>
 
-                                @csrf
-                                @method('DELETE')
 
-                                <button type="submit">
-                                    Hapus
-                                </button>
+                                <form action="{{ route('admin.varian.destroy', $item->id_varian) }}" method="POST"
+                                    style="display: inline;" onsubmit="
+                                            return confirm(
+                                                'Yakin ingin menghapus varian ini?'
+                                            )
+                                        ">
 
-                            </form>
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit">
+                                        Hapus
+                                    </button>
+
+                                </form>
                             </div>
                         </td>
 
@@ -246,7 +233,7 @@
 
     <a href="{{ route('admin.produk.index') }}">
         <button type="button">
-        ← Kembali ke Produk
+            ← Kembali ke Produk
         </button>
     </a>
 

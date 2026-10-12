@@ -8,14 +8,8 @@
     {{-- HERO --}}
     <section class="hero">
         <div class="container">
-            <h1>
-                TWFood
-            </h1>
-
-            <p>
-                Lezat dan Sehat
-            </p>
-
+            <h1>TWFood</h1>
+            <p>Lezat dan Sehat</p>
             <p>
                 Menghadirkan berbagai produk
                 olahan pangan plant-based.
@@ -30,12 +24,8 @@
     {{-- PRODUK KAMI --}}
     <section class="section">
         <div class="container">
-
             <div class="section-title">
-                <h2>
-                    Kenali Produk Kami
-                </h2>
-
+                <h2>Kenali Produk Kami</h2>
                 <p>
                     Berbagai produk olahan TWFood
                     untuk menemani kebutuhan Anda.
@@ -45,8 +35,6 @@
             <div class="products">
                 @forelse ($produk as $item)
                     <div class="product-card">
-
-                        {{-- FOTO PRODUK --}}
                         @if ($item->foto_produk)
                             <img
                                 src="{{ asset('storage/' . $item->foto_produk) }}"
@@ -58,9 +46,7 @@
                         @endif
 
                         <div class="product-content">
-                            <h3>
-                                {{ $item->nama_produk }}
-                            </h3>
+                            <h3>{{ $item->nama_produk }}</h3>
 
                             <p>
                                 {{ $item->deskripsi ?? 'Produk TWFood.' }}
@@ -73,12 +59,9 @@
                                 Lihat Detail
                             </a>
                         </div>
-
                     </div>
                 @empty
-                    <p>
-                        Belum ada produk yang tersedia.
-                    </p>
+                    <p>Belum ada produk yang tersedia.</p>
                 @endforelse
             </div>
 
@@ -87,25 +70,32 @@
                     Lihat Semua Produk
                 </a>
             </div>
-
         </div>
     </section>
 
-    {{-- INFORMASI PRODUK --}}
+    {{-- KONTEN BERANDA DINAMIS BERDASARKAN KATEGORI --}}
     @php
-        $kontenProduk = $konten->where('jenis_konten', 'informasi_produk');
+        $kelompokKonten = $konten
+            ->filter(fn ($item) => $item->kategori !== null
+                && $item->kategori->status_aktif)
+            ->groupBy('id_kategori')
+            ->sortBy(fn ($items) => $items->min('urutan'));
     @endphp
 
-    @if ($kontenProduk->isNotEmpty())
+    @foreach ($kelompokKonten as $items)
+        @php
+            $kategori = $items->first()->kategori;
+        @endphp
+
         <section class="section">
             <div class="container">
 
                 <div class="section-title">
-                    <h2>Informasi Produk</h2>
+                    <h2>{{ $kategori->nama_kategori }}</h2>
                 </div>
 
                 <div class="content-list">
-                    @foreach ($kontenProduk as $item)
+                    @foreach ($items->sortBy('urutan') as $item)
                         <div class="content-card">
 
                             @if ($item->gambar)
@@ -128,129 +118,11 @@
 
             </div>
         </section>
-    @endif
-
-    {{-- INFORMASI BAHAN --}}
-    @php
-        $kontenBahan = $konten->where('jenis_konten', 'informasi_bahan');
-    @endphp
-
-    @if ($kontenBahan->isNotEmpty())
-        <section class="section">
-            <div class="container">
-
-                <div class="section-title">
-                    <h2>Informasi Bahan</h2>
-                </div>
-
-                <div class="content-list">
-                    @foreach ($kontenBahan as $item)
-                        <div class="content-card">
-
-                            @if ($item->gambar)
-                                <img
-                                    src="{{ asset('storage/' . $item->gambar) }}"
-                                    alt="{{ $item->judul }}"
-                                    style="max-width: 100%; height: auto;"
-                                >
-                            @endif
-
-                            <h3>{{ $item->judul }}</h3>
-
-                            @if ($item->deskripsi)
-                                <p>{{ $item->deskripsi }}</p>
-                            @endif
-
-                        </div>
-                    @endforeach
-                </div>
-
-            </div>
-        </section>
-    @endif
-
-    {{-- INFORMASI MEREK / TENTANG TWFOOD --}}
-    @php
-        $kontenMerek = $konten->where('jenis_konten', 'informasi_merek');
-    @endphp
-
-    @if ($kontenMerek->isNotEmpty())
-        <section class="section">
-            <div class="container">
-
-                <div class="section-title">
-                    <h2>Informasi Merek</h2>
-                </div>
-
-                <div class="content-list">
-                    @foreach ($kontenMerek as $item)
-                        <div class="content-card">
-
-                            @if ($item->gambar)
-                                <img
-                                    src="{{ asset('storage/' . $item->gambar) }}"
-                                    alt="{{ $item->judul }}"
-                                    style="max-width: 100%; height: auto;"
-                                >
-                            @endif
-
-                            <h3>{{ $item->judul }}</h3>
-
-                            @if ($item->deskripsi)
-                                <p>{{ $item->deskripsi }}</p>
-                            @endif
-
-                        </div>
-                    @endforeach
-                </div>
-
-            </div>
-        </section>
-    @endif
-
-    {{-- ACARA --}}
-    @php
-        $kontenAcara = $konten->where('jenis_konten', 'acara');
-    @endphp
-
-    @if ($kontenAcara->isNotEmpty())
-        <section class="section">
-            <div class="container">
-
-                <div class="section-title">
-                    <h2>Kegiatan & Acara</h2>
-                </div>
-
-                <div class="content-list">
-                    @foreach ($kontenAcara as $item)
-                        <div class="content-card">
-
-                            @if ($item->gambar)
-                                <img
-                                    src="{{ asset('storage/' . $item->gambar) }}"
-                                    alt="{{ $item->judul }}"
-                                    style="max-width: 100%; height: auto;"
-                                >
-                            @endif
-
-                            <h3>{{ $item->judul }}</h3>
-
-                            @if ($item->deskripsi)
-                                <p>{{ $item->deskripsi }}</p>
-                            @endif
-
-                        </div>
-                    @endforeach
-                </div>
-
-            </div>
-        </section>
-    @endif
+    @endforeach
 
     {{-- RESEP --}}
     <section class="section">
         <div class="container">
-
             <div class="section-title">
                 <h2>Resep</h2>
 
@@ -263,33 +135,25 @@
                     Lihat Resep
                 </a>
             </div>
-
         </div>
     </section>
 
     {{-- OUTLET --}}
     <section class="section">
         <div class="container">
-
             <div class="section-title">
                 <h2>Outlet TWFood</h2>
             </div>
 
             @if ($outlet)
                 <div class="outlet">
+                    <h3>{{ $outlet->nama_outlet }}</h3>
 
-                    <h3>
-                        {{ $outlet->nama_outlet }}
-                    </h3>
-
-                    <p>
-                        {{ $outlet->alamat }}
-                    </p>
+                    <p>{{ $outlet->alamat }}</p>
 
                     @if ($outlet->nomor_telepon)
                         <p>
-                            WhatsApp:
-                            {{ $outlet->nomor_telepon }}
+                            WhatsApp: {{ $outlet->nomor_telepon }}
                         </p>
                     @endif
 
@@ -303,21 +167,16 @@
                     <a href="{{ route('outlet.public') }}" class="button">
                         Lihat Outlet
                     </a>
-
                 </div>
             @else
-                <p>
-                    Informasi outlet belum tersedia.
-                </p>
+                <p>Informasi outlet belum tersedia.</p>
             @endif
-
         </div>
     </section>
 
     {{-- DOWNLOAD APLIKASI --}}
     <section class="section">
         <div class="container">
-
             <div class="section-title">
                 <h2>Gunakan Aplikasi TWFood</h2>
 
@@ -330,7 +189,6 @@
                     Download Aplikasi
                 </a>
             </div>
-
         </div>
     </section>
 

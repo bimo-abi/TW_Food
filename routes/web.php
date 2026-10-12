@@ -18,6 +18,7 @@ use App\Http\Controllers\AdminOutletController;
 use App\Http\Controllers\AdminJamOperasionalOutletController;
 use App\Http\Controllers\AdminPengaturanMitraController;
 use App\Http\Controllers\AdminKontenBerandaController;
+use App\Http\Controllers\AdminKategoriKontenController;
 
 //Dashboard
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -414,6 +415,31 @@ Route::delete(
     [AdminKontenBerandaController::class, 'destroy']
 )->name('admin.konten-beranda.destroy')
  ->middleware('admin');
+
+// Admin Kategori Konten
+Route::get('/admin/kategori-konten', [AdminKategoriKontenController::class, 'index'])
+    ->name('admin.kategori-konten.index')
+    ->middleware('admin');
+
+Route::get('/admin/kategori-konten/create', [AdminKategoriKontenController::class, 'create'])
+    ->name('admin.kategori-konten.create')
+    ->middleware('admin');
+
+Route::post('/admin/kategori-konten', [AdminKategoriKontenController::class, 'store'])
+    ->name('admin.kategori-konten.store')
+    ->middleware('admin');
+
+Route::get('/admin/kategori-konten/{id}/edit', [AdminKategoriKontenController::class, 'edit'])
+    ->name('admin.kategori-konten.edit')
+    ->middleware('admin');
+
+Route::put('/admin/kategori-konten/{id}', [AdminKategoriKontenController::class, 'update'])
+    ->name('admin.kategori-konten.update')
+    ->middleware('admin');
+
+Route::delete('/admin/kategori-konten/{id}', [AdminKategoriKontenController::class, 'destroy'])
+    ->name('admin.kategori-konten.destroy')
+    ->middleware('admin');
 
 //public website
 Route::get('/', [HomeController::class, 'index'])

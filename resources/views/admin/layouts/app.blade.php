@@ -207,6 +207,14 @@
                     Pengaturan Mitra
                 </a>
 
+                <a href="{{ route('admin.konten-beranda.index') }}">
+                    Konten Beranda
+                </a>
+
+                <a href="{{ route('admin.kategori-konten.index') }}">
+                    Kategori Konten
+                </a>
+
                 <a href="#">
                     Pelanggan
                 </a>
@@ -217,10 +225,6 @@
 
                 <a href="#">
                     Keuangan
-                </a>
-
-                <a href="#">
-                    Konten Beranda
                 </a>
 
             </nav>

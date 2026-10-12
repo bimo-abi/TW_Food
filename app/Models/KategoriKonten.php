@@ -20,4 +20,14 @@ class KategoriKonten extends Model
     protected $casts = [
         'status_aktif' => 'boolean',
     ];
+
+
+    public function kontenBeranda()
+    {
+        return $this->hasMany(
+            KontenBeranda::class,
+            'id_kategori',
+            'id_kategori'
+        );
+    }
 }

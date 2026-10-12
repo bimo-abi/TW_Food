@@ -16,6 +16,8 @@ use App\Http\Controllers\AdminResepController;
 use App\Http\Controllers\AdminResepProdukController;
 use App\Http\Controllers\AdminOutletController;
 use App\Http\Controllers\AdminJamOperasionalOutletController;
+use App\Http\Controllers\AdminPengaturanMitraController;
+use App\Http\Controllers\AdminKontenBerandaController;
 
 //Dashboard
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -360,6 +362,58 @@ Route::delete(
 )
     ->name('admin.jam-operasional.destroy')
     ->middleware('admin');
+
+    // Admin Pengaturan Mitra
+Route::get(
+    '/admin/pengaturan-mitra',
+    [AdminPengaturanMitraController::class, 'index']
+)
+    ->name('admin.pengaturan-mitra.index')
+    ->middleware('admin');
+
+Route::put(
+    '/admin/pengaturan-mitra',
+    [AdminPengaturanMitraController::class, 'update']
+)
+    ->name('admin.pengaturan-mitra.update')
+    ->middleware('admin');
+
+// Admin Konten Beranda
+Route::get(
+    '/admin/konten-beranda',
+    [AdminKontenBerandaController::class, 'index']
+)->name('admin.konten-beranda.index')
+ ->middleware('admin');
+
+Route::get(
+    '/admin/konten-beranda/create',
+    [AdminKontenBerandaController::class, 'create']
+)->name('admin.konten-beranda.create')
+ ->middleware('admin');
+
+Route::post(
+    '/admin/konten-beranda',
+    [AdminKontenBerandaController::class, 'store']
+)->name('admin.konten-beranda.store')
+ ->middleware('admin');
+
+Route::get(
+    '/admin/konten-beranda/{id}/edit',
+    [AdminKontenBerandaController::class, 'edit']
+)->name('admin.konten-beranda.edit')
+ ->middleware('admin');
+
+Route::put(
+    '/admin/konten-beranda/{id}',
+    [AdminKontenBerandaController::class, 'update']
+)->name('admin.konten-beranda.update')
+ ->middleware('admin');
+
+Route::delete(
+    '/admin/konten-beranda/{id}',
+    [AdminKontenBerandaController::class, 'destroy']
+)->name('admin.konten-beranda.destroy')
+ ->middleware('admin');
 
 //public website
 Route::get('/', [HomeController::class, 'index'])

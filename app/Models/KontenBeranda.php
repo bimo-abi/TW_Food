@@ -17,13 +17,10 @@ class KontenBeranda extends Model
         'jenis_konten',
         'status_aktif',
         'urutan',
-        'tanggal_mulai',
-        'tanggal_selesai',
     ];
 
     protected $casts = [
         'status_aktif' => 'boolean',
-        'tanggal_mulai' => 'date',
-        'tanggal_selesai' => 'date',
+        'urutan' => 'integer',
     ];
 }

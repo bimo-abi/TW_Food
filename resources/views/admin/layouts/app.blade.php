@@ -155,12 +155,10 @@
         }
 
         /* Sizing photo on Produk */
-        .produk-foto-container{
+        .produk-foto-container {
             display: flex;
 
         }
-
-
     </style>
 
 
@@ -203,6 +201,10 @@
 
                 <a href="{{ route('admin.outlet.index') }}">
                     Outlet
+                </a>
+
+                <a href="{{ route('admin.pengaturan-mitra.index') }}">
+                    Pengaturan Mitra
                 </a>
 
                 <a href="#">

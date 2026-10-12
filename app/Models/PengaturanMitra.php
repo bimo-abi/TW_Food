@@ -16,12 +16,14 @@ class PengaturanMitra extends Model
         'id_pengguna',
         'minimal_quantity_dp',
         'persentase_dp',
+        'dp_aktif',
         'notifikasi_aktif',
-        'updated_at',
     ];
 
     protected $casts = [
+        'minimal_quantity_dp' => 'integer',
         'persentase_dp' => 'decimal:2',
+        'dp_aktif' => 'boolean',
         'notifikasi_aktif' => 'boolean',
         'updated_at' => 'datetime',
     ];

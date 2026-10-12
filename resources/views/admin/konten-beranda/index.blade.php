@@ -40,7 +40,7 @@
                     <th>No.</th>
                     <th>Gambar</th>
                     <th>Judul</th>
-                    <th>Jenis Konten</th>
+                    <th>Kategori Konten</th>
                     <th>Status</th>
                     <th>Urutan</th>
                     <th>Aksi</th>
@@ -87,7 +87,7 @@
                                     Acara
                                     @break
                                 @default
-                                    {{ $item->jenis_konten }}
+                                    {{ $item->kategori?->nama_kategori ?? 'Kategori tidak tersedia' }}
                             @endswitch
                         </td>
 

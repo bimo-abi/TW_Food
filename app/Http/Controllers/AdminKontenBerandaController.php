@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KontenBeranda;
+use App\Models\KategoriKonten;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -11,7 +12,8 @@ class AdminKontenBerandaController extends Controller
 {
     public function index()
     {
-        $konten = KontenBeranda::orderBy('urutan')
+        $konten = KontenBeranda::with('kategori')
+            ->orderBy('urutan')
             ->orderByDesc('created_at')
             ->paginate(10);
 
@@ -20,12 +22,22 @@ class AdminKontenBerandaController extends Controller
 
     public function create()
     {
-        return view('admin.konten-beranda.create');
+        $kategori = KategoriKonten::where('status_aktif', true)
+            ->orderBy('nama_kategori')
+            ->get();
+
+        return view('admin.konten-beranda.create', compact('kategori'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'id_kategori' => [
+                'required',
+                'integer',
+                Rule::exists('kategori_konten', 'id_kategori')
+                    ->where('status_aktif', true),
+            ],
             'judul' => ['required', 'string', 'max:150'],
             'deskripsi' => ['nullable', 'string'],
             'gambar' => [
@@ -33,15 +45,6 @@ class AdminKontenBerandaController extends Controller
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:2048',
-            ],
-            'jenis_konten' => [
-                'required',
-                Rule::in([
-                    'informasi_produk',
-                    'informasi_bahan',
-                    'informasi_merek',
-                    'acara',
-                ]),
             ],
             'urutan' => [
                 'required',
@@ -70,7 +73,15 @@ class AdminKontenBerandaController extends Controller
     {
         $konten = KontenBeranda::findOrFail($id);
 
-        return view('admin.konten-beranda.edit', compact('konten'));
+        $kategori = KategoriKonten::where('status_aktif', true)
+            ->orWhere('id_kategori', $konten->id_kategori)
+            ->orderBy('nama_kategori')
+            ->get();
+
+        return view(
+            'admin.konten-beranda.edit',
+            compact('konten', 'kategori')
+        );
     }
 
     public function update(Request $request, $id)
@@ -78,6 +89,18 @@ class AdminKontenBerandaController extends Controller
         $konten = KontenBeranda::findOrFail($id);
 
         $validated = $request->validate([
+            'id_kategori' => [
+                'required',
+                'integer',
+                Rule::exists('kategori_konten', 'id_kategori')
+                    ->where(function ($query) use ($konten) {
+                        $query->where('status_aktif', true)
+                            ->orWhere(
+                                'id_kategori',
+                                $konten->id_kategori
+                            );
+                    }),
+            ],
             'judul' => ['required', 'string', 'max:150'],
             'deskripsi' => ['nullable', 'string'],
             'gambar' => [
@@ -85,15 +108,6 @@ class AdminKontenBerandaController extends Controller
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:2048',
-            ],
-            'jenis_konten' => [
-                'required',
-                Rule::in([
-                    'informasi_produk',
-                    'informasi_bahan',
-                    'informasi_merek',
-                    'acara',
-                ]),
             ],
             'urutan' => [
                 'required',
@@ -118,10 +132,7 @@ class AdminKontenBerandaController extends Controller
 
         $konten->update($validated);
 
-        if (
-            $request->hasFile('gambar') &&
-            $gambarLama
-        ) {
+        if ($request->hasFile('gambar') && $gambarLama) {
             Storage::disk('public')->delete($gambarLama);
         }
 

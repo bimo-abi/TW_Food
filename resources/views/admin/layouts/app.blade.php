@@ -7,11 +7,11 @@
 
     <title>@yield('title', 'Admin TWFood')</title>
 
-    {{-- Tabler UI: sudah menyertakan Bootstrap --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css">
+    {{-- Tabler Core CSS --}}
+    <link rel="stylesheet" href="{{ asset('assets/tabler/css/tabler.min.css') }}">
 
     {{-- Tabler Icons --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/tabler-icons.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/tabler/icons/tabler-icons.min.css') }}">
 
     <style>
         body {
@@ -21,17 +21,24 @@
             font-family: Arial, sans-serif;
         }
 
+        /* Layout utama */
         .admin-wrapper {
-            display: flex;
             min-height: 100vh;
         }
 
+        /* Sidebar tetap di sebelah kiri */
         .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
             width: 250px;
-            flex-shrink: 0;
+            box-sizing: border-box;
+            overflow-y: auto;
             background: #fff;
             border-right: 1px solid #e6e8eb;
             padding: 24px 16px;
+            z-index: 1030;
         }
 
         .sidebar-brand {
@@ -49,6 +56,7 @@
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .sidebar-menu {
@@ -61,12 +69,12 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 11px 12px;
+            padding: 10px 12px;
             border-radius: 6px;
             color: #354052;
             font-size: 14px;
             text-decoration: none;
-            transition: background .15s, color .15s;
+            transition: background 0.15s, color 0.15s;
         }
 
         .sidebar-menu a:hover {
@@ -74,16 +82,32 @@
             color: #206bc4;
         }
 
+        .sidebar-menu a.active {
+            background: #eaf2fc;
+            color: #206bc4;
+            font-weight: 600;
+        }
+
+        .sidebar-menu a.active i {
+            color: #206bc4;
+        }
+
         .sidebar-menu a i {
+            flex-shrink: 0;
             font-size: 19px;
         }
 
+        /* Konten utama bergeser mengikuti lebar sidebar */
         .main-content {
             min-width: 0;
-            flex: 1;
+            margin-left: 250px;
         }
 
+        /* Topbar tetap di bagian atas */
         .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
             min-height: 72px;
             padding: 16px 28px;
             display: flex;
@@ -107,9 +131,11 @@
         }
 
         .page-content {
+            min-width: 0;
             padding: 28px;
         }
 
+        /* Tombol logout */
         .logout-button {
             border: 1px solid #d63939;
             border-radius: 6px;
@@ -117,36 +143,79 @@
             background: #d63939;
             color: #fff;
             cursor: pointer;
+            transition: background 0.15s;
         }
 
         .logout-button:hover {
             background: #b52b2b;
         }
 
-        /* Kompatibilitas dasar dengan halaman CRUD lama */
+        /* Kompatibilitas halaman CRUD lama */
         .page-content .card {
             border: 1px solid #e6e8eb;
             border-radius: 8px;
             background: #fff;
         }
 
-        .page-content table {
-            width: 100%;
-        }
-
         .page-content img {
             max-width: 100%;
         }
 
-        @media (max-width: 768px) {
-            .admin-wrapper {
-                flex-direction: column;
-            }
+        /* Tabel produk */
+        .produk-table {
+            width: 100%;
+            min-width: 1050px;
+        }
 
+        .produk-table th,
+        .produk-table td {
+            padding: 12px 16px;
+            vertical-align: middle;
+        }
+
+        .produk-table .produk-name {
+            min-width: 160px;
+        }
+
+        .produk-table .produk-description {
+            min-width: 240px;
+            max-width: 340px;
+        }
+
+        .produk-table .produk-action-column {
+            min-width: 330px;
+            text-align: center;
+        }
+
+        /* Tombol aksi produk */
+        .produk-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            min-width: 310px;
+        }
+
+        .produk-actions .btn {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Tablet dan layar kecil */
+        @media (max-width: 768px) {
             .sidebar {
+                position: static;
                 width: 100%;
+                max-height: none;
+                overflow-y: visible;
                 border-right: 0;
                 border-bottom: 1px solid #e6e8eb;
+                padding: 16px;
+            }
+
+            .sidebar-brand {
+                margin-bottom: 16px;
             }
 
             .sidebar-menu {
@@ -154,20 +223,47 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
+            .main-content {
+                margin-left: 0;
+            }
+
             .topbar {
-                padding: 16px;
+                min-height: 64px;
+                padding: 12px 16px;
+            }
+
+            .topbar-user {
+                gap: 8px;
             }
 
             .page-content {
                 padding: 16px;
-                overflow-x: auto;
+            }
+        }
+
+        /* Ponsel */
+        @media (max-width: 480px) {
+            .topbar {
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .topbar-user {
+                flex-wrap: wrap;
+            }
+
+            .sidebar-menu {
+                grid-template-columns: 1fr;
+            }
+
+            .page-content {
+                padding: 12px;
             }
         }
     </style>
 </head>
 
 <body>
-
     <div class="admin-wrapper">
 
         {{-- SIDEBAR --}}
@@ -182,44 +278,52 @@
 
             <nav class="sidebar-menu">
 
-                <a href="{{ route('admin.dashboard') }}">
+                <a href="{{ route('admin.dashboard') }}"
+                   class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="ti ti-dashboard"></i>
-                    Dashboard
+                    <span>Dashboard</span>
                 </a>
 
-                <a href="{{ route('admin.produk.index') }}">
+                <a href="{{ route('admin.produk.index') }}"
+                   class="{{ request()->routeIs('admin.produk.*') ? 'active' : '' }}">
                     <i class="ti ti-package"></i>
-                    Produk
+                    <span>Produk</span>
                 </a>
 
-                <a href="{{ route('admin.resep.index') }}">
+                <a href="{{ route('admin.resep.index') }}"
+                   class="{{ request()->routeIs('admin.resep.*') ? 'active' : '' }}">
                     <i class="ti ti-book-2"></i>
-                    Resep
+                    <span>Resep</span>
                 </a>
 
-                <a href="{{ route('admin.pesanan.index') }}">
+                <a href="{{ route('admin.pesanan.index') }}"
+                   class="{{ request()->routeIs('admin.pesanan.*') ? 'active' : '' }}">
                     <i class="ti ti-shopping-cart"></i>
-                    Pesanan
+                    <span>Pesanan</span>
                 </a>
 
-                <a href="{{ route('admin.outlet.index') }}">
+                <a href="{{ route('admin.outlet.index') }}"
+                   class="{{ request()->routeIs('admin.outlet.*') ? 'active' : '' }}">
                     <i class="ti ti-building-store"></i>
-                    Outlet
+                    <span>Outlet</span>
                 </a>
 
-                <a href="{{ route('admin.pengaturan-mitra.index') }}">
+                <a href="{{ route('admin.pengaturan-mitra.index') }}"
+                   class="{{ request()->routeIs('admin.pengaturan-mitra.*') ? 'active' : '' }}">
                     <i class="ti ti-settings"></i>
-                    Pengaturan Mitra
+                    <span>Pengaturan Mitra</span>
                 </a>
 
-                <a href="{{ route('admin.konten-beranda.index') }}">
+                <a href="{{ route('admin.konten-beranda.index') }}"
+                   class="{{ request()->routeIs('admin.konten-beranda.*') ? 'active' : '' }}">
                     <i class="ti ti-layout-dashboard"></i>
-                    Konten Beranda
+                    <span>Konten Beranda</span>
                 </a>
 
-                <a href="{{ route('admin.kategori-konten.index') }}">
+                <a href="{{ route('admin.kategori-konten.index') }}"
+                   class="{{ request()->routeIs('admin.kategori-konten.*') ? 'active' : '' }}">
                     <i class="ti ti-category"></i>
-                    Kategori Konten
+                    <span>Kategori Konten</span>
                 </a>
 
             </nav>
@@ -229,17 +333,17 @@
             <nav class="sidebar-menu">
                 <a href="#">
                     <i class="ti ti-users"></i>
-                    Pelanggan
+                    <span>Pelanggan</span>
                 </a>
 
                 <a href="#">
                     <i class="ti ti-discount-2"></i>
-                    Promosi
+                    <span>Promosi</span>
                 </a>
 
                 <a href="#">
                     <i class="ti ti-report-money"></i>
-                    Keuangan
+                    <span>Keuangan</span>
                 </a>
             </nav>
 
@@ -249,15 +353,14 @@
         <main class="main-content">
 
             <header class="topbar">
-
                 <h3>@yield('page-title', 'Dashboard')</h3>
 
                 <div class="topbar-user">
-                    <span>
-                        {{ auth()->user()->nama }}
-                    </span>
+                    <span>{{ auth()->user()->nama }}</span>
 
-                    <form action="{{ route('admin.logout') }}" method="POST" class="m-0">
+                    <form action="{{ route('admin.logout') }}"
+                          method="POST"
+                          class="m-0">
                         @csrf
 
                         <button type="submit" class="logout-button">
@@ -266,7 +369,6 @@
                         </button>
                     </form>
                 </div>
-
             </header>
 
             <section class="page-content">
@@ -274,12 +376,9 @@
             </section>
 
         </main>
-
     </div>
 
-    {{-- Tabler JavaScript --}}
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script>
-
+    <script src="{{ asset('assets/tabler/js/tabler.min.js') }}"></script>
 </body>
 
 </html>

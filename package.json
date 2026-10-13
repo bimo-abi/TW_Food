@@ -17,6 +17,7 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
-        "@tabler/core": "^1.6.1"
+        "@tabler/core": "^1.6.1",
+        "@tabler/icons-webfont": "^3.49.0"
     }
 }

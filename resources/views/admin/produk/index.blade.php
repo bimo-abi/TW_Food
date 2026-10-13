@@ -1,266 +1,185 @@
 @extends('admin.layouts.app')
 
-
 @section('title', 'Produk - Admin TWFood')
-
-
 @section('page-title', 'Produk')
 
-
 @section('content')
+    <div class="page-header d-print-none mb-3">
+        <div class="row align-items-center">
+            <div class="col">
+                <div class="page-pretitle">Manajemen</div>
+                <h2 class="page-title">Produk</h2>
+                <div class="text-secondary mt-1">
+                    Kelola produk TWFood.
+                </div>
+            </div>
 
-    <div
-        style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    ">
-
-        <div>
-
-            <h1>
-                Produk
-            </h1>
-
-            <p>
-                Kelola produk TWFood.
-            </p>
-
+            <div class="col-auto">
+                <a href="{{ route('admin.produk.create') }}" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i>
+                    Tambah Produk
+                </a>
+            </div>
         </div>
-
-
-        <a href="{{ route('admin.produk.create') }}"
-            style="
-                background: #198754;
-                color: white;
-                padding: 10px 15px;
-                border-radius: 5px;
-                text-decoration: none;
-            ">
-            + Tambah Produk
-        </a>
-
     </div>
 
-
     {{-- Pesan sukses --}}
-
     @if (session('success'))
-        <div
-            style="
-            background: #d1e7dd;
-            color: #0f5132;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
-
+        <div class="alert alert-success" role="alert">
+            <i class="ti ti-check-circle me-2"></i>
             {{ session('success') }}
-
         </div>
     @endif
 
     {{-- Pesan error --}}
     @if (session('error'))
-        <div
-            style="
-            background: #f8d7da;
-            color: #842029;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
+        <div class="alert alert-danger" role="alert">
+            <i class="ti ti-alert-circle me-2"></i>
             {{ session('error') }}
         </div>
     @endif
 
-
     {{-- Error validasi --}}
-
     @if ($errors->any())
-
-        <div
-            style="
-            background: #f8d7da;
-            color: #842029;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        ">
-
-            @foreach ($errors->all() as $error)
-                <div>
-                    {{ $error }}
-                </div>
-            @endforeach
-
+        <div class="alert alert-danger" role="alert">
+            <div class="fw-bold mb-2">Periksa kembali data berikut:</div>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-
     @endif
 
-
     <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Daftar Produk</h3>
+        </div>
 
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        No
-                    </th>
-
-                    <th>
-                        Foto
-                    </th>
-
-                    <th>
-                        Nama Produk
-                    </th>
-
-                    <th>
-                        Deskripsi
-                    </th>
-
-                    <th>
-                        Status
-                    </th>
-
-                    <th style="text-align: center">
-                        Aksi
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                @forelse ($produk as $item)
+        <div class="table-responsive">
+            <table class="table table-vcenter card-table produk-table">
+                <thead>
                     <tr>
+                        <th>No.</th>
+                        <th>Foto</th>
+                        <th class="produk-name">Nama Produk</th>
+                        <th class="produk-description">Deskripsi</th>
+                        <th>Status</th>
+                        <th class="produk-action-column">Aksi</th>
+                    </tr>
+                </thead>
 
-                        <td>
-                            {{ $loop->iteration }}
-                        </td>
+                <tbody>
+                    @forelse ($produk as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
 
+                            <td>
+                                @if ($item->foto_produk)
+                                    <img
+                                        src="{{ asset('storage/' . $item->foto_produk) }}"
+                                        alt="{{ $item->nama_produk }}"
+                                        width="64"
+                                        height="64"
+                                        class="rounded"
+                                        style="object-fit: cover;"
+                                    >
+                                @else
+                                    <span class="text-secondary">Tidak ada foto</span>
+                                @endif
+                            </td>
 
-                        <td>
-                            <div class="produk-foto-container">
-
-                            @if ($item->foto_produk)
-                                <img src="{{ asset('storage/' . $item->foto_produk) }}" alt="{{ $item->nama_produk }}"
-                                    width="70" height="70"
-                                    style="
-                                        object-fit: cover;
-                                        border-radius: 5px;
-                                    ">
-                            @else
-                                Tidak ada foto
-                            @endif
-                            
-                            </div>
-                        </td>
-
-
-                        <td>
-                            <strong>
-                                {{ $item->nama_produk }}
-                            </strong>
-                        </td>
-
-
-                        <td>
-
-                            {{ $item->deskripsi ? Str::limit($item->deskripsi, 80) : '-' }}
-
-                        </td>
-
-
-                        <td>
-
-                            @if ($item->status_aktif)
-                                <span>
-                                    Aktif
+                            <td class="produk-name">
+                                <span class="fw-bold">
+                                    {{ $item->nama_produk }}
                                 </span>
-                            @else
-                                <span>
-                                    Tidak Aktif
-                                </span>
-                            @endif
+                            </td>
 
-                        </td>
+                            <td class="produk-description">
+                                {{ $item->deskripsi ? Str::limit($item->deskripsi, 80) : '-' }}
+                            </td>
 
+                            <td>
+                                @if ($item->status_aktif)
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                @else
+                                    <span class="badge bg-secondary-lt">Tidak Aktif</span>
+                                @endif
+                            </td>
 
-                        <td>
-                            <div class="crud-btn-Produk">
-                                <a href="{{ route('admin.produk.edit', $item->id_produk) }}">
-                                    <button type="button">
+                            <td class="produk-action-column">
+                                <div class="produk-actions">
+
+                                    <a
+                                        href="{{ route('admin.produk.edit', $item->id_produk) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                    >
+                                        <i class="ti ti-edit me-1"></i>
                                         Edit
-                                    </button>
-                                </a>
-                                <br>
-                                <a href="{{ route('admin.varian.index', $item->id_produk) }}">
-                                    <button type="button">
+                                    </a>
+
+                                    <a
+                                        href="{{ route('admin.varian.index', $item->id_produk) }}"
+                                        class="btn btn-sm btn-outline-info"
+                                    >
+                                        <i class="ti ti-layers-intersect me-1"></i>
                                         Varian
-                                    </button>
-                                </a>
-                                <br>
-                                <form action="{{ route('admin.produk.toggle-status', $item->id_produk) }}" method="POST"
-                                    style="display: inline;">
+                                    </a>
 
-                                    @csrf
+                                    <form
+                                        action="{{ route('admin.produk.toggle-status', $item->id_produk) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
 
-                                    @method('PATCH')
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-warning"
+                                        >
+                                            @if ($item->status_aktif)
+                                                <i class="ti ti-eye-off me-1"></i>
+                                                Nonaktifkan
+                                            @else
+                                                <i class="ti ti-eye me-1"></i>
+                                                Aktifkan
+                                            @endif
+                                        </button>
+                                    </form>
 
-                                    <button type="submit">
-                                        @if ($item->status_aktif)
-                                            Nonaktifkan
-                                        @else
-                                            Aktifkan
-                                        @endif
-                                    </button>
+                                    <form
+                                        action="{{ route('admin.produk.destroy', $item->id_produk) }}"
+                                        method="POST"
+                                        class="d-inline"
+                                        onsubmit="return confirm('Yakin ingin menghapus produk ini?')"
+                                    >
+                                        @csrf
+                                        @method('DELETE')
 
-                                </form>
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                        >
+                                            <i class="ti ti-trash me-1"></i>
+                                            Hapus
+                                        </button>
+                                    </form>
 
-
-                                <br>
-
-
-                                <form action="{{ route('admin.produk.destroy', $item->id_produk) }}" method="POST"
-                                    style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
-
-                                    @csrf
-
-                                    @method('DELETE')
-
-                                    <button type="submit">
-                                        Hapus
-                                    </button>
-
-                                </form>
-                            </div>
-                        </td>
-
-                    </tr>
-
-                @empty
-
-                    <tr>
-
-                        <td colspan="6">
-                            Belum ada produk.
-                        </td>
-
-                    </tr>
-                @endforelse
-
-            </tbody>
-
-        </table>
-
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-secondary py-4">
+                                <i class="ti ti-package-off d-block mb-2"
+                                   style="font-size: 2rem;"></i>
+                                Belum ada produk.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-
 @endsection

@@ -6,7 +6,7 @@ use App\Models\KategoriKonten;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-class KategoriKontenSeeder extends Seeder
+class TwfoodKategoriKontenSeeder extends Seeder
 {
     public function run(): void
     {

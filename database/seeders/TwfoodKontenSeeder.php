@@ -2,13 +2,20 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\KontenBeranda;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class TwfoodKontenSeeder extends Seeder
 {
     public function run(): void
     {
+        $kategori = DB::table('kategori_konten')->pluck('id_kategori', 'slug');
+
+        $idKategori = fn (string $slug) => $kategori[$slug]
+            ?? throw new RuntimeException("Slug '{$slug}' tidak ditemukan di kategori_konten.");
+
         KontenBeranda::updateOrCreate(
             [
                 'judul' => 'Tentang TWFood'
@@ -16,11 +23,9 @@ class TwfoodKontenSeeder extends Seeder
             [
                 'deskripsi' => 'TWFood merupakan usaha di bidang makanan, FnB, dan oleh-oleh yang menghadirkan produk olahan plant-based dengan tagline Lezat dan Sehat.',
                 'gambar' => null,
-                'jenis_konten' => 'informasi_merek',
+                'id_kategori' => $idKategori('informasi-merek'),
                 'status_aktif' => true,
                 'urutan' => 1,
-                'tanggal_mulai' => null,
-                'tanggal_selesai' => null,
             ]
         );
 
@@ -31,11 +36,9 @@ class TwfoodKontenSeeder extends Seeder
             [
                 'deskripsi' => 'TWFood menghadirkan berbagai produk olahan berbahan dasar jamur dan bahan pangan lainnya, seperti Kaldu Jamur, Kecap Jamur, Jamur Tiram Krispi, Stik Jantung Pisang, Kerupuk Jamur, Abon Jamur, dan Mie Jamur Tiram Kelor.',
                 'gambar' => null,
-                'jenis_konten' => 'informasi_produk',
+                'id_kategori' => $idKategori('informasi-produk'),
                 'status_aktif' => true,
                 'urutan' => 2,
-                'tanggal_mulai' => null,
-                'tanggal_selesai' => null,
             ]
         );
 
@@ -46,11 +49,9 @@ class TwfoodKontenSeeder extends Seeder
             [
                 'deskripsi' => 'Jamur tiram diolah menjadi berbagai produk pangan seperti kaldu, keripik, kecap, abon, kerupuk, dan produk lainnya.',
                 'gambar' => null,
-                'jenis_konten' => 'informasi_bahan',
+                'id_kategori' => $idKategori('informasi-bahan'),
                 'status_aktif' => true,
                 'urutan' => 3,
-                'tanggal_mulai' => null,
-                'tanggal_selesai' => null,
             ]
         );
 
@@ -61,11 +62,9 @@ class TwfoodKontenSeeder extends Seeder
             [
                 'deskripsi' => 'TWFood menghadirkan produk plant-based yang mengutamakan cita rasa dan pilihan pangan yang lebih sehat.',
                 'gambar' => null,
-                'jenis_konten' => 'informasi_merek',
+                'id_kategori' => $idKategori('informasi-merek'),
                 'status_aktif' => true,
                 'urutan' => 4,
-                'tanggal_mulai' => null,
-                'tanggal_selesai' => null,
             ]
         );
     }

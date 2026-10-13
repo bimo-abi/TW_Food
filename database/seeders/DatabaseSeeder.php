@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             TwfoodProductSeeder::class,
+            TwfoodKategoriKontenSeeder::class,
             TwfoodKontenSeeder::class,
             TwfoodOutletSeeder::class,
             TwfoodUserSeeder::class,

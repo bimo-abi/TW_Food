@@ -1,104 +1,137 @@
-
 @extends('admin.layouts.app')
 
+@section('title', 'Kategori Konten')
+@section('page-title', 'Kategori Konten')
+
 @section('content')
-<div style="padding: 20px;">
+<div class="container-fluid">
 
-    <h1>Kategori Konten</h1>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="mb-1">Kategori Konten</h2>
+            <p class="text-secondary mb-0">
+                Kelola kategori untuk Konten Beranda TWFOOD.
+            </p>
+        </div>
 
-    <p>Kelola kategori untuk Konten Beranda TWFOOD.</p>
+        <a href="{{ route('admin.kategori-konten.create') }}"
+           class="btn btn-primary">
+            <i class="ti ti-plus me-1"></i>
+            Tambah Kategori
+        </a>
+    </div>
 
     @if (session('success'))
-        <div style="padding: 10px; margin-bottom: 15px; background: #d1e7dd; color: #0f5132;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
         </div>
     @endif
 
     @if (session('error'))
-        <div style="padding: 10px; margin-bottom: 15px; background: #f8d7da; color: #842029;">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
         </div>
     @endif
 
-    <div style="margin-bottom: 20px;">
-        <a href="{{ route('admin.kategori-konten.create') }}"
-           style="display: inline-block; padding: 10px 15px; background: #198754; color: white; text-decoration: none;">
-            + Tambah Kategori
-        </a>
-    </div>
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Daftar Kategori</h5>
+        </div>
 
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="background: #f2f2f2;">
-                <th style="padding: 10px; border: 1px solid #ddd;">No.</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Nama Kategori</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Slug</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Deskripsi</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Status</th>
-                <th style="padding: 10px; border: 1px solid #ddd;">Aksi</th>
-            </tr>
-        </thead>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-3" style="width: 70px;">No.</th>
+                            <th>Nama Kategori</th>
+                            <th>Slug</th>
+                            <th>Deskripsi</th>
+                            <th>Status</th>
+                            <th class="text-center" style="min-width: 150px;">Aksi</th>
+                        </tr>
+                    </thead>
 
-        <tbody>
-            @forelse ($kategori as $item)
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        {{ $kategori->firstItem() + $loop->index }}
-                    </td>
+                    <tbody>
+                        @forelse ($kategori as $item)
+                            <tr>
+                                <td class="px-3">
+                                    {{ $kategori->firstItem() + $loop->index }}
+                                </td>
 
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        {{ $item->nama_kategori }}
-                    </td>
+                                <td class="fw-semibold">
+                                    {{ $item->nama_kategori }}
+                                </td>
 
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        {{ $item->slug }}
-                    </td>
+                                <td>
+                                    <code>{{ $item->slug }}</code>
+                                </td>
 
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        {{ $item->deskripsi ?? '-' }}
-                    </td>
+                                <td>
+                                    {{ $item->deskripsi ?: '-' }}
+                                </td>
 
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        @if ($item->status_aktif)
-                            <span style="color: green;">Aktif</span>
-                        @else
-                            <span style="color: red;">Nonaktif</span>
-                        @endif
-                    </td>
+                                <td>
+                                    @if ($item->status_aktif)
+                                        <span class="badge bg-success-subtle text-success">
+                                            Aktif
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary-subtle text-secondary">
+                                            Nonaktif
+                                        </span>
+                                    @endif
+                                </td>
 
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        <a href="{{ route('admin.kategori-konten.edit', $item->id_kategori) }}">
-                            Edit
-                        </a>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-2">
+                                        <a href="{{ route('admin.kategori-konten.edit', $item->id_kategori) }}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="ti ti-edit me-1"></i>
+                                            Edit
+                                        </a>
 
-                        <form
-                            action="{{ route('admin.kategori-konten.destroy', $item->id_kategori) }}"
-                            method="POST"
-                            style="display: inline;"
-                            onsubmit="return confirm('Yakin ingin menghapus kategori ini?');"
-                        >
-                            @csrf
-                            @method('DELETE')
+                                        <form
+                                            action="{{ route('admin.kategori-konten.destroy', $item->id_kategori) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Yakin ingin menghapus kategori ini?');"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
 
-                            <button type="submit"
-                                    style="margin-left: 8px; color: red; cursor: pointer;">
-                                Hapus
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" style="padding: 15px; text-align: center;">
-                        Belum ada kategori konten.
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                <i class="ti ti-trash me-1"></i>
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="ti ti-folder-off fs-1 text-secondary"></i>
+                                    <p class="text-secondary mb-0 mt-2">
+                                        Belum ada kategori konten.
+                                    </p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <div style="margin-top: 20px;">
-        {{ $kategori->links() }}
+        @if ($kategori->hasPages())
+            <div class="card-footer bg-white">
+                {{ $kategori->links() }}
+            </div>
+        @endif
     </div>
 
 </div>

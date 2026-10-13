@@ -69,7 +69,6 @@
 
             @csrf
 
-
             {{-- Nama Outlet --}}
 
             <div style="margin-bottom: 15px;">

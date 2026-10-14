@@ -20,8 +20,8 @@ use App\Http\Controllers\AdminPengaturanMitraController;
 use App\Http\Controllers\AdminKontenBerandaController;
 use App\Http\Controllers\AdminKategoriKontenController;
 
-//Dashboard
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// //Dashboard
+// Route::get('/', [HomeController::class, 'index'])->name('home');
 
 //login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])

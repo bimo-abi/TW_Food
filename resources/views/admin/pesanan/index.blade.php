@@ -1,27 +1,54 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Pesanan')
+@section('title', 'Pesanan - Admin TWFood')
+@section('page-title', 'Pesanan')
 
 @section('content')
+    <div class="page-header mb-3">
+        <div class="row align-items-center">
+            <div class="col">
+                <div class="page-pretitle">Transaksi</div>
+                <h2 class="page-title">Manajemen Pesanan</h2>
+                <div class="text-secondary mt-1">
+                    Daftar pesanan pelanggan TWFood.
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="container">
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">
+            <i class="ti ti-check-circle me-2"></i>
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <h1>Pesanan</h1>
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            <i class="ti ti-alert-circle me-2"></i>
+            {{ session('error') }}
+        </div>
+    @endif
 
-        <p>
-            Daftar pesanan pelanggan TWFood.
-        </p>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Daftar Pesanan</h3>
+        </div>
 
         @if ($pesanan->isEmpty())
+            <div class="card-body text-center py-5">
+                <i class="ti ti-clipboard-off d-block mb-3"
+                   style="font-size: 3rem;"></i>
 
-            <div class="card">
-                <p>Belum ada pesanan.</p>
+                <h3 class="mb-1">Belum Ada Pesanan</h3>
+
+                <p class="text-secondary mb-0">
+                    Pesanan pelanggan akan ditampilkan di halaman ini.
+                </p>
             </div>
         @else
-            <div class="card">
-
-                <table width="100%" cellpadding="10" cellspacing="0">
-
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
                     <thead>
                         <tr>
                             <th>No. Pesanan</th>
@@ -30,24 +57,24 @@
                             <th>Pembayaran</th>
                             <th>Pengiriman</th>
                             <th>Status Pesanan</th>
-                            <th style="text-align: center">Aksi</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
 
                     <tbody>
-
                         @foreach ($pesanan as $item)
                             <tr>
-
                                 <td>
-                                    {{ $item->nomor_pesanan }}
+                                    <span class="fw-bold">
+                                        {{ $item->nomor_pesanan }}
+                                    </span>
                                 </td>
 
                                 <td>
                                     {{ $item->pengguna->nama ?? '-' }}
                                 </td>
 
-                                <td>
+                                <td class="text-nowrap">
                                     Rp {{ number_format($item->total_pesanan, 0, ',', '.') }}
                                 </td>
 
@@ -57,36 +84,36 @@
 
                                 <td>
                                     @if ($item->jenis_pesanan === 'pickup')
-                                        Pickup
+                                        <span class="badge bg-secondary-lt">
+                                            Pickup
+                                        </span>
                                     @elseif ($item->jenis_pesanan === 'delivery')
                                         @if ($item->kurir === 'gosend')
-                                            GoSend
-
-                                            <br>
+                                            <div class="fw-bold">GoSend</div>
 
                                             @if ($item->tautan_pelacakan)
-                                                <small>
-                                                    Tracking: Tersedia
-                                                </small>
+                                                <span class="badge bg-success-lt mt-1">
+                                                    Tracking tersedia
+                                                </span>
                                             @else
-                                                <small>
-                                                    Tracking: Belum diisi
-                                                </small>
+                                                <span class="badge bg-warning-lt mt-1">
+                                                    Tracking belum diisi
+                                                </span>
                                             @endif
-                                        @elseif ($item->kurir === 'jnt')
-                                            J&T
 
-                                            <br>
+                                        @elseif ($item->kurir === 'jnt')
+                                            <div class="fw-bold">J&T</div>
 
                                             @if ($item->nomor_resi)
-                                                <small>
-                                                    Resi: {{ $item->nomor_resi }}
-                                                </small>
+                                                <span class="badge bg-success-lt mt-1">
+                                                    Resi tersedia
+                                                </span>
                                             @else
-                                                <small>
-                                                    Resi: Belum diisi
-                                                </small>
+                                                <span class="badge bg-warning-lt mt-1">
+                                                    Resi belum diisi
+                                                </span>
                                             @endif
+
                                         @else
                                             Delivery
                                         @endif
@@ -96,33 +123,43 @@
                                 </td>
 
                                 <td>
-                                    {{ ucwords(str_replace('_', ' ', $item->status_pesanan)) }}
+                                    @php
+                                        $status = $item->status_pesanan;
+
+                                        $statusClass = match ($status) {
+                                            'selesai',
+                                            'diterima',
+                                            'pesanan_diambil' => 'bg-success-lt',
+
+                                            'dibatalkan' => 'bg-danger-lt',
+
+                                            'sedang_diproses',
+                                            'pesanan_siap',
+                                            'menunggu_pengiriman',
+                                            'dalam_pengiriman',
+                                            'siap_diambil' => 'bg-info-lt',
+
+                                            default => 'bg-secondary-lt',
+                                        };
+                                    @endphp
+
+                                    <span class="badge {{ $statusClass }}">
+                                        {{ ucwords(str_replace('_', ' ', $status)) }}
+                                    </span>
                                 </td>
 
-                                <td>
-
-                                    <div class="crud-btn-Produk">
-
-
-                                        <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}" class="button">
-                                            <button type="button">
-                                                Detail
-                                            </button>
-                                        </a>
-                                    </div>
+                                <td class="text-center">
+                                    <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="ti ti-eye me-1"></i>
+                                        Detail
+                                    </a>
                                 </td>
-
                             </tr>
                         @endforeach
-
                     </tbody>
-
                 </table>
-
             </div>
-
         @endif
-
     </div>
-
 @endsection

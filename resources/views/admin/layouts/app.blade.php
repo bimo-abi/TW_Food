@@ -285,10 +285,11 @@
                     <span>Dashboard</span>
                 </a>
 
-                {{-- 2. Verifikasi Mitra --}}
-                <a href="#">
+                {{-- Verifikasi Pelanggan Toko dan Horeca --}}
+                <a href="{{ route('admin.verifikasi-pelanggan.index') }}"
+                    class="{{ request()->routeIs('admin.verifikasi-pelanggan.*') ? 'active' : '' }}">
                     <i class="ti ti-user-check"></i>
-                    <span>Verifikasi Mitra</span>
+                    <span>Verifikasi Pelanggan</span>
                 </a>
 
                 {{-- 3. Produk (termasuk Varian, Harga, Stok, Pre-order) --}}

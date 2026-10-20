@@ -20,7 +20,7 @@ class AdminPengaturanMitraController extends Controller
                 'id_pengguna' => $pengguna->id_pengguna,
             ],
             [
-                'minimal_quantity_dp' => 10,
+                'minimal_nominal_dp' => null,
                 'persentase_dp' => 50.00,
                 'dp_aktif' => true,
                 'notifikasi_aktif' => false,
@@ -39,11 +39,11 @@ class AdminPengaturanMitraController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'minimal_quantity_dp' => [
+            'minimal_nominal_dp' => [
                 'required',
                 'integer',
                 'min:1',
-                'max:65535',
+                'max:4294967295',
             ],
             'persentase_dp' => [
                 'required',
@@ -68,15 +68,15 @@ class AdminPengaturanMitraController extends Controller
                 'id_pengguna' => $pengguna->id_pengguna,
             ],
             [
-                'minimal_quantity_dp' => 10,
+                'minimal_nominal_dp' => null,
                 'persentase_dp' => 50.00,
                 'dp_aktif' => true,
                 'notifikasi_aktif' => false,
             ]
         );
 
-        $pengaturan->minimal_quantity_dp =
-            $validated['minimal_quantity_dp'];
+        $pengaturan->minimal_nominal_dp =
+            $validated['minimal_nominal_dp'];
 
         $pengaturan->persentase_dp =
             $validated['persentase_dp'];

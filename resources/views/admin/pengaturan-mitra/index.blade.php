@@ -44,10 +44,7 @@
         </div>
     @endif
 
-    <form
-        action="{{ route('admin.pengaturan-mitra.update') }}"
-        method="POST"
-    >
+    <form action="{{ route('admin.pengaturan-mitra.update') }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -68,13 +65,8 @@
                     <div class="card-body">
                         <div class="mb-4">
                             <label class="form-check form-switch">
-                                <input
-                                    type="checkbox"
-                                    name="dp_aktif"
-                                    value="1"
-                                    class="form-check-input"
-                                    @checked(old('dp_aktif', $pengaturan->dp_aktif))
-                                >
+                                <input type="checkbox" name="dp_aktif" value="1" class="form-check-input"
+                                    @checked(old('dp_aktif', $pengaturan->dp_aktif))>
 
                                 <span class="form-check-label fw-semibold">
                                     Aktifkan pembayaran DP
@@ -89,58 +81,38 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label
-                                    for="minimal_quantity_dp"
-                                    class="form-label required"
-                                >
-                                    Minimum Jumlah Pembelian untuk DP
+                                <label for="minimal_nominal_dp">
+                                    Minimum Nominal Pesanan untuk DP (Rp)
                                 </label>
 
-                                <input
-                                    type="number"
-                                    id="minimal_quantity_dp"
-                                    name="minimal_quantity_dp"
-                                    value="{{ old('minimal_quantity_dp', $pengaturan->minimal_quantity_dp) }}"
-                                    min="1"
-                                    max="65535"
-                                    step="1"
-                                    required
-                                    class="form-control @error('minimal_quantity_dp') is-invalid @enderror"
-                                >
+                                <input type="number" name="minimal_nominal_dp" id="minimal_nominal_dp"
+                                    value="{{ old('minimal_nominal_dp', $pengaturan->minimal_nominal_dp) }}" min="1"
+                                    max="4294967295" step="1" required
+                                    class="form-control @error('minimal_nominal_dp') is-invalid @enderror">
 
-                                @error('minimal_quantity_dp')
+                                @error('minimal_nominal_dp')
                                     <div class="invalid-feedback">
                                         {{ $message }}
                                     </div>
-                                @enderror
+                                @enderror   
 
                                 <div class="form-hint">
-                                    Contoh: 10 unit. Nilai ini menjadi batas
+                                    Contoh: 500000. Nominal ini menjadi batas
                                     minimum jumlah pembelian untuk memenuhi
                                     ketentuan DP.
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label
-                                    for="persentase_dp"
-                                    class="form-label required"
-                                >
+                                <label for="persentase_dp" class="form-label required">
                                     Persentase DP (%)
                                 </label>
 
                                 <div class="input-group">
-                                    <input
-                                        type="number"
-                                        id="persentase_dp"
-                                        name="persentase_dp"
-                                        value="{{ old('persentase_dp', $pengaturan->persentase_dp) }}"
-                                        min="0.01"
-                                        max="100"
-                                        step="0.01"
-                                        required
-                                        class="form-control @error('persentase_dp') is-invalid @enderror"
-                                    >
+                                    <input type="number" id="persentase_dp" name="persentase_dp"
+                                        value="{{ old('persentase_dp', $pengaturan->persentase_dp) }}" min="0.01" max="100"
+                                        step="0.01" required
+                                        class="form-control @error('persentase_dp') is-invalid @enderror">
 
                                     <span class="input-group-text">%</span>
 
@@ -177,13 +149,8 @@
 
                     <div class="card-body">
                         <label class="form-check form-switch">
-                            <input
-                                type="checkbox"
-                                name="notifikasi_aktif"
-                                value="1"
-                                class="form-check-input"
-                                @checked(old('notifikasi_aktif', $pengaturan->notifikasi_aktif))
-                            >
+                            <input type="checkbox" name="notifikasi_aktif" value="1" class="form-check-input"
+                                @checked(old('notifikasi_aktif', $pengaturan->notifikasi_aktif))>
 
                             <span class="form-check-label fw-semibold">
                                 Aktifkan notifikasi

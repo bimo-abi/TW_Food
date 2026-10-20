@@ -59,6 +59,7 @@ class AuthController extends Controller
         }
 
         $pengguna = DB::transaction(function () use ($request) {
+
             $pengguna = Pengguna::create([
                 'nama' => $request->nama,
                 'email' => $request->email,
@@ -67,7 +68,12 @@ class AuthController extends Controller
                 'peran' => 'pelanggan',
                 'jenis_pelanggan' => $request->jenis_pelanggan,
                 'status_aktif' => true,
+                'status_verifikasi' => in_array(
+                    $request->jenis_pelanggan,
+                    ['toko', 'horeca']
+                ) ? 'menunggu_verifikasi' : null,
             ]);
+
 
             if (
                 in_array(
@@ -189,6 +195,7 @@ class AuthController extends Controller
                 'peran' => $pengguna->peran,
                 'jenis_pelanggan' => $pengguna->jenis_pelanggan,
                 'status_aktif' => $pengguna->status_aktif,
+                'status_verifikasi' => $pengguna->status_verifikasi,
             ],
         ], 200);
     }

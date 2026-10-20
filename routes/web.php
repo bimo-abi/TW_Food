@@ -19,9 +19,10 @@ use App\Http\Controllers\AdminJamOperasionalOutletController;
 use App\Http\Controllers\AdminPengaturanMitraController;
 use App\Http\Controllers\AdminKontenBerandaController;
 use App\Http\Controllers\AdminKategoriKontenController;
+use App\Http\Controllers\AdminVerifikasiPelangganController;
 
-//Dashboard
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// //Dashboard
+// Route::get('/', [HomeController::class, 'index'])->name('home');
 
 //login admin
 Route::get('/admin/login', [LoginController::class, 'showLogin'])
@@ -52,6 +53,35 @@ Route::put('/admin/pesanan/{id}/status', [AdminPesananController::class, 'update
 
 Route::put('/admin/pesanan/{id}/pengiriman', [AdminPesananController::class, 'updatePengiriman'])
     ->name('admin.pesanan.update-pengiriman')
+    ->middleware('admin');
+
+// Verifikasi Pelanggan Toko dan Horeca
+Route::get('/admin/verifikasi-pelanggan', [
+    AdminVerifikasiPelangganController::class,
+    'index'
+])
+    ->name('admin.verifikasi-pelanggan.index')
+    ->middleware('admin');
+
+Route::get('/admin/verifikasi-pelanggan/{id}', [
+    AdminVerifikasiPelangganController::class,
+    'show'
+])
+    ->name('admin.verifikasi-pelanggan.show')
+    ->middleware('admin');
+
+Route::put('/admin/verifikasi-pelanggan/{id}/setujui', [
+    AdminVerifikasiPelangganController::class,
+    'setujui'
+])
+    ->name('admin.verifikasi-pelanggan.setujui')
+    ->middleware('admin');
+
+Route::put('/admin/verifikasi-pelanggan/{id}/tolak', [
+    AdminVerifikasiPelangganController::class,
+    'tolak'
+])
+    ->name('admin.verifikasi-pelanggan.tolak')
     ->middleware('admin');
 
 //admin produk

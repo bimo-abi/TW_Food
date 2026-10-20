@@ -15,6 +15,7 @@ class PengaturanMitra extends Model
     protected $fillable = [
         'id_pengguna',
         'minimal_quantity_dp',
+        'minimal_nominal_dp',
         'persentase_dp',
         'dp_aktif',
         'notifikasi_aktif',
@@ -22,6 +23,7 @@ class PengaturanMitra extends Model
 
     protected $casts = [
         'minimal_quantity_dp' => 'integer',
+        'minimal_nominal_dp' => 'integer',
         'persentase_dp' => 'decimal:2',
         'dp_aktif' => 'boolean',
         'notifikasi_aktif' => 'boolean',
@@ -30,6 +32,9 @@ class PengaturanMitra extends Model
 
     public function pengguna()
     {
-        return $this->belongsTo(Pengguna::class, 'id_pengguna');
+        return $this->belongsTo(
+            Pengguna::class,
+            'id_pengguna'
+        );
     }
 }

@@ -32,6 +32,10 @@ class PesananController extends Controller
 
         // Validasi data yang dikirim oleh Flutter.
         $validated = $request->validate([
+            'jenis_pemenuhan' => [
+                'required',
+                'in:reguler,pre_order',
+            ],
             'jenis_pesanan' => [
                 'required',
                 'in:pickup,delivery',
@@ -206,8 +210,22 @@ class PesananController extends Controller
                     ]);
                 }
 
-                // Periksa stok dan kelayakan pre-order.
-                if ($item['jumlah'] > $varian->stok) {
+                // Periksa jenis pemenuhan dan kelayakan stok.
+                if ($validated['jenis_pemenuhan'] === 'reguler') {
+                    // Pesanan reguler wajib tersedia pada stok reguler.
+                    if ($item['jumlah'] > $varian->stok) {
+                        throw ValidationException::withMessages([
+                            'items' => [
+                                'Stok reguler tidak mencukupi untuk pesanan ini.',
+                            ],
+                        ]);
+                    }
+
+                    // Cadangkan stok reguler di dalam transaksi database.
+                    $varian->stok -= (int) $item['jumlah'];
+                    $varian->save();
+                } else {
+                    // Pre-order hanya untuk pelanggan Toko/Horeca.
                     $jenisPelangganDiizinkan = in_array(
                         $pengguna->jenis_pelanggan,
                         ['toko', 'horeca'],
@@ -236,12 +254,11 @@ class PesananController extends Controller
                     if (!$preOrderDiizinkan) {
                         throw ValidationException::withMessages([
                             'items' => [
-                                'Stok tidak mencukupi dan pre-order tidak tersedia untuk pesanan ini.',
+                                'Pre-order hanya tersedia untuk pelanggan Toko/Horeca terverifikasi pada periode yang berlaku.',
                             ],
                         ]);
                     }
                 }
-
                 // Harga diambil dari database, bukan dari Flutter.
                 $harga = (int) $daftarHarga->harga;
                 $jumlah = (int) $item['jumlah'];
@@ -252,9 +269,9 @@ class PesananController extends Controller
                 $detailItems[] = [
                     'id_varian' => $varian->id_varian,
                     'nama_produk_saat_pesan' =>
-                        $varian->produk->nama_produk,
+                    $varian->produk->nama_produk,
                     'nama_varian_saat_pesan' =>
-                        $varian->nama_varian,
+                    $varian->nama_varian,
                     'harga_saat_pesan' => $harga,
                     'jumlah' => $jumlah,
                     'subtotal' => $subtotal,
@@ -290,6 +307,7 @@ class PesananController extends Controller
                     : null,
                 'saluran_pesanan' => $saluranPesanan,
                 'jenis_pesanan' => $validated['jenis_pesanan'],
+                'jenis_pemenuhan' => $validated['jenis_pemenuhan'],
                 'subtotal_produk' => $subtotalProduk,
                 'diskon' => $diskon,
                 'total_pesanan' => $totalPesanan,

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\AlamatController;
+use App\Http\Controllers\Api\PesananController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -41,4 +42,5 @@ Route::middleware('auth:sanctum')->group(function () {
         '/alamat/{idAlamat}',
         [AlamatController::class, 'destroy']
     );
+    Route::post('/pesanan', [PesananController::class, 'store']);
 });

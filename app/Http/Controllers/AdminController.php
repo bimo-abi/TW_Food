@@ -11,35 +11,45 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        // Total produk
-        $totalProduk = Produk::count();
+        // Counters
+        $totalProduk    = Produk::count();
+        $totalVarian    = VarianProduk::count();
+        $totalPesanan   = Pesanan::count();
+        $pesananBaru    = Pesanan::where('status_pesanan', 'pesanan_diterima')->count();
+        $totalStok      = VarianProduk::sum('stok');
+        $totalPelanggan = Pengguna::where('peran', 'pelanggan')->count();
 
-        // Total varian produk
-        $totalVarian = VarianProduk::count();
+        // Paginated tables, each with its own page parameter
+        $produkList = Produk::withCount('varian')
+            ->latest()
+            ->paginate(5, ['*'], 'produk_page')
+            ->withQueryString();
 
-        // Total pesanan
-        $totalPesanan = Pesanan::count();
+        $varianList = VarianProduk::with([
+            'produk',
+            'daftarHarga' => function ($q) {
+                $q->where('status_aktif', 1)
+                    ->orderByRaw("FIELD(jenis_harga, 'grosir', 'ecer')");
+            },
+        ])
+            ->latest()
+            ->paginate(5, ['*'], 'varian_page')
+            ->withQueryString();
 
-        // Pesanan baru
-        $pesananBaru = Pesanan::where(
-            'status_pesanan',
-            'pesanan_diterima'
-        )->count();
+        $stokList = VarianProduk::with('produk')
+            ->orderBy('stok')
+            ->paginate(5, ['*'], 'stok_page')
+            ->withQueryString();
 
-        // Total stok seluruh varian
-        $totalStok = VarianProduk::sum('stok');
-
-        // Total pelanggan
-        $totalPelanggan = Pengguna::where(
-            'peran',
-            'pelanggan'
-        )->count();
-
-        // 5 pesanan terbaru
-        $pesananTerbaru = Pesanan::with('pengguna')
+        $pesananList = Pesanan::with('pengguna')
             ->latest('created_at')
-            ->take(5)
-            ->get();
+            ->paginate(5, ['*'], 'pesanan_page')
+            ->withQueryString();
+
+        $pelangganList = Pengguna::where('peran', 'pelanggan')
+            ->latest()
+            ->paginate(5, ['*'], 'pelanggan_page')
+            ->withQueryString();
 
         return view('admin.dashboard', compact(
             'totalProduk',
@@ -48,7 +58,11 @@ class AdminController extends Controller
             'pesananBaru',
             'totalStok',
             'totalPelanggan',
-            'pesananTerbaru'
+            'produkList',
+            'varianList',
+            'stokList',
+            'pesananList',
+            'pelangganList'
         ));
     }
 }

@@ -179,7 +179,7 @@ class AdminProdukController extends Controller
                     'nullable',
                     'string',
                     'max:5000',
-                    'regex:/^[\p{L}\p{N}\s]+$/u',
+                    'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_\[\]{}]+$/u',
                 ],
 
                 'foto_produk' => [

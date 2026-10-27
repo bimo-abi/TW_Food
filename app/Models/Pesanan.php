@@ -17,12 +17,14 @@ class Pesanan extends Model
         'id_outlet',
         'saluran_pesanan',
         'jenis_pesanan',
+        'jenis_pemenuhan',
         'subtotal_produk',
         'diskon',
         'total_pesanan',
         'status_pembayaran',
         'status_pesanan',
         'diterima_pada',
+        'estimasi_selesai',
         'kurir',
         'nomor_resi',
         'tautan_pelacakan',
@@ -31,6 +33,7 @@ class Pesanan extends Model
 
     protected $casts = [
         'diterima_pada' => 'datetime',
+        'estimasi_selesai' => 'datetime',
     ];
 
     public function pengguna()

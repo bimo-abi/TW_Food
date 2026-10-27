@@ -45,4 +45,13 @@ class DetailPesanan extends Model
             'id_detail_pesanan'
         );
     }
+
+    public function produksiPreOrder()
+    {
+        return $this->hasOne(
+            ProduksiPreOrder::class,
+            'id_detail_pesanan',
+            'id_detail_pesanan'
+        );
+    }
 }

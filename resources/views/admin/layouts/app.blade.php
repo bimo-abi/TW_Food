@@ -350,11 +350,11 @@
                 </a>
 
                 {{-- 12. Konten Beranda --}}
-                <a href="{{ route('admin.konten-beranda.index') }}"
+                {{-- <a href="{{ route('admin.konten-beranda.index') }}"
                     class="{{ request()->routeIs('admin.konten-beranda.*') ? 'active' : '' }}">
                     <i class="ti ti-layout-dashboard"></i>
                     <span>Konten Beranda</span>
-                </a>
+                </a> --}}
 
                 {{-- 13. Outlet (termasuk Jam Operasional) --}}
                 <a href="{{ route('admin.outlet.index') }}"

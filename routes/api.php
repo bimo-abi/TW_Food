@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ResepController;
 use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\PesananController;
+use App\Http\Controllers\Api\PembayaranController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -27,6 +28,10 @@ Route::get('/produk/{id}', [ProdukController::class, 'show']);
 Route::get('/resep', [ResepController::class, 'index']);
 Route::get('/resep/{id}', [ResepController::class, 'show']);
 Route::get('/outlet', [OutletController::class, 'index']);
+Route::post(
+    '/midtrans/notifikasi',
+    [PembayaranController::class, 'notification']
+);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/alamat', [AlamatController::class, 'index']);
@@ -43,4 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
         [AlamatController::class, 'destroy']
     );
     Route::post('/pesanan', [PesananController::class, 'store']);
+    Route::post(
+        '/pesanan/{id_pesanan}/pembayaran',
+        [PembayaranController::class, 'store']
+    );
 });

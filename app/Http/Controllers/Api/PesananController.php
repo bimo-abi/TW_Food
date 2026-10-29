@@ -118,8 +118,7 @@ class PesananController extends Controller
         // Tentukan saluran pesanan dari data backend.
         $saluranPesanan = match ($pengguna->jenis_pelanggan) {
             'umum' => 'online',
-            'toko' => 'toko',
-            'horeca' => 'horeca',
+            'toko', 'horeca' => 'toko',
             default => null,
         };
 

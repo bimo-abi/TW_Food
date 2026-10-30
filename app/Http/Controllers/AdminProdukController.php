@@ -57,7 +57,7 @@ class AdminProdukController extends Controller
                     'nullable',
                     'string',
                     'max:5000',
-                    'regex:/^[\p{L}\p{N}\s]+$/u',
+                    'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_]+$/u',
                 ],
 
                 'foto_produk' => [
@@ -66,7 +66,6 @@ class AdminProdukController extends Controller
                     'mimes:jpg,jpeg,png,webp',
                     'max:2048',
                 ],
-            ],
             [
                 'nama_produk.required' =>
                 'Nama produk wajib diisi.',
@@ -87,7 +86,7 @@ class AdminProdukController extends Controller
                 'Deskripsi maksimal 5.000 karakter.',
 
                 'deskripsi.regex' =>
-                'Deskripsi hanya boleh berisi huruf, angka, dan spasi. Simbol tidak diperbolehkan.',
+                'Deskripsi hanya boleh berisi huruf, angka, spasi, dan tanda baca umum (tidak boleh mengandung <, >, |, \, ^, ~, `, $, atau =).',
 
                 'foto_produk.image' =>
                 'File yang dipilih harus berupa gambar.',
@@ -97,6 +96,7 @@ class AdminProdukController extends Controller
 
                 'foto_produk.max' =>
                 'Ukuran foto maksimal 2 MB.',
+            ]
             ]
         );
 
@@ -179,7 +179,7 @@ class AdminProdukController extends Controller
                     'nullable',
                     'string',
                     'max:5000',
-                    'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_\[\]{}]+$/u',
+                    'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_]+$/u',
                 ],
 
                 'foto_produk' => [
@@ -209,7 +209,7 @@ class AdminProdukController extends Controller
                 'Deskripsi maksimal 5.000 karakter.',
 
                 'deskripsi.regex' =>
-                'Deskripsi hanya boleh berisi huruf, angka, dan spasi. Simbol tidak diperbolehkan.',
+                'Deskripsi hanya boleh berisi huruf, angka, spasi, dan tanda baca umum (tidak boleh mengandung <, >, |, \, ^, ~, `, $, atau =).',
 
                 'foto_produk.image' =>
                 'File yang dipilih harus berupa gambar.',

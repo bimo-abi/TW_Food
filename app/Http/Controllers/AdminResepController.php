@@ -43,13 +43,13 @@ class AdminResepController extends Controller
                     'string',
                     'min:3',
                     'max:100',
-                ],
+'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_]+$/u',                ],
 
                 'deskripsi' => [
                     'nullable',
                     'string',
                     'max:5000',
-                ],
+'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_]+$/u',                ],
 
                 'foto' => [
                     'nullable',
@@ -92,6 +92,9 @@ class AdminResepController extends Controller
 
                 'deskripsi.string' =>
                 'Deskripsi harus berupa teks.',
+
+                'deskripsi.regex' =>
+                'Deskripsi hanya boleh berisi huruf, angka, spasi, dan tanda baca umum (tidak boleh mengandung <, >, |, \, ^, ~, `, $, atau =).',
 
                 'deskripsi.max' =>
                 'Deskripsi maksimal 5.000 karakter.',
@@ -195,6 +198,7 @@ class AdminResepController extends Controller
                     'nullable',
                     'string',
                     'max:5000',
+                    'regex:/^[\p{L}\p{N}\s.,!?:;\'"()\-+&\/%@#*_]+$/u',
                 ],
 
                 'foto' => [
@@ -241,6 +245,9 @@ class AdminResepController extends Controller
 
                 'deskripsi.max' =>
                 'Deskripsi maksimal 5.000 karakter.',
+
+                'deskripsi.regex' =>
+                'Deskripsi hanya boleh berisi huruf, angka, spasi, dan tanda baca umum (tidak boleh mengandung <, >, |, \, ^, ~, `, $, atau =).',
 
                 'foto.image' =>
                 'File yang dipilih harus berupa gambar.',

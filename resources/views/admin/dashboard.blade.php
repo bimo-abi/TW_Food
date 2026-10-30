@@ -126,6 +126,196 @@
             </a>
         </div>
     </div>
+
+    {{-- ===== Mockup cards (dummy data) ===== --}}
+    @php
+        // ===== DUMMY DATA (replace with controller values later) =====
+        $dummyActivity = [
+            'pengguna_online' => 12,
+            'registrasi_baru' => 5,
+            'pesanan_diproses' => 7,
+        ];
+
+        $dummyLowStock = [
+            'total' => 11,
+            'produk' => ['Kopi Susu Gula Aren', 'Teh Tarik Original', 'Roti Coklat Keju'],
+        ];
+
+        $dummySales = [
+            'minggu' => [
+                'labels' => ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                'data' => [420000, 380000, 510000, 465000, 620000, 780000, 690000],
+            ],
+            'bulan' => [
+                'labels' => ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+                'data' => [2850000, 3120000, 2640000, 3390000],
+            ],
+            'tahun' => [
+                'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                'data' => [
+                    18200000,
+                    16500000,
+                    19800000,
+                    21000000,
+                    20100000,
+                    22400000,
+                    23900000,
+                    21700000,
+                    24300000,
+                    25100000,
+                    0,
+                    0,
+                ],
+            ],
+        ];
+    @endphp
+
+    <div class="row row-cards mb-3">
+        {{-- Aktivitas --}}
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bg-green-lt avatar me-3">
+                            <i class="ti ti-users icon"></i>
+                        </span>
+                        <div>
+                            <div class="text-secondary">Pengguna Online</div>
+                            <div class="h2 mb-0">{{ $dummyActivity['pengguna_online'] }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bg-blue-lt avatar me-3">
+                            <i class="ti ti-user-plus icon"></i>
+                        </span>
+                        <div>
+                            <div class="text-secondary">Registrasi Baru</div>
+                            <div class="h2 mb-0">{{ $dummyActivity['registrasi_baru'] }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <span class="bg-orange-lt avatar me-3">
+                            <i class="ti ti-bell-ringing icon"></i>
+                        </span>
+                        <div>
+                            <div class="text-secondary">Pesanan Perlu Diproses</div>
+                            <div class="h2 mb-0">{{ $dummyActivity['pesanan_diproses'] }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Stok menipis --}}
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="bg-red-lt avatar me-3">
+                            <i class="ti ti-alert-triangle icon"></i>
+                        </span>
+                        <div>
+                            <div class="text-secondary">Stok Menipis</div>
+                            <div class="h2 mb-0">{{ $dummyLowStock['total'] }} <span
+                                    class="text-secondary h5">produk</span></div>
+                        </div>
+                    </div>
+
+                    <ul class="list-unstyled mb-0">
+                        @foreach ($dummyLowStock['produk'] as $namaProduk)
+                            <li class="d-flex align-items-center py-1">
+                                <i class="ti ti-point-filled text-red me-2"></i>
+                                {{ $namaProduk }}
+                            </li>
+                        @endforeach
+                        <li class="text-secondary py-1 ps-4">
+                            +{{ $dummyLowStock['total'] - count($dummyLowStock['produk']) }} produk lainnya
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {{-- Penjualan --}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Penjualan per Hari</h3>
+                    <div class="card-actions">
+                        <select id="salesRange" class="form-select form-select-sm w-auto">
+                            <option value="minggu" selected>Per Minggu</option>
+                            <option value="bulan">Per Bulan</option>
+                            <option value="tahun">Per Tahun</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div style="height: 300px;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{{-- ===== Chart script (inline, no @push needed) ===== --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sales = @json($dummySales);
+        const canvas = document.getElementById('salesChart');
+        const select = document.getElementById('salesRange');
+
+        if (!canvas || !select) {
+            console.error('Sales chart: canvas or select not found');
+            return;
+        }
+        if (typeof Chart === 'undefined') {
+            console.error('Sales chart: Chart.js failed to load');
+            return;
+        }
+
+        const chart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Penjualan (Rp)',
+                    data: [],
+                    backgroundColor: '#206bc4',
+                    borderRadius: 4,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                        },
+                    },
+                },
+            },
+        });
+
+        function render(range) {
+            chart.data.labels = sales[range].labels;
+            chart.data.datasets[0].data = sales[range].data;
+            chart.update();
+        }
+
+        select.addEventListener('change', e => render(e.target.value));
+        render(select.value);
+    });
+</script>
+
     {{-- ===== Pesanan ===== --}}
     <div id="pesanan" class="card mb-3">
         <div class="card-header">
@@ -209,7 +399,7 @@
             {{ $stokList->links('pagination::bootstrap-5') }}
         </div>
     </div>
-    
+
     {{-- ===== Produk ===== --}}
     <div id="produk" class="card mb-3">
         <div class="card-header">

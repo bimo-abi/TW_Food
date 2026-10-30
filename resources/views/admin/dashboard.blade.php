@@ -22,9 +22,9 @@
         $dummyPenjualanHariIni = 1250000;
 
         $dummyProdukTerlaris = [
-            ['nama' => 'Kopi Susu Gula Aren', 'terjual' => 48],
-            ['nama' => 'Teh Tarik Original', 'terjual' => 35],
-            ['nama' => 'Roti Coklat Keju', 'terjual' => 22],
+            ['nama' => 'Kaldu Jamur Tiram dan Shitake', 'terjual' => 48],
+            ['nama' => 'Kaldu Jamur Tiram MPASI', 'terjual' => 35],
+            ['nama' => 'Kerupuk Jamur Tiram', 'terjual' => 22],
         ];
 
         $dummySales = [

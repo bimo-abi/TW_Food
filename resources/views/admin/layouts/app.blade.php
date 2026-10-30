@@ -325,10 +325,10 @@
                 </a>
 
                 {{-- 8. Keuangan --}}
-                <a href="#">
+                {{-- <a href="#">
                     <i class="ti ti-report-money"></i>
                     <span>Keuangan</span>
-                </a>
+                </a> --}}
 
                 {{-- 9. Laporan --}}
                 <a href="#">
@@ -337,10 +337,10 @@
                 </a>
 
                 {{-- 10. Analitik --}}
-                <a href="#">
+                {{-- <a href="#">
                     <i class="ti ti-chart-bar"></i>
                     <span>Analitik</span>
-                </a>
+                </a> --}}
 
                 {{-- 11. Resep --}}
                 <a href="{{ route('admin.resep.index') }}"

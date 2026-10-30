@@ -218,21 +218,32 @@
                         </span>
                         <div>
                             <div class="text-secondary">Stok Menipis</div>
-                            <div class="h2 mb-0">{{ $dummyLowStock['total'] }} <span
-                                    class="text-secondary h5">produk</span></div>
+                            <div class="h2 mb-0">
+                                {{ $stokMenipisCount }}
+                                <span class="text-secondary h5">varian</span>
+                            </div>
                         </div>
                     </div>
 
                     <ul class="list-unstyled mb-0">
-                        @foreach ($dummyLowStock['produk'] as $namaProduk)
-                            <li class="d-flex align-items-center py-1">
-                                <i class="ti ti-point-filled text-red me-2"></i>
-                                {{ $namaProduk }}
+                        @forelse ($stokMenipisList as $item)
+                            <li class="d-flex align-items-center justify-content-between py-1">
+                                <span>
+                                    <i class="ti ti-point-filled text-red me-1"></i>
+                                    {{ $item->produk->nama_produk ?? '-' }}
+                                    <span class="text-secondary">({{ $item->nama_varian ?? '-' }})</span>
+                                </span>
+                                <span class="badge bg-red-lt">{{ $item->stok }}</span>
                             </li>
-                        @endforeach
-                        <li class="text-secondary py-1 ps-4">
-                            +{{ $dummyLowStock['total'] - count($dummyLowStock['produk']) }} produk lainnya
-                        </li>
+                        @empty
+                            <li class="text-secondary py-1">Semua stok aman.</li>
+                        @endforelse
+
+                        @if ($stokMenipisCount > $stokMenipisList->count())
+                            <li class="text-secondary py-1 ps-4">
+                                +{{ $stokMenipisCount - $stokMenipisList->count() }} varian lainnya
+                            </li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -260,61 +271,63 @@
         </div>
     </div>
 
-{{-- ===== Chart script (inline, no @push needed) ===== --}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sales = @json($dummySales);
-        const canvas = document.getElementById('salesChart');
-        const select = document.getElementById('salesRange');
+    {{-- ===== Chart script (inline, no @push needed) ===== --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sales = @json($dummySales);
+            const canvas = document.getElementById('salesChart');
+            const select = document.getElementById('salesRange');
 
-        if (!canvas || !select) {
-            console.error('Sales chart: canvas or select not found');
-            return;
-        }
-        if (typeof Chart === 'undefined') {
-            console.error('Sales chart: Chart.js failed to load');
-            return;
-        }
+            if (!canvas || !select) {
+                console.error('Sales chart: canvas or select not found');
+                return;
+            }
+            if (typeof Chart === 'undefined') {
+                console.error('Sales chart: Chart.js failed to load');
+                return;
+            }
 
-        const chart = new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Penjualan (Rp)',
-                    data: [],
-                    backgroundColor: '#206bc4',
-                    borderRadius: 4,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+            const chart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Penjualan (Rp)',
+                        data: [],
+                        backgroundColor: '#206bc4',
+                        borderRadius: 4,
+                    }],
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: value => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                            },
                         },
                     },
                 },
-            },
+            });
+
+            function render(range) {
+                chart.data.labels = sales[range].labels;
+                chart.data.datasets[0].data = sales[range].data;
+                chart.update();
+            }
+
+            select.addEventListener('change', e => render(e.target.value));
+            render(select.value);
         });
-
-        function render(range) {
-            chart.data.labels = sales[range].labels;
-            chart.data.datasets[0].data = sales[range].data;
-            chart.update();
-        }
-
-        select.addEventListener('change', e => render(e.target.value));
-        render(select.value);
-    });
-</script>
+    </script>
 
     {{-- ===== Pesanan ===== --}}
     <div id="pesanan" class="card mb-3">

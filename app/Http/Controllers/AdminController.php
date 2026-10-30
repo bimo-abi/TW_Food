@@ -19,6 +19,14 @@ class AdminController extends Controller
         $totalStok      = VarianProduk::sum('stok');
         $totalPelanggan = Pengguna::where('peran', 'pelanggan')->count();
 
+        // ===== Stok menipis (stok <= 5) =====
+        $stokMenipisQuery = VarianProduk::with('produk')
+            ->where('stok', '<=', 5)
+            ->orderBy('stok');
+
+        $stokMenipisCount = (clone $stokMenipisQuery)->count();
+        $stokMenipisList  = (clone $stokMenipisQuery)->limit(3)->get();
+
         // Paginated tables, each with its own page parameter
         $produkList = Produk::withCount('varian')
             ->latest()
@@ -58,6 +66,8 @@ class AdminController extends Controller
             'pesananBaru',
             'totalStok',
             'totalPelanggan',
+            'stokMenipisCount',
+            'stokMenipisList',
             'produkList',
             'varianList',
             'stokList',

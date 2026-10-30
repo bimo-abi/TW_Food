@@ -17,128 +17,14 @@
         </div>
     </div>
 
-    <div class="row row-cards mb-3">
-        <div class="col-sm-6 col-lg-4">
-            <a href="#produk" class="card card-sm text-reset text-decoration-none">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-secondary">Total Produk</div>
-                            <div class="h1 mb-0">{{ $totalProduk }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="bg-primary-lt avatar">
-                                <i class="ti ti-package icon"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-sm-6 col-lg-4">
-            <a href="#varian" class="card card-sm text-reset text-decoration-none">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-secondary">Total Varian</div>
-                            <div class="h1 mb-0">{{ $totalVarian }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="bg-azure-lt avatar">
-                                <i class="ti ti-layers-intersect icon"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-sm-6 col-lg-4">
-            <a href="#pesanan" class="card card-sm text-reset text-decoration-none">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-secondary">Total Pesanan</div>
-                            <div class="h1 mb-0">{{ $totalPesanan }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="bg-indigo-lt avatar">
-                                <i class="ti ti-shopping-cart icon"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-sm-6 col-lg-4">
-            <a href="#pesanan" class="card card-sm text-reset text-decoration-none">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-secondary">Pesanan Baru</div>
-                            <div class="h1 mb-0">{{ $pesananBaru }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="bg-orange-lt avatar">
-                                <i class="ti ti-bell icon"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-sm-6 col-lg-4">
-            <a href="#stok" class="card card-sm text-reset text-decoration-none">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-secondary">Total Stok</div>
-                            <div class="h1 mb-0">{{ $totalStok }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="bg-green-lt avatar">
-                                <i class="ti ti-box icon"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-sm-6 col-lg-4">
-            <a href="#pelanggan" class="card card-sm text-reset text-decoration-none">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-secondary">Total Pelanggan</div>
-                            <div class="h1 mb-0">{{ $totalPelanggan }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <span class="bg-purple-lt avatar">
-                                <i class="ti ti-users icon"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    {{-- ===== Mockup cards (dummy data) ===== --}}
+    {{-- ===== Dummy data (ganti saat transaksi sudah final) ===== --}}
     @php
-        // ===== DUMMY DATA (replace with controller values later) =====
-        $dummyActivity = [
-            'pengguna_online' => 12,
-            'registrasi_baru' => 5,
-            'pesanan_diproses' => 7,
-        ];
+        $dummyPenjualanHariIni = 1250000;
 
-        $dummyLowStock = [
-            'total' => 11,
-            'produk' => ['Kopi Susu Gula Aren', 'Teh Tarik Original', 'Roti Coklat Keju'],
+        $dummyProdukTerlaris = [
+            ['nama' => 'Kopi Susu Gula Aren', 'terjual' => 48],
+            ['nama' => 'Teh Tarik Original', 'terjual' => 35],
+            ['nama' => 'Roti Coklat Keju', 'terjual' => 22],
         ];
 
         $dummySales = [
@@ -152,84 +38,91 @@
             ],
             'tahun' => [
                 'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                'data' => [
-                    18200000,
-                    16500000,
-                    19800000,
-                    21000000,
-                    20100000,
-                    22400000,
-                    23900000,
-                    21700000,
-                    24300000,
-                    25100000,
-                    0,
-                    0,
-                ],
+                'data' => [18200000, 16500000, 19800000, 21000000, 20100000, 22400000,
+                    23900000, 21700000, 24300000, 25100000, 0, 0],
             ],
         ];
     @endphp
 
+    {{-- ===== KPI ===== --}}
     <div class="row row-cards mb-3">
-        {{-- Aktivitas --}}
-        <div class="col-lg-5">
-            <div class="card h-100">
+        <div class="col-sm-6 col-lg-3">
+            <a href="#pesanan" class="card card-sm text-reset text-decoration-none">
                 <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="bg-green-lt avatar me-3">
-                            <i class="ti ti-users icon"></i>
-                        </span>
-                        <div>
-                            <div class="text-secondary">Pengguna Online</div>
-                            <div class="h2 mb-0">{{ $dummyActivity['pengguna_online'] }}</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="bg-blue-lt avatar me-3">
-                            <i class="ti ti-user-plus icon"></i>
-                        </span>
-                        <div>
-                            <div class="text-secondary">Registrasi Baru</div>
-                            <div class="h2 mb-0">{{ $dummyActivity['registrasi_baru'] }}</div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center">
-                        <span class="bg-orange-lt avatar me-3">
-                            <i class="ti ti-bell-ringing icon"></i>
-                        </span>
-                        <div>
+                    <div class="row align-items-center">
+                        <div class="col">
                             <div class="text-secondary">Pesanan Perlu Diproses</div>
-                            <div class="h2 mb-0">{{ $dummyActivity['pesanan_diproses'] }}</div>
+                            <div class="h1 mb-0">{{ $pesananBaru }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="bg-orange-lt avatar"><i class="ti ti-bell-ringing icon"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-secondary">Penjualan Hari Ini</div>
+                            <div class="h1 mb-0">Rp {{ number_format($dummyPenjualanHariIni, 0, ',', '.') }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="bg-green-lt avatar"><i class="ti ti-cash icon"></i></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Stok menipis --}}
-        <div class="col-lg-7">
-            <div class="card h-100">
+        <div class="col-sm-6 col-lg-3">
+            <a href="#lowstocktable" class="card card-sm text-reset text-decoration-none">
                 <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="bg-red-lt avatar me-3">
-                            <i class="ti ti-alert-triangle icon"></i>
-                        </span>
-                        <div>
+                    <div class="row align-items-center">
+                        <div class="col">
                             <div class="text-secondary">Stok Menipis</div>
-                            <div class="h2 mb-0">
-                                {{ $stokMenipisCount }}
-                                <span class="text-secondary h5">varian</span>
-                            </div>
+                            <div class="h1 mb-0">{{ $stokMenipisCount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="bg-red-lt avatar"><i class="ti ti-alert-triangle icon"></i></span>
                         </div>
                     </div>
+                </div>
+            </a>
+        </div>
 
+        <div class="col-sm-6 col-lg-3">
+            <div class="card card-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="text-secondary">Pelanggan Baru (7 hari)</div>
+                            <div class="h1 mb-0">{{ $pelangganBaru }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="bg-purple-lt avatar"><i class="ti ti-user-plus icon"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== Stok menipis + Produk terlaris ===== --}}
+    <div class="row row-cards mb-3">
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">Stok Menipis</h3>
+                </div>
+                <div class="card-body">
                     <ul class="list-unstyled mb-0">
                         @forelse ($stokMenipisList as $item)
                             <li class="d-flex align-items-center justify-content-between py-1">
                                 <span>
-                                    <i class="ti ti-point-filled text-red me-1"></i>
                                     {{ $item->produk->nama_produk ?? '-' }}
                                     <span class="text-secondary">({{ $item->nama_varian ?? '-' }})</span>
                                 </span>
@@ -240,8 +133,10 @@
                         @endforelse
 
                         @if ($stokMenipisCount > $stokMenipisList->count())
-                            <li class="text-secondary py-1 ps-4">
-                                +{{ $stokMenipisCount - $stokMenipisList->count() }} varian lainnya
+                            <li class="py-1 ps-0">
+                                <a href="#lowstocktable">
+                                    +{{ $stokMenipisCount - $stokMenipisList->count() }} varian lainnya
+                                </a>
                             </li>
                         @endif
                     </ul>
@@ -249,90 +144,49 @@
             </div>
         </div>
 
-        {{-- Penjualan --}}
-        <div class="col-12">
-            <div class="card">
+        <div class="col-lg-7">
+            <div class="card h-100">
                 <div class="card-header">
-                    <h3 class="card-title">Penjualan per Hari</h3>
-                    <div class="card-actions">
-                        <select id="salesRange" class="form-select form-select-sm w-auto">
-                            <option value="minggu" selected>Per Minggu</option>
-                            <option value="bulan">Per Bulan</option>
-                            <option value="tahun">Per Tahun</option>
-                        </select>
-                    </div>
+                    <h3 class="card-title">Produk Terlaris</h3>
+                    <div class="card-actions text-secondary small">Data contoh</div>
                 </div>
                 <div class="card-body">
-                    <div style="height: 300px;">
-                        <canvas id="salesChart"></canvas>
-                    </div>
+                    <ul class="list-unstyled mb-0">
+                        @foreach ($dummyProdukTerlaris as $produk)
+                            <li class="d-flex align-items-center justify-content-between py-1">
+                                <span>{{ $produk['nama'] }}</span>
+                                <span class="text-secondary">{{ $produk['terjual'] }} terjual</span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ===== Chart script (inline, no @push needed) ===== --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sales = @json($dummySales);
-            const canvas = document.getElementById('salesChart');
-            const select = document.getElementById('salesRange');
+    {{-- ===== Chart penjualan (dummy) ===== --}}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">Penjualan</h3>
+            <div class="card-actions">
+                <select id="salesRange" class="form-select form-select-sm w-auto">
+                    <option value="minggu" selected>Per Minggu</option>
+                    <option value="bulan">Per Bulan</option>
+                    <option value="tahun">Per Tahun</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="height: 300px;">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
 
-            if (!canvas || !select) {
-                console.error('Sales chart: canvas or select not found');
-                return;
-            }
-            if (typeof Chart === 'undefined') {
-                console.error('Sales chart: Chart.js failed to load');
-                return;
-            }
-
-            const chart = new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Penjualan (Rp)',
-                        data: [],
-                        backgroundColor: '#206bc4',
-                        borderRadius: 4,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => 'Rp ' + Number(value).toLocaleString('id-ID'),
-                            },
-                        },
-                    },
-                },
-            });
-
-            function render(range) {
-                chart.data.labels = sales[range].labels;
-                chart.data.datasets[0].data = sales[range].data;
-                chart.update();
-            }
-
-            select.addEventListener('change', e => render(e.target.value));
-            render(select.value);
-        });
-    </script>
-
-    {{-- ===== Pesanan ===== --}}
+    {{-- ===== Pesanan terbaru (top 5) ===== --}}
     <div id="pesanan" class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">Daftar Pesanan</h3>
+            <h3 class="card-title">Pesanan Terbaru</h3>
         </div>
         <div class="table-responsive">
             <table class="table table-vcenter card-table">
@@ -362,21 +216,21 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-secondary py-4">Belum ada pesanan.</td>
+                            <td colspan="6" class="text-center text-secondary py-4">Belum ada pesanan hari ini.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="card-footer d-flex align-items-center">
-            {{ $pesananList->links('pagination::bootstrap-5') }}
+        <div class="card-footer">
+            <a href="{{ route('admin.pesanan.index') }}">Lihat semua pesanan</a>
         </div>
     </div>
 
-    {{-- ===== Stok ===== --}}
-    <div id="stok" class="card mb-3">
+    {{-- ===== Tabel stok menipis (dituju dari card) ===== --}}
+    <div id="lowstocktable" class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">Stok Varian (terkecil dulu)</h3>
+            <h3 class="card-title">Stok Menipis (stok ≤ 5)</h3>
         </div>
         <div class="table-responsive">
             <table class="table table-vcenter card-table">
@@ -395,14 +249,12 @@
                             <td>{{ $item->produk->nama_produk ?? '-' }}</td>
                             <td>{{ $item->nama_varian ?? '-' }}</td>
                             <td>
-                                <span class="badge {{ $item->stok <= 5 ? 'bg-red-lt' : 'bg-green-lt' }}">
-                                    {{ $item->stok }}
-                                </span>
+                                <span class="badge bg-red-lt">{{ $item->stok }}</span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-secondary py-4">Belum ada data stok.</td>
+                            <td colspan="4" class="text-center text-secondary py-4">Semua stok aman.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -413,124 +265,49 @@
         </div>
     </div>
 
-    {{-- ===== Produk ===== --}}
-    <div id="produk" class="card mb-3">
-        <div class="card-header">
-            <h3 class="card-title">Daftar Produk</h3>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Produk</th>
-                        <th>Jumlah Varian</th>
-                        <th>Dibuat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($produkList as $produk)
-                        <tr>
-                            <td>{{ $produkList->firstItem() + $loop->index }}</td>
-                            <td>{{ $produk->nama_produk }}</td>
-                            <td>{{ $produk->varian_count }}</td>
-                            <td>{{ $produk->created_at->format('d M Y') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-secondary py-4">Belum ada produk.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer d-flex align-items-center">
-            {{ $produkList->links('pagination::bootstrap-5') }}
-        </div>
-    </div>
+    {{-- ===== Chart script (dummy) ===== --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sales = @json($dummySales);
+            const canvas = document.getElementById('salesChart');
+            const select = document.getElementById('salesRange');
+            if (!canvas || !select || typeof Chart === 'undefined') return;
 
-    {{-- ===== Varian ===== --}}
-    <div id="varian" class="card mb-3">
-        <div class="card-header">
-            <h3 class="card-title">Daftar Varian</h3>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Produk</th>
-                        <th>Nama Varian</th>
-                        <th>Harga</th>
-                        <th>Stok</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($varianList as $varian)
-                        <tr>
-                            <td>{{ $varianList->firstItem() + $loop->index }}</td>
-                            <td>{{ $varian->produk->nama_produk ?? '-' }}</td>
-                            <td>{{ $varian->nama_varian }}</td>
-                            <td>
-                                @forelse ($varian->daftarHarga as $harga)
-                                    <div>
-                                        {{ ucfirst($harga->jenis_harga) }}:
-                                        Rp {{ number_format($harga->harga, 0, ',', '.') }}
-                                    </div>
-                                @empty
-                                    <span class="text-secondary">-</span>
-                                @endforelse
-                            </td>
-                            <td>{{ $varian->stok }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-secondary py-4">Belum ada varian.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer d-flex align-items-center">
-            {{ $varianList->links('pagination::bootstrap-5') }}
-        </div>
-    </div>
+            const chart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Penjualan (Rp)',
+                        data: [],
+                        backgroundColor: '#206bc4',
+                        borderRadius: 4,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => 'Rp ' + Number(value).toLocaleString('id-ID'),
+                            },
+                        },
+                    },
+                },
+            });
 
+            function render(range) {
+                chart.data.labels = sales[range].labels;
+                chart.data.datasets[0].data = sales[range].data;
+                chart.update();
+            }
 
-
-    {{-- ===== Pelanggan ===== --}}
-    <div id="pelanggan" class="card mb-3">
-        <div class="card-header">
-            <h3 class="card-title">Daftar Pelanggan</h3>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>Bergabung</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($pelangganList as $pelanggan)
-                        <tr>
-                            <td>{{ $pelangganList->firstItem() + $loop->index }}</td>
-                            <td>{{ $pelanggan->nama }}</td>
-                            <td>{{ $pelanggan->email ?? '-' }}</td>
-                            <td>{{ $pelanggan->created_at->format('d M Y') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-secondary py-4">Belum ada pelanggan.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer d-flex align-items-center">
-            {{ $pelangganList->links('pagination::bootstrap-5') }}
-        </div>
-    </div>
+            select.addEventListener('change', e => render(e.target.value));
+            render(select.value);
+        });
+    </script>
 @endsection

@@ -10,9 +10,19 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Mengambil produk aktif
+        // Mengambil produk aktif BESERTA varian dan daftar harganya
+        // (sama seperti ProdukController@index, supaya harga eceran dan grosir ikut terbaca)
         $produk = Produk::where('status_aktif', true)
-            ->with('varian')
+            ->with([
+                'varian' => function ($query) {
+                    $query->where('status_aktif', true)
+                        ->with([
+                            'daftarHarga' => function ($harga) {
+                                $harga->where('status_aktif', true);
+                            }
+                        ]);
+                }
+            ])
             ->orderBy('nama_produk')
             ->take(8)
             ->get();

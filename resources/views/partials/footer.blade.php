@@ -1,4 +1,3 @@
-{{-- resources/views/partials/footer.blade.php (atau layouts/footer.blade.php) --}}
 <footer class="tw-footer">
     <div class="tw-footer-grid">
 
@@ -33,7 +32,6 @@
         <div>
             <h4>Belanja</h4>
             <a href="{{ route('produk.public') }}">Daftar Produk</a>
-            {{-- Halaman Grosir belum ada: ganti URL-nya setelah halaman dibuat, atau pakai # dulu --}}
             <a href="{{ url('/grosir') }}">Harga Grosir</a>
             <a href="https://shopee.co.id/twfood_id" target="_blank" rel="noopener">Shopee: twfood_id</a>
             <a href="https://www.tokopedia.com/twfood" target="_blank" rel="noopener">Tokopedia: TW Food</a>

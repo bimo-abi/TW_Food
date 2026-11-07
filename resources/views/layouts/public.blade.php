@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/public.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 
@@ -10,8 +9,6 @@
         @yield('title', 'TWFood - Lezat dan Sehat')
     </title>
 
-    {{-- CSS LAMA: tetap dipakai halaman yang belum diubah (produk, resep, outlet, kontak, detail).
-         Aturan navbar dan footer lama sudah dihapus karena diganti header/footer baru. --}}
     <style>
         :root {
             --text-light: #FFF5F1;
@@ -197,14 +194,13 @@
         }
     </style>
 
-    {{-- CSS TEMA BARU (file: public/css/twfood-theme.css), dipasang setelah CSS lama --}}
-    <link rel="stylesheet" href="{{ asset('css/twfood-theme.css') }}">
+    {{-- 1) Gaya bersama: warna, header, footer, tombol (public/css/layout.css) --}}
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
 
+    {{-- 2) Gaya khusus tiap halaman (mis. home.css) diisi lewat @push('styles') di halaman itu --}}
     @stack('styles')
 </head>
 
-{{-- Halaman yang sudah memakai desain baru mengisi @section('body_class', 'tw').
-     Halaman lain dibiarkan kosong supaya tampilannya tidak rusak. --}}
 <body class="@yield('body_class')">
 
     @include('partials.header')

@@ -1,71 +1,27 @@
-/* public/css/home.css — styling beranda TWFood (sesuai Figma)
-   Semua class diawali "home-" supaya tidak bentrok dengan CSS header/footer (tw-nav, dll). */
-
 :root {
-    /* Warna diambil dari layout.css supaya sama dengan header & footer */
-    --home-bg: var(--tw-bg);
-    --home-card: var(--tw-sf);
-    --home-card-border: var(--tw-bd);
-    --home-text: var(--tw-tx);
-    --home-muted: var(--tw-mu);
-    --home-orange: var(--tw-or);
-    --home-green: var(--tw-wa);
-    --home-chip: var(--tw-cream);
-    --home-chip-text: var(--tw-no);
+    --lihat-bg:        #FF7A00;   /* warna tombol */
+    --lihat-bg-hover:  #D96400;   /* warna saat disentuh kursor */
+    --lihat-teks:      #FFFFFF;   /* warna tulisan */
 }
 
-.home {
-    background: var(--home-bg);
-    color: var(--home-text);
-    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-    padding-bottom: 40px;
-}
-
-.home .home-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
-}
-
-/* ---------- Kartu umum ---------- */
-.home .home-card {
-    background: var(--home-card);
-    border: 1px solid var(--home-card-border);
-    border-radius: 16px;
-}
-
-/* ---------- Tombol ---------- */
-.home .home-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 22px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 15px;
-    text-decoration: none;
-    transition: transform .15s, filter .15s;
-}
-.home .home-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
-
-.home .home-btn--orange {
-    background: var(--home-orange);
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(255, 122, 0, .35);
-}
-.home .home-btn--wa {
-    background: var(--home-green);
-    color: #fff;
-    width: 100%;
+/* ---------- Lebar & jarak antar bagian ---------- */
+.tw-hero,
+.tw-sec {
+    max-width: 1240px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
     box-sizing: border-box;
-    font-size: 13px;
-    padding: 10px 14px;
 }
-.home .home-btn--wa img { width: 20px; height: 20px; flex-shrink: 0; }
+.tw-sec { margin-bottom: 36px; }
 
-/* ---------- Hero ---------- */
-.home .home-hero {
+/* ---------- Judul bagian ---------- */
+.tw-sec h2 { font-size: 24px; margin: 0 0 4px; font-weight: 700; }
+.tw-sec > p { color: var(--tw-mu); margin: 0 0 22px; font-size: 15px; }
+
+/* ---------- Hero (teks kiri, foto kanan) ---------- */
+.tw-hero {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
     gap: 40px;
@@ -74,10 +30,10 @@
     padding-bottom: 36px;
 }
 
-.home .home-badge {
+.tw-badge {
     display: inline-block;
-    background: var(--home-chip);
-    color: var(--home-chip-text);
+    background: var(--tw-cream);
+    color: var(--tw-no);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: .5px;
@@ -86,123 +42,141 @@
     margin-bottom: 18px;
 }
 
-.home .home-hero__text h1 {
-    font-size: 42px;
-    line-height: 1.15;
+.tw-hero h1 {
+    font-size: 54px;
+    line-height: 1.3;
     font-weight: 800;
     margin: 0 0 16px;
 }
-.home .home-hero__text p {
-    color: var(--home-muted);
+
+.tw-lead {
+    color: var(--tw-tx);
+    opacity: .85;
     font-size: 16px;
     line-height: 1.55;
     margin: 0 0 24px;
 }
-.home .home-hero__link {
-    display: block;
-    margin-top: 18px;
-    color: #fff;
-    font-size: 13px;
-    text-decoration: underline;
-}
-.home .home-hero__terms {
-    display: block;
-    margin-top: 8px;
-    font-size: 11px;
-    color: var(--home-muted);
-}
 
-.home .home-hero__image {
+/* tombol oranye "Masuk Sekarang" */
+.tw-hero a.tw-btn { text-decoration: none; color: #fff; }
+.tw-hero .tw-btn-primary {
+    background: linear-gradient(135deg, #ff9a1f, var(--tw-or));
+    box-shadow: 0 6px 18px rgba(255, 122, 0, .35);
+}
+.tw-hero .tw-btn-primary:hover { filter: brightness(1.08); }
+
+.tw-link { display: inline-block; color: #fff; font-size: 13px; text-decoration: underline; }
+.tw-link:visited { color: #fff; }
+
+.tw-terms { margin: 10px 0 0; font-size: 11px; color: var(--tw-mu); }
+.tw-terms b { font-weight: 500; color: var(--tw-tx); }
+
+/* foto hero */
+.tw-hero-img {
     position: relative;
     border-radius: 26px;
     overflow: hidden;
-    background: var(--home-card);
-    min-height: 260px;
+    background: var(--tw-sf);
+    aspect-ratio: 482 / 435;
 }
-.home .home-hero__image img {
-    display: block;
+.tw-hero-img.kosong { min-height: 260px; }
+.tw-hero-img img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    min-height: 260px;
     object-fit: cover;
+    display: block;
 }
-.home .home-hero__tag {
+.tw-tag {
     position: absolute;
     top: 14px;
     left: 14px;
     z-index: 2;
     background: #fff;
-    color: var(--home-chip);
+    color: #5a3a10;
     font-size: 12px;
     font-weight: 600;
     padding: 5px 12px;
     border-radius: 999px;
 }
 
-/* ---------- 3 keunggulan ---------- */
-.home .home-features {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 40px;
-}
-.home .home-feature { padding: 20px; }
-.home .home-feature__icon { font-size: 26px; }
-.home .home-feature h3 { font-size: 15px; margin: 10px 0 6px; }
-.home .home-feature p { font-size: 13px; color: var(--home-muted); margin: 0; line-height: 1.5; }
-
-/* ---------- Judul seksi ---------- */
-.home .home-section { margin-bottom: 36px; }
-.home .home-section h2 { font-size: 24px; margin: 0 0 4px; font-weight: 700; }
-.home .home-section__sub { color: var(--home-muted); margin: 0 0 22px; font-size: 15px; }
-
-/* ---------- Produk ---------- */
-.home .home-products {
+/* ---------- Grid 3 kolom & kotak umum ---------- */
+.tw-grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
     align-items: stretch;
 }
-.home .home-product { display: flex; flex-direction: column; padding: 12px; }
 
-.home .home-product__photo {
-    aspect-ratio: 1 / 1;
+.tw-box {
+    background: var(--tw-sf);
+    border: 1px solid var(--tw-bd);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+/* tiga kotak keunggulan */
+.tw-grid-3 > .tw-box > span { display: block; font-size: 26px; line-height: 1.2; }
+.tw-grid-3 > .tw-box > b    { display: block; font-size: 15px; margin: 10px 0 6px; }
+.tw-grid-3 > .tw-box > p    { font-size: 13px; color: var(--tw-mu); margin: 0; line-height: 1.5; }
+
+/* ---------- Kartu produk unggulan ---------- */
+.tw-pcard {
+    display: flex;
+    flex-direction: column;
+    background: var(--tw-sf);
+    border: 1px solid var(--tw-bd);
+    border-radius: 16px;
+    padding: 12px;
+}
+
+.tw-pcard-img {
+    aspect-ratio: 1.3 / 1;
     border-radius: 12px;
-    background: #f1f1f1;
+    background: #fff;
     overflow: hidden;
 }
-.home .home-product__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tw-pcard-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.home .home-product__body { display: flex; flex-direction: column; flex: 1; padding: 12px 6px 6px; }
-.home .home-product__cat { color: var(--home-orange); font-size: 12px; font-weight: 600; }
-.home .home-product__body h3 { font-size: 15px; margin: 4px 0 6px; }
-.home .home-product__desc { font-size: 12.5px; color: var(--home-muted); line-height: 1.5; margin: 0 0 12px; }
+.tw-pcard-body { display: flex; flex-direction: column; flex: 1; padding: 12px 6px 6px; }
+.tw-cat { color: var(--tw-or); font-size: 12px; font-weight: 600; }
+.tw-pcard-body h3 { font-size: 15px; margin: 4px 0 6px; }
+.tw-pcard-body > p { font-size: 12.5px; color: var(--tw-mu); line-height: 1.5; margin: 0 0 12px; }
 
-.home .home-product__price { margin-top: auto; }
-.home .home-product__price strong { font-size: 16px; display: block; }
-.home .home-product__price small { font-size: 12px; color: var(--home-muted); }
+/* tombol di dasar kartu supaya sejajar antar kartu */
+.tw-pcard-foot { margin-top: auto; padding-top: 4px; }
 
-.home .home-product__grosir {
-    background: var(--home-chip);
-    color: var(--home-chip-text);
-    font-size: 12px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin: 12px 0;
+/* tombol "Lihat Produk" (warna diatur di bagian paling atas file ini) */
+.tw-pcard a.tw-btn {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-decoration: none;
 }
-.home .home-product .home-btn--wa { margin-top: 12px; }
-.home .home-product__grosir + .home-btn--wa { margin-top: 0; }
+.tw-pcard a.tw-btn.tw-btn-lihat {
+    background: var(--lihat-bg);
+    color: var(--lihat-teks);
+}
+.tw-pcard a.tw-btn.tw-btn-lihat:hover {
+    background: var(--lihat-bg-hover);
+}
 
-.home .home-empty { color: var(--home-muted); }
-
-/* ---------- Tentang ---------- */
-.home .home-about { padding: 24px 28px; }
-.home .home-about h2 { font-size: 22px; margin: 0 0 10px; }
-.home .home-about p { color: var(--home-muted); font-size: 16px; line-height: 1.6; margin: 0; }
+/* ---------- Tentang TW FOOD ---------- */
+.tw-about { padding: 24px 28px; }
+.tw-about h2 { font-size: 22px; margin: 0 0 10px; }
+.tw-about p  { color: var(--tw-mu); font-size: 16px; line-height: 1.6; margin: 0; }
 
 /* ---------- Responsif ---------- */
+@media (max-width: 1024px) {
+    .tw-grid-produk { grid-template-columns: repeat(2, 1fr); }
+    .tw-hero h1 { font-size: 42px; }
+}
 @media (max-width: 900px) {
-.home .home-hero { grid-template-columns: 1fr; }
-.home .home-hero__text h1 { font-size: 32px; }
-.home .home-features, .home .home-products { grid-template-columns: 1fr; }
+    .tw-hero { grid-template-columns: 1fr; }
+    .tw-grid-3,
+    .tw-grid-produk { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+    .tw-hero h1 { font-size: 32px; }
 }

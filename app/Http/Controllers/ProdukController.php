@@ -6,9 +6,7 @@ use App\Models\Produk;
 
 class ProdukController extends Controller
 {
-    /**
-     * Menampilkan katalog produk public.
-     */
+    
     public function index()
     {
         $produk = Produk::where('status_aktif', true)
@@ -17,8 +15,7 @@ class ProdukController extends Controller
                     $query->where('status_aktif', true)
                         ->with([
                             'daftarHarga' => function ($harga) {
-                                $harga->where('jenis_harga', 'ecer')
-                                    ->where('status_aktif', true);
+                                $harga->where('status_aktif', true);
                             }
                         ]);
                 }
@@ -27,25 +24,6 @@ class ProdukController extends Controller
             ->get();
 
         return view('produk.index', compact('produk'));
-    }
-
-    public function show($id)
-    {
-        $produk = Produk::where('status_aktif', true)
-            ->with([
-                'varian' => function ($query) {
-                    $query->where('status_aktif', true)
-                        ->with([
-                            'daftarHarga' => function ($harga) {
-                                $harga->where('jenis_harga', 'ecer')
-                                    ->where('status_aktif', true);
-                            }
-                        ]);
-                }
-            ])
-            ->findOrFail($id);
-
-        return view('produk.show', compact('produk'));
     }
 
     /**

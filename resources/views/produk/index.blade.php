@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Produk - TWFood</title>
 
-    {{-- 1) Gaya bersama: warna, header & footer --}}
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
-    {{-- 2) Gaya khusus halaman produk (dimuat setelah layout.css) --}}
     <link rel="stylesheet" href="{{ asset('css/produk.css') }}">
 </head>
 <body>
@@ -98,10 +96,20 @@
                         $e = $v->daftarHarga->where('jenis_harga', 'ecer')->first();
                         $g = $v->daftarHarga->where('jenis_harga', 'grosir')->first();
                         if ($e) {
-                            // Kalau varian punya berat (berat_gram), tampil "/ 185 gr". Kalau tidak, tampil satuan ("/pc").
-                            $unit = $v->berat_gram
-                                ? ' / ' . number_format($v->berat_gram, 0, ',', '.') . ' gr'
-                                : '/' . $v->satuan_jual;
+                            // Satuan di belakang harga eceran:
+                            // 1) Varian punya berat (berat_gram)            -> "/ 185 gr"
+                            // 2) Minimal pembelian ecer dalam gram          -> "/ 185 gr"
+                            // 3) Selain itu pakai satuan varian             -> "/pc"
+                            $satE = strtolower(trim((string) $e->satuan_minimal));
+
+                            if ($v->berat_gram) {
+                                $unit = ' / ' . number_format($v->berat_gram, 0, ',', '.') . ' gr';
+                            } elseif (in_array($satE, ['g', 'gr', 'gram']) && $e->minimal_pembelian) {
+                                $unit = ' / ' . number_format($e->minimal_pembelian, 0, ',', '.') . ' gr';
+                            } else {
+                                $unit = '/' . $v->satuan_jual;
+                            }
+
                             $ecer[] = ['nama' => $v->nama_varian, 'harga' => $e->harga, 'satuan' => $v->satuan_jual, 'unit' => $unit];
                         }
                         if ($g) {

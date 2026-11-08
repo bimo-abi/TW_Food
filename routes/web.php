@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\BahanController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminProdukController;
@@ -477,6 +478,9 @@ Route::get('/', [HomeController::class, 'index'])
 
 Route::get('/produk', [ProdukController::class, 'index'])
     ->name('produk.public');
+
+Route::get('/bahan', [BahanController::class, 'index'])
+    ->name('bahan.public');
 
 Route::get('/resep', [ResepController::class, 'index'])
     ->name('resep.public');

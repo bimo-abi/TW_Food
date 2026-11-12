@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProduksiPreOrder extends Model
 {
@@ -14,9 +15,23 @@ class ProduksiPreOrder extends Model
         'id_detail_pesanan',
         'jumlah_produksi',
         'status_produksi',
+        'estimasi_selesai',
+        'mulai_produksi_pada',
+        'selesai_produksi_pada',
+        'catatan_produksi',
     ];
 
-    public function detailPesanan()
+    protected function casts(): array
+    {
+        return [
+            'jumlah_produksi' => 'integer',
+            'estimasi_selesai' => 'datetime',
+            'mulai_produksi_pada' => 'datetime',
+            'selesai_produksi_pada' => 'datetime',
+        ];
+    }
+
+    public function detailPesanan(): BelongsTo
     {
         return $this->belongsTo(
             DetailPesanan::class,

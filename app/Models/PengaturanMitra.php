@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PengaturanMitra extends Model
 {
@@ -14,9 +15,7 @@ class PengaturanMitra extends Model
 
     protected $fillable = [
         'id_pengguna',
-        'minimal_quantity_dp',
         'minimal_nominal_dp',
-        'persentase_dp',
         'dp_aktif',
         'notifikasi_aktif',
     ];
@@ -30,10 +29,11 @@ class PengaturanMitra extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function pengguna()
+    public function pengguna(): BelongsTo
     {
         return $this->belongsTo(
             Pengguna::class,
+            'id_pengguna',
             'id_pengguna'
         );
     }

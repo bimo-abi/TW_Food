@@ -12,7 +12,10 @@ class AdminController extends Controller
     public function dashboard()
     {
         // ===== KPI =====
-        $pesananBaru    = Pesanan::where('status_pesanan', 'pesanan_diterima')->count();
+        $pesananBaru = Pesanan::where(
+            'status_pesanan',
+            'menunggu_pembayaran'
+        )->count();
         $pelangganBaru  = Pengguna::where('peran', 'pelanggan')
             ->where('created_at', '>=', now()->subDays(7))
             ->count();

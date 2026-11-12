@@ -17,8 +17,7 @@
             </div>
 
             <div class="col-auto">
-                <a href="{{ route('admin.pesanan.index') }}"
-                   class="btn btn-outline-secondary">
+                <a href="{{ route('admin.pesanan.index') }}" class="btn btn-outline-secondary">
                     <i class="ti ti-arrow-left me-1"></i>
                     Kembali
                 </a>
@@ -148,6 +147,7 @@
         </div>
     </div>
 
+
     {{-- TINDAKAN PESANAN --}}
     <div class="card mb-3">
         <div class="card-header">
@@ -162,205 +162,143 @@
                 Pilih tindakan sesuai dengan kondisi pesanan saat ini.
             </p>
 
+            @php
+                $status = $pesanan->status_pesanan;
+
+                $statusBisaDibatalkan = in_array($status, [
+                    'menunggu_pembayaran',
+                    'sedang_diproses',
+                    'siap_diambil',
+                    'siap_dikirim',
+                    'dalam_pengiriman',
+                ], true);
+            @endphp
+
             <div class="d-flex flex-wrap gap-2">
-                @if ($pesanan->status_pesanan === 'pesanan_diterima')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="sedang_diproses"
-                                class="btn btn-primary">
-                            <i class="ti ti-player-play me-1"></i>
-                            Proses Pesanan
-                        </button>
-                    </form>
 
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST"
-                          onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="dibatalkan"
-                                class="btn btn-outline-danger">
-                            <i class="ti ti-x me-1"></i>
-                            Batalkan Pesanan
-                        </button>
-                    </form>
+                {{-- MENUNGGU PEMBAYARAN --}}
+                @if ($status === 'menunggu_pembayaran')
+                    <div class="text-secondary">
+                        Pesanan menunggu pembayaran pelanggan.
+                    </div>
 
-                @elseif ($pesanan->status_pesanan === 'sedang_diproses')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="pesanan_siap"
-                                class="btn btn-primary">
-                            <i class="ti ti-check me-1"></i>
-                            Pesanan Siap
-                        </button>
-                    </form>
+                    {{-- SEDANG DIPROSES --}}
+                @elseif ($status === 'sedang_diproses')
 
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST"
-                          onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="dibatalkan"
-                                class="btn btn-outline-danger">
-                            <i class="ti ti-x me-1"></i>
-                            Batalkan Pesanan
-                        </button>
-                    </form>
-
-                @elseif ($pesanan->status_pesanan === 'pesanan_siap')
-                    @if ($pesanan->jenis_pesanan === 'delivery')
-                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                              method="POST">
+                    @if ($pesanan->jenis_pesanan === 'pickup')
+                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
                             @csrf
                             @method('PUT')
-                            <button type="submit"
-                                    name="status_pesanan"
-                                    value="menunggu_pengiriman"
-                                    class="btn btn-primary">
-                                <i class="ti ti-truck me-1"></i>
-                                Menunggu Pengiriman
-                            </button>
-                        </form>
-                    @elseif ($pesanan->jenis_pesanan === 'pickup')
-                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                              method="POST">
-                            @csrf
-                            @method('PUT')
-                            <button type="submit"
-                                    name="status_pesanan"
-                                    value="siap_diambil"
-                                    class="btn btn-primary">
+
+                            <button type="submit" name="status_pesanan" value="siap_diambil" class="btn btn-primary">
                                 <i class="ti ti-package me-1"></i>
                                 Siap Diambil
                             </button>
                         </form>
+
+                    @elseif ($pesanan->jenis_pesanan === 'delivery')
+                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <button type="submit" name="status_pesanan" value="siap_dikirim" class="btn btn-primary">
+                                <i class="ti ti-truck me-1"></i>
+                                Siap Dikirim
+                            </button>
+                        </form>
                     @endif
 
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST"
-                          onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')">
+                    {{-- SIAP DIAMBIL --}}
+                @elseif ($status === 'siap_diambil')
+                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="dibatalkan"
-                                class="btn btn-outline-danger">
-                            <i class="ti ti-x me-1"></i>
-                            Batalkan Pesanan
-                        </button>
-                    </form>
 
-                @elseif ($pesanan->status_pesanan === 'menunggu_pengiriman')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="dalam_pengiriman"
-                                class="btn btn-primary">
-                            <i class="ti ti-truck-delivery me-1"></i>
-                            Mulai Pengiriman
-                        </button>
-                    </form>
-
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST"
-                          onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="dibatalkan"
-                                class="btn btn-outline-danger">
-                            <i class="ti ti-x me-1"></i>
-                            Batalkan Pesanan
-                        </button>
-                    </form>
-
-                @elseif ($pesanan->status_pesanan === 'dalam_pengiriman')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="diterima"
-                                class="btn btn-primary">
+                        <button type="submit" name="status_pesanan" value="diterima" class="btn btn-primary">
                             <i class="ti ti-check me-1"></i>
                             Tandai Diterima
                         </button>
                     </form>
 
-                @elseif ($pesanan->status_pesanan === 'diterima')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="selesai"
-                                class="btn btn-success">
-                            <i class="ti ti-checks me-1"></i>
-                            Selesaikan Pesanan
-                        </button>
-                    </form>
-
-                @elseif ($pesanan->status_pesanan === 'siap_diambil')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="pesanan_diambil"
-                                class="btn btn-primary">
-                            <i class="ti ti-package-export me-1"></i>
-                            Tandai Pesanan Diambil
-                        </button>
-                    </form>
-
-                @elseif ($pesanan->status_pesanan === 'pesanan_diambil')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}"
-                          method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit"
-                                name="status_pesanan"
-                                value="selesai"
-                                class="btn btn-success">
-                            <i class="ti ti-checks me-1"></i>
-                            Selesaikan Pesanan
-                        </button>
-                    </form>
-
-                @elseif ($pesanan->status_pesanan === 'selesai')
-                    <div class="text-success">
-                        <i class="ti ti-circle-check me-1"></i>
-                        Pesanan telah selesai.
+                    {{-- SIAP DIKIRIM --}}
+                @elseif ($status === 'siap_dikirim')
+                    <div class="text-secondary w-100 mb-2">
+                        Pastikan informasi tracking sudah disimpan sebelum memulai pengiriman.
                     </div>
 
-                @elseif ($pesanan->status_pesanan === 'dibatalkan')
+                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <button type="submit" name="status_pesanan" value="dalam_pengiriman" class="btn btn-primary">
+                            <i class="ti ti-truck-delivery me-1"></i>
+                            Mulai Pengiriman
+                        </button>
+                    </form>
+
+                    {{-- DALAM PENGIRIMAN --}}
+                @elseif ($status === 'dalam_pengiriman')
+                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <button type="submit" name="status_pesanan" value="diterima" class="btn btn-primary">
+                            <i class="ti ti-check me-1"></i>
+                            Tandai Diterima
+                        </button>
+                    </form>
+
+                    {{-- DITERIMA --}}
+                @elseif ($status === 'diterima')
+                    <div class="text-success">
+                        <i class="ti ti-circle-check me-1"></i>
+                        Pesanan telah diterima pelanggan.
+                    </div>
+
+                    {{-- DIBATALKAN --}}
+                @elseif ($status === 'dibatalkan')
                     <div class="text-danger">
                         <i class="ti ti-circle-x me-1"></i>
                         Pesanan telah dibatalkan.
                     </div>
                 @endif
+
+                {{-- PEMBATALAN OPERASIONAL --}}
+                @if ($statusBisaDibatalkan)
+                    <div class="w-100">
+                        <hr>
+
+                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST"
+                            onsubmit="return confirm('Yakin ingin membatalkan pesanan ini? Pastikan alasan pembatalan sudah benar.')">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="mb-3">
+                                <label for="alasan_pembatalan" class="form-label">
+                                    Alasan Pembatalan
+                                </label>
+
+                                <textarea name="alasan_pembatalan" id="alasan_pembatalan" class="form-control" rows="3"
+                                    maxlength="1000" placeholder="Masukkan alasan pembatalan pesanan..."
+                                    required>{{ old('alasan_pembatalan') }}</textarea>
+
+                                <small class="form-hint">
+                                    Alasan pembatalan wajib diisi.
+                                </small>
+                            </div>
+
+                            <button type="submit" name="status_pesanan" value="dibatalkan" class="btn btn-outline-danger">
+                                <i class="ti ti-x me-1"></i>
+                                Batalkan Pesanan
+                            </button>
+                        </form>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
+
 
     {{-- INFORMASI PENGIRIMAN --}}
     @if ($pesanan->jenis_pesanan === 'delivery')
@@ -393,9 +331,7 @@
                         </div>
 
                         @if ($pesanan->tautan_pelacakan)
-                            <a href="{{ $pesanan->tautan_pelacakan }}"
-                               target="_blank"
-                               rel="noopener noreferrer">
+                            <a href="{{ $pesanan->tautan_pelacakan }}" target="_blank" rel="noopener noreferrer">
                                 <i class="ti ti-external-link me-1"></i>
                                 Lihat Tracking GoSend
                             </a>
@@ -428,8 +364,7 @@
 
                 <h4 class="mb-3">Perbarui Informasi Pengiriman</h4>
 
-                <form action="{{ route('admin.pesanan.update-pengiriman', $pesanan->id_pesanan) }}"
-                      method="POST">
+                <form action="{{ route('admin.pesanan.update-pengiriman', $pesanan->id_pesanan) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -439,13 +374,10 @@
                                 Tautan Pelacakan GoSend
                             </label>
 
-                            <input type="url"
-                                   name="tautan_pelacakan"
-                                   id="tautan_pelacakan"
-                                   value="{{ old('tautan_pelacakan', $pesanan->tautan_pelacakan) }}"
-                                   class="form-control @error('tautan_pelacakan') is-invalid @enderror"
-                                   placeholder="https://..."
-                                   maxlength="2048">
+                            <input type="url" name="tautan_pelacakan" id="tautan_pelacakan"
+                                value="{{ old('tautan_pelacakan', $pesanan->tautan_pelacakan) }}"
+                                class="form-control @error('tautan_pelacakan') is-invalid @enderror" placeholder="https://..."
+                                maxlength="2048">
 
                             @error('tautan_pelacakan')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -462,13 +394,10 @@
                                 Nomor Resi J&T
                             </label>
 
-                            <input type="text"
-                                   name="nomor_resi"
-                                   id="nomor_resi"
-                                   value="{{ old('nomor_resi', $pesanan->nomor_resi) }}"
-                                   class="form-control @error('nomor_resi') is-invalid @enderror"
-                                   placeholder="Masukkan nomor resi J&T"
-                                   maxlength="100">
+                            <input type="text" name="nomor_resi" id="nomor_resi"
+                                value="{{ old('nomor_resi', $pesanan->nomor_resi) }}"
+                                class="form-control @error('nomor_resi') is-invalid @enderror" placeholder="Masukkan nomor resi J&T"
+                                maxlength="100">
 
                             @error('nomor_resi')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -530,8 +459,7 @@
             </div>
         @empty
             <div class="card-body text-center text-secondary py-4">
-                <i class="ti ti-package-off d-block mb-2"
-                   style="font-size: 2rem;"></i>
+                <i class="ti ti-package-off d-block mb-2" style="font-size: 2rem;"></i>
                 Belum ada detail produk pada pesanan ini.
             </div>
         @endforelse
@@ -605,8 +533,7 @@
 
     {{-- KEMBALI --}}
     <div class="mt-3">
-        <a href="{{ route('admin.pesanan.index') }}"
-           class="btn btn-outline-secondary">
+        <a href="{{ route('admin.pesanan.index') }}" class="btn btn-outline-secondary">
             <i class="ti ti-arrow-left me-1"></i>
             Kembali ke Daftar Pesanan
         </a>

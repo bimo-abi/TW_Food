@@ -7,39 +7,36 @@ use App\Models\Alamat;
 use App\Models\DaftarHarga;
 use App\Models\Outlet;
 use App\Models\Pesanan;
+use App\Models\ProduksiPreOrder;
+use App\Models\ReservasiStok;
+use App\Models\RiwayatAktivitasTransaksi;
 use App\Models\VarianProduk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PesananController extends Controller
 {
     /**
-     * Membuat pesanan baru dari aplikasi Flutter.
+     * Membuat pesanan dari aplikasi Flutter.
+     * Harga, stok, kelayakan pelanggan, dan total selalu dihitung backend.
      */
     public function store(Request $request)
     {
         $pengguna = $request->user();
 
-        // Pastikan akun pelanggan aktif.
         if (!$pengguna || !$pengguna->status_aktif) {
             return response()->json([
                 'message' => 'Akun tidak aktif atau belum login.',
             ], 403);
         }
 
-        // Validasi data yang dikirim oleh Flutter.
         $validated = $request->validate([
-            'jenis_pemenuhan' => [
-                'required',
-                'in:reguler,pre_order',
-            ],
-            'jenis_pesanan' => [
-                'required',
-                'in:pickup,delivery',
-            ],
+            'jenis_pemenuhan' => ['required', 'in:reguler,pre_order'],
+            'jenis_pesanan' => ['required', 'in:pickup,delivery'],
             'id_alamat' => [
                 'required_if:jenis_pesanan,delivery',
                 'nullable',
@@ -52,258 +49,219 @@ class PesananController extends Controller
                 'integer',
                 'exists:outlet,id_outlet',
             ],
-            'catatan' => [
-                'nullable',
-                'string',
-                'max:1000',
-            ],
-            'items' => [
-                'required',
-                'array',
-                'min:1',
-            ],
+            'catatan' => ['nullable', 'string', 'max:1000'],
+            'items' => ['required', 'array', 'min:1', 'max:50'],
             'items.*.id_varian' => [
-                'required',
-                'integer',
-                'distinct',
-                'exists:varian_produk,id_varian',
+                'required', 'integer', 'distinct', 'exists:varian_produk,id_varian',
             ],
             'items.*.id_daftar_harga' => [
-                'required',
-                'integer',
-                'exists:daftar_harga,id_daftar_harga',
+                'required', 'integer', 'exists:daftar_harga,id_daftar_harga',
             ],
             'items.*.jumlah' => [
-                'required',
-                'integer',
-                'min:1',
-                'max:65535',
+                'required', 'integer', 'min:1', 'max:65535',
             ],
         ]);
 
-        // Pastikan pelanggan hanya menggunakan alamat miliknya.
-        if ($validated['jenis_pesanan'] === 'delivery') {
-            $alamatMilikPelanggan = Alamat::where(
-                'id_alamat',
-                $validated['id_alamat']
-            )
-                ->where('id_pengguna', $pengguna->id_pengguna)
-                ->exists();
+        // Validasi kepemilikan alamat dilakukan ulang di dalam transaksi
+        // database agar snapshot yang disimpan berasal dari alamat pemilik pesanan.
+        $hasil = DB::transaction(function () use ($validated, $pengguna) {
+            $alamat = null;
+            $outlet = null;
 
-            if (!$alamatMilikPelanggan) {
+            if ($validated['jenis_pesanan'] === 'delivery') {
+                $alamat = Alamat::where('id_alamat', $validated['id_alamat'])
+                    ->where('id_pengguna', $pengguna->id_pengguna)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$alamat) {
+                    throw ValidationException::withMessages([
+                        'id_alamat' => ['Alamat tidak ditemukan atau bukan milik Anda.'],
+                    ]);
+                }
+            }
+
+            if ($validated['jenis_pesanan'] === 'pickup') {
+                $outlet = Outlet::where('id_outlet', $validated['id_outlet'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$outlet) {
+                    throw ValidationException::withMessages([
+                        'id_outlet' => ['Outlet yang dipilih tidak ditemukan.'],
+                    ]);
+                }
+            }
+
+            // Saluran pesanan harus mengikuti jenis pelanggan dari backend.
+            $saluranPesanan = match ($pengguna->jenis_pelanggan) {
+                'umum' => 'online',
+                'toko' => 'toko',
+                'horeca' => 'horeca',
+                default => null,
+            };
+
+            if ($saluranPesanan === null) {
                 throw ValidationException::withMessages([
-                    'id_alamat' => [
-                        'Alamat tidak ditemukan atau bukan milik Anda.',
-                    ],
+                    'jenis_pelanggan' => ['Jenis pelanggan tidak valid untuk membuat pesanan.'],
                 ]);
             }
-        }
 
-        // Validasi outlet untuk pesanan pickup.
-        if ($validated['jenis_pesanan'] === 'pickup') {
-            $outletAda = Outlet::where(
-                'id_outlet',
-                $validated['id_outlet']
-            )->exists();
+            $isPreOrder = $validated['jenis_pemenuhan'] === 'pre_order';
 
-            if (!$outletAda) {
+            if ($isPreOrder && !in_array($pengguna->jenis_pelanggan, ['toko', 'horeca'], true)) {
                 throw ValidationException::withMessages([
-                    'id_outlet' => [
-                        'Outlet yang dipilih tidak ditemukan.',
-                    ],
+                    'jenis_pemenuhan' => ['Pre-order hanya tersedia untuk pelanggan Toko/Horeca.'],
                 ]);
             }
-        }
 
-        // Tentukan saluran pesanan dari data backend.
-        $saluranPesanan = match ($pengguna->jenis_pelanggan) {
-            'umum' => 'online',
-            'toko', 'horeca' => 'toko',
-            default => null,
-        };
+            if ($isPreOrder && $pengguna->status_verifikasi !== 'disetujui') {
+                throw ValidationException::withMessages([
+                    'jenis_pemenuhan' => ['Pre-order hanya tersedia untuk pelanggan Toko/Horeca yang telah terverifikasi.'],
+                ]);
+            }
 
-        if (!$saluranPesanan) {
-            return response()->json([
-                'message' => 'Jenis pelanggan tidak valid.',
-            ], 422);
-        }
-
-        // Simpan pesanan dan detail dalam satu transaksi database.
-        $pesanan = DB::transaction(function () use (
-            $validated,
-            $pengguna,
-            $saluranPesanan
-        ) {
             $subtotalProduk = 0;
             $detailItems = [];
+            $reservasiKadaluarsa = now()->addHours(24);
 
-            foreach ($validated['items'] as $item) {
-                // Kunci varian selama proses pemeriksaan.
-                $varian = VarianProduk::where(
-                    'id_varian',
-                    $item['id_varian']
-                )
+            foreach ($validated['items'] as $index => $item) {
+                // Kunci varian agar dua checkout bersamaan tidak melewati
+                // pemeriksaan ketersediaan stok yang sama.
+                $varian = VarianProduk::where('id_varian', $item['id_varian'])
                     ->lockForUpdate()
                     ->first();
 
                 if (!$varian || !$varian->status_aktif) {
                     throw ValidationException::withMessages([
-                        'items' => [
-                            'Terdapat varian produk yang tidak aktif.',
-                        ],
+                        "items.$index.id_varian" => ['Varian produk tidak aktif atau tidak ditemukan.'],
                     ]);
                 }
 
-                // Produk induk juga harus aktif.
-                $produkAktif = $varian->produk()
-                    ->where('status_aktif', true)
-                    ->exists();
-
-                if (!$produkAktif) {
+                $produk = $varian->produk;
+                if (!$produk || !$produk->status_aktif) {
                     throw ValidationException::withMessages([
-                        'items' => [
-                            'Terdapat produk yang tidak aktif.',
-                        ],
+                        "items.$index.id_varian" => ['Produk tidak aktif atau tidak ditemukan.'],
                     ]);
                 }
 
-                // Harga harus aktif dan milik varian yang dipilih.
-                $daftarHarga = DaftarHarga::where(
-                    'id_daftar_harga',
-                    $item['id_daftar_harga']
-                )
+                // Harga wajib aktif dan benar-benar milik varian yang dipilih.
+                $daftarHarga = DaftarHarga::where('id_daftar_harga', $item['id_daftar_harga'])
                     ->where('id_varian', $varian->id_varian)
                     ->where('status_aktif', true)
+                    ->lockForUpdate()
                     ->first();
 
                 if (!$daftarHarga) {
                     throw ValidationException::withMessages([
-                        'items' => [
-                            'Harga tidak aktif atau tidak sesuai dengan varian.',
-                        ],
+                        "items.$index.id_daftar_harga" => ['Harga tidak aktif atau tidak sesuai dengan varian.'],
                     ]);
                 }
 
-                // Periksa minimum pembelian untuk harga yang dipilih.
-                if (
-                    $item['jumlah'] <
-                    $daftarHarga->minimal_pembelian
-                ) {
+                $jumlah = (int) $item['jumlah'];
+                $minimalPembelian = (int) $daftarHarga->minimal_pembelian;
+
+                if ($jumlah < $minimalPembelian) {
                     throw ValidationException::withMessages([
-                        'items' => [
-                            'Jumlah pembelian belum memenuhi minimum harga.',
+                        "items.$index.jumlah" => [
+                            'Jumlah pembelian belum memenuhi minimum untuk jenis harga ' . $daftarHarga->jenis_harga . '.',
                         ],
                     ]);
                 }
 
-                // Jika satuan minimum ditentukan, satuannya harus sesuai.
                 if (
                     $daftarHarga->satuan_minimal !== null &&
                     $daftarHarga->satuan_minimal !== '' &&
                     $daftarHarga->satuan_minimal !== $varian->satuan_jual
                 ) {
                     throw ValidationException::withMessages([
-                        'items' => [
-                            'Satuan minimum harga tidak sesuai dengan satuan jual varian.',
-                        ],
+                        "items.$index.id_daftar_harga" => ['Satuan minimum harga tidak sesuai dengan satuan jual varian.'],
                     ]);
                 }
 
-                // Periksa jenis pemenuhan dan kelayakan stok.
-                if ($validated['jenis_pemenuhan'] === 'reguler') {
-                    // Pesanan reguler wajib tersedia pada stok reguler.
-                    if ($item['jumlah'] > $varian->stok) {
+                if ($isPreOrder) {
+                    $tanggalMulai = $varian->tanggal_mulai_pre_order;
+                    $tanggalSelesai = $varian->tanggal_selesai_pre_order;
+                    $hariIni = today();
+
+                    $periodeAktif = $tanggalMulai && $tanggalSelesai
+                        && $hariIni->greaterThanOrEqualTo($tanggalMulai->copy()->startOfDay())
+                        && $hariIni->lessThanOrEqualTo($tanggalSelesai->copy()->startOfDay());
+
+                    if (!$varian->tersedia_pre_order || !$periodeAktif) {
                         throw ValidationException::withMessages([
-                            'items' => [
-                                'Stok reguler tidak mencukupi untuk pesanan ini.',
+                            "items.$index.id_varian" => [
+                                'Pre-order tidak aktif atau berada di luar periode pemesanan.',
                             ],
                         ]);
                     }
-
-                    // Cadangkan stok reguler di dalam transaksi database.
-                    $varian->stok -= (int) $item['jumlah'];
-                    $varian->save();
                 } else {
-                    // Pre-order hanya untuk pelanggan Toko/Horeca.
-                    $jenisPelangganDiizinkan = in_array(
-                        $pengguna->jenis_pelanggan,
-                        ['toko', 'horeca'],
-                        true
-                    );
+                    // Stok tersedia dikurangi reservasi aktif yang belum kedaluwarsa.
+                    // Stok fisik tidak dikurangi saat checkout; reservasi dikonversi
+                    // menjadi pengurangan stok setelah pembayaran diverifikasi.
+                    $jumlahReservasiAktif = (int) ReservasiStok::where(
+                        'id_varian',
+                        $varian->id_varian
+                    )
+                        ->where('status_reservasi', 'aktif')
+                        ->where('kadaluarsa_pada', '>', now())
+                        ->sum('jumlah');
 
-                    $statusVerifikasiDisetujui =
-                        $pengguna->status_verifikasi === 'disetujui';
+                    $stokTersedia = (int) $varian->stok - $jumlahReservasiAktif;
 
-                    $hariIni = now()->startOfDay();
-
-                    $periodePreOrderBerlaku =
-                        $varian->tanggal_mulai_pre_order !== null &&
-                        $varian->tanggal_selesai_pre_order !== null &&
-                        $hariIni->betweenIncluded(
-                            $varian->tanggal_mulai_pre_order,
-                            $varian->tanggal_selesai_pre_order
-                        );
-
-                    $preOrderDiizinkan =
-                        $jenisPelangganDiizinkan &&
-                        $statusVerifikasiDisetujui &&
-                        $varian->tersedia_pre_order &&
-                        $periodePreOrderBerlaku;
-
-                    if (!$preOrderDiizinkan) {
+                    if ($jumlah > $stokTersedia) {
                         throw ValidationException::withMessages([
-                            'items' => [
-                                'Pre-order hanya tersedia untuk pelanggan Toko/Horeca terverifikasi pada periode yang berlaku.',
-                            ],
+                            "items.$index.jumlah" => ['Stok tersedia tidak mencukupi setelah memperhitungkan reservasi pesanan lain.'],
                         ]);
                     }
                 }
-                // Harga diambil dari database, bukan dari Flutter.
-                $harga = (int) $daftarHarga->harga;
-                $jumlah = (int) $item['jumlah'];
-                $subtotal = $harga * $jumlah;
 
-                $subtotalProduk += $subtotal;
+                $harga = (int) $daftarHarga->harga;
+                $subtotalItem = $harga * $jumlah;
+
+                if ($subtotalItem > 4294967295) {
+                    throw ValidationException::withMessages([
+                        "items.$index.jumlah" => ['Subtotal item melebihi kapasitas penyimpanan database.'],
+                    ]);
+                }
+
+                $subtotalProduk += $subtotalItem;
+
+                if ($subtotalProduk > 4294967295) {
+                    throw ValidationException::withMessages([
+                        'items' => ['Total pesanan melebihi kapasitas penyimpanan database.'],
+                    ]);
+                }
 
                 $detailItems[] = [
                     'id_varian' => $varian->id_varian,
-                    'nama_produk_saat_pesan' =>
-                    $varian->produk->nama_produk,
-                    'nama_varian_saat_pesan' =>
-                    $varian->nama_varian,
+                    'nama_produk_saat_pesan' => $produk->nama_produk,
+                    'nama_varian_saat_pesan' => $varian->nama_varian,
                     'harga_saat_pesan' => $harga,
+                    'jenis_harga_saat_pesan' => $daftarHarga->jenis_harga,
                     'jumlah' => $jumlah,
-                    'subtotal' => $subtotal,
+                    'subtotal' => $subtotalItem,
+                    'diskon_item' => 0,
+                    'subtotal_setelah_diskon' => $subtotalItem,
                 ];
             }
 
-            // Pastikan total tidak melebihi kapasitas kolom database.
-            if ($subtotalProduk > 4294967295) {
-                throw ValidationException::withMessages([
-                    'items' => [
-                        'Total pesanan melebihi batas nominal yang didukung.',
-                    ],
-                ]);
-            }
-
-            // Diskon belum diterapkan pada tahap checkout awal.
+            // Diskon checkout belum dihitung dari modul promosi pada controller
+            // yang tersedia. Nilai awal tetap nol, bukan menerima diskon dari client.
             $diskon = 0;
             $totalPesanan = $subtotalProduk - $diskon;
 
-            $kodePesanan = 'TW-' .
-                now()->format('YmdHis') .
-                '-' .
-                Str::upper(Str::random(6));
-
             $pesanan = Pesanan::create([
-                'nomor_pesanan' => $kodePesanan,
+                'nomor_pesanan' => 'TW-' . now()->format('YmdHis') . '-' . Str::upper(Str::random(6)),
                 'id_pengguna' => $pengguna->id_pengguna,
-                'id_alamat' => $validated['jenis_pesanan'] === 'delivery'
-                    ? $validated['id_alamat']
-                    : null,
-                'id_outlet' => $validated['jenis_pesanan'] === 'pickup'
-                    ? $validated['id_outlet']
-                    : null,
+                'id_alamat' => $alamat?->id_alamat,
+                'id_outlet' => $outlet?->id_outlet,
+                'nama_penerima_saat_pesan' => $alamat?->nama_penerima,
+                'nomor_telepon_saat_pesan' => $alamat?->nomor_telepon,
+                'alamat_lengkap_saat_pesan' => $alamat?->alamat_lengkap,
+                'kota_saat_pesan' => $alamat?->kota,
+                'provinsi_saat_pesan' => $alamat?->provinsi,
+                'kode_pos_saat_pesan' => $alamat?->kode_pos,
                 'saluran_pesanan' => $saluranPesanan,
                 'jenis_pesanan' => $validated['jenis_pesanan'],
                 'jenis_pemenuhan' => $validated['jenis_pemenuhan'],
@@ -311,21 +269,52 @@ class PesananController extends Controller
                 'diskon' => $diskon,
                 'total_pesanan' => $totalPesanan,
                 'status_pembayaran' => 'belum_dibayar',
-                'status_pesanan' => 'pesanan_diterima',
+                'status_pesanan' => 'menunggu_pembayaran',
                 'catatan' => $validated['catatan'] ?? null,
             ]);
 
-            // Simpan setiap barang sebagai detail pesanan.
             foreach ($detailItems as $detail) {
-                $pesanan->detailPesanan()->create($detail);
+                $detailPesanan = $pesanan->detailPesanan()->create($detail);
+
+                if (!$isPreOrder) {
+                    ReservasiStok::create([
+                        'id_pesanan' => $pesanan->id_pesanan,
+                        'id_detail_pesanan' => $detailPesanan->id_detail_pesanan,
+                        'id_varian' => $detailPesanan->id_varian,
+                        'jumlah' => $detailPesanan->jumlah,
+                        'status_reservasi' => 'aktif',
+                        'dipesan_pada' => now(),
+                        'kadaluarsa_pada' => $reservasiKadaluarsa,
+                    ]);
+                } else {
+                    // Catatan produksi dibuat menunggu pembayaran. Produksi baru
+                    // boleh dimulai setelah pembayaran DP/penuh diverifikasi.
+                    ProduksiPreOrder::create([
+                        'id_detail_pesanan' => $detailPesanan->id_detail_pesanan,
+                        'jumlah_produksi' => $detailPesanan->jumlah,
+                        'status_produksi' => 'menunggu',
+                    ]);
+                }
             }
 
-            return $pesanan->load('detailPesanan');
-        });
+            RiwayatAktivitasTransaksi::create([
+                'id_pengguna' => $pengguna->id_pengguna,
+                'jenis_aktor' => 'pelanggan',
+                'id_pesanan' => $pesanan->id_pesanan,
+                'id_pembayaran' => null,
+                'jenis_aktivitas' => 'pesanan_dibuat',
+                'status_sebelum' => null,
+                'status_sesudah' => 'menunggu_pembayaran',
+                'deskripsi' => 'Pelanggan membuat pesanan ' . $pesanan->nomor_pesanan . '.',
+                'created_at' => now(),
+            ]);
+
+            return $pesanan->load(['detailPesanan', 'reservasiStok']);
+        }, 3);
 
         return response()->json([
-            'message' => 'Pesanan berhasil dibuat.',
-            'data' => $pesanan,
+            'message' => 'Pesanan berhasil dibuat dan ketersediaan stok telah dicadangkan jika pesanan reguler.',
+            'data' => $hasil,
         ], 201);
     }
 }

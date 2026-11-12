@@ -27,6 +27,12 @@ class AdminPengaturanMitraController extends Controller
             ]
         );
 
+        // Persentase DP ditetapkan 50% sesuai PRD dan tidak dapat diubah pengguna.
+        if ((float) $pengaturan->persentase_dp !== 50.00) {
+            $pengaturan->persentase_dp = 50.00;
+            $pengaturan->save();
+        }
+
         return view(
             'admin.pengaturan-mitra.index',
             compact('pengaturan')
@@ -34,7 +40,8 @@ class AdminPengaturanMitraController extends Controller
     }
 
     /**
-     * Menyimpan perubahan pengaturan Mitra.
+     * Menyimpan pengaturan Mitra.
+     * Nominal minimum dapat diatur, tetapi persentase DP selalu 50%.
      */
     public function update(Request $request)
     {
@@ -44,12 +51,6 @@ class AdminPengaturanMitraController extends Controller
                 'integer',
                 'min:1',
                 'max:4294967295',
-            ],
-            'persentase_dp' => [
-                'required',
-                'numeric',
-                'min:0.01',
-                'max:100',
             ],
             'dp_aktif' => [
                 'sometimes',
@@ -78,15 +79,12 @@ class AdminPengaturanMitraController extends Controller
         $pengaturan->minimal_nominal_dp =
             $validated['minimal_nominal_dp'];
 
-        $pengaturan->persentase_dp =
-            $validated['persentase_dp'];
+        // Nilai DP tidak diambil dari request agar tidak dapat diubah dari client.
+        $pengaturan->persentase_dp = 50.00;
 
         // Checkbox yang tidak dicentang dianggap nonaktif.
-        $pengaturan->dp_aktif =
-            $request->boolean('dp_aktif');
-
-        $pengaturan->notifikasi_aktif =
-            $request->boolean('notifikasi_aktif');
+        $pengaturan->dp_aktif = $request->boolean('dp_aktif');
+        $pengaturan->notifikasi_aktif = $request->boolean('notifikasi_aktif');
 
         $pengaturan->save();
 

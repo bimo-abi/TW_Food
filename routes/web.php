@@ -11,7 +11,6 @@ use App\Http\Controllers\AdminDaftarHargaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ResepController;
 use App\Http\Controllers\OutletController;
-use App\Http\Controllers\KontakController;
 use App\Http\Controllers\AdminPesananController;
 use App\Http\Controllers\AdminResepController;
 use App\Http\Controllers\AdminResepProdukController;
@@ -491,5 +490,5 @@ Route::get('/resep/{id}', [ResepController::class, 'show'])
 Route::get('/outlet', [OutletController::class, 'index'])
     ->name('outlet.public');
 
-Route::get('/kontak', [KontakController::class, 'index'])
+Route::view('/kontak', 'kontak.index')
     ->name('kontak.public');

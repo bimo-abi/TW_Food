@@ -310,35 +310,32 @@
                 </a>
 
                 {{-- 5. Pembayaran --}}
-                <a href="#">
+                <a href="{{ route('admin.pembayaran.index') }}"
+                    class="{{ request()->routeIs('admin.pembayaran.*') ? 'active' : '' }}">
                     <i class="ti ti-credit-card"></i>
                     <span>Pembayaran</span>
                 </a>
 
                 {{-- 6. Retur --}}
-                <a href="#">
+                <a href="{{ route('admin.retur.index') }}"
+                    class="{{ request()->routeIs('admin.retur.*') ? 'active' : '' }}">
                     <i class="ti ti-package-export"></i>
                     <span>Retur</span>
                 </a>
 
                 {{-- 7. Promosi --}}
-                <a href="#">
+                <a href="{{ route('admin.promosi.index') }}"
+                    class="{{ request()->routeIs('admin.promosi.*') ? 'active' : '' }}">
                     <i class="ti ti-discount-2"></i>
                     <span>Promosi</span>
                 </a>
 
-                {{-- 8. Keuangan --}}
-                {{-- <a href="#">
-                    <i class="ti ti-report-money"></i>
-                    <span>Keuangan</span>
-                </a> --}}
-
                 {{-- 9. Laporan --}}
-                <a href="#">
+                <a href="{{ route('admin.laporan.index') }}"
+                    class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                     <i class="ti ti-file-report"></i>
                     <span>Laporan</span>
                 </a>
-
                 {{-- 10. Analitik --}}
                 {{-- <a href="#">
                     <i class="ti ti-chart-bar"></i>

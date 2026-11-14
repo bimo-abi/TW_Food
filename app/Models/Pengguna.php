@@ -91,4 +91,13 @@ class Pengguna extends Authenticatable
             'id_pengguna'
         );
     }
+
+    public function riwayatAktivitasTransaksi()
+    {
+        return $this->hasMany(
+            RiwayatAktivitasTransaksi::class,
+            'id_pengguna',
+            'id_pengguna'
+        );
+    }
 }

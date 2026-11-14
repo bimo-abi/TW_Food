@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BuktiRetur extends Model
 {
@@ -16,7 +17,7 @@ class BuktiRetur extends Model
         'file_bukti',
     ];
 
-    public function retur()
+    public function retur(): BelongsTo
     {
         return $this->belongsTo(
             Retur::class,

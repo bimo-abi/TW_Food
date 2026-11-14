@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetailRetur extends Model
 {
@@ -16,17 +17,37 @@ class DetailRetur extends Model
         'jumlah_diretur',
         'alasan_item',
         'nominal_refund',
+        'jumlah_diminta',
+        'jumlah_disetujui',
+        'diskon_dialokasikan',
+        'status_kelayakan_stok',
     ];
 
-    public function retur()
+    protected function casts(): array
     {
-        return $this->belongsTo(Retur::class, 'id_retur');
+        return [
+            'jumlah_diretur' => 'integer',
+            'jumlah_diminta' => 'integer',
+            'jumlah_disetujui' => 'integer',
+            'nominal_refund' => 'integer',
+            'diskon_dialokasikan' => 'integer',
+        ];
     }
 
-    public function detailPesanan()
+    public function retur(): BelongsTo
+    {
+        return $this->belongsTo(
+            Retur::class,
+            'id_retur',
+            'id_retur'
+        );
+    }
+
+    public function detailPesanan(): BelongsTo
     {
         return $this->belongsTo(
             DetailPesanan::class,
+            'id_detail_pesanan',
             'id_detail_pesanan'
         );
     }

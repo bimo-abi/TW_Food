@@ -11,7 +11,6 @@ use App\Http\Controllers\AdminDaftarHargaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ResepController;
 use App\Http\Controllers\OutletController;
-use App\Http\Controllers\KontakController;
 use App\Http\Controllers\AdminPesananController;
 use App\Http\Controllers\AdminResepController;
 use App\Http\Controllers\AdminResepProdukController;
@@ -21,6 +20,10 @@ use App\Http\Controllers\AdminPengaturanMitraController;
 use App\Http\Controllers\AdminKontenBerandaController;
 use App\Http\Controllers\AdminKategoriKontenController;
 use App\Http\Controllers\AdminVerifikasiPelangganController;
+use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\ReturController;
+use App\Http\Controllers\PromosiController;
+use App\Http\Controllers\LaporanController;
 
 // //Dashboard
 // Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -395,7 +398,7 @@ Route::delete(
     ->name('admin.jam-operasional.destroy')
     ->middleware('admin');
 
-    // Admin Pengaturan Mitra
+// Admin Pengaturan Mitra
 Route::get(
     '/admin/pengaturan-mitra',
     [AdminPengaturanMitraController::class, 'index']
@@ -415,37 +418,37 @@ Route::get(
     '/admin/konten-beranda',
     [AdminKontenBerandaController::class, 'index']
 )->name('admin.konten-beranda.index')
- ->middleware('admin');
+    ->middleware('admin');
 
 Route::get(
     '/admin/konten-beranda/create',
     [AdminKontenBerandaController::class, 'create']
 )->name('admin.konten-beranda.create')
- ->middleware('admin');
+    ->middleware('admin');
 
 Route::post(
     '/admin/konten-beranda',
     [AdminKontenBerandaController::class, 'store']
 )->name('admin.konten-beranda.store')
- ->middleware('admin');
+    ->middleware('admin');
 
 Route::get(
     '/admin/konten-beranda/{id}/edit',
     [AdminKontenBerandaController::class, 'edit']
 )->name('admin.konten-beranda.edit')
- ->middleware('admin');
+    ->middleware('admin');
 
 Route::put(
     '/admin/konten-beranda/{id}',
     [AdminKontenBerandaController::class, 'update']
 )->name('admin.konten-beranda.update')
- ->middleware('admin');
+    ->middleware('admin');
 
 Route::delete(
     '/admin/konten-beranda/{id}',
     [AdminKontenBerandaController::class, 'destroy']
 )->name('admin.konten-beranda.destroy')
- ->middleware('admin');
+    ->middleware('admin');
 
 // Admin Kategori Konten
 Route::get('/admin/kategori-konten', [AdminKategoriKontenController::class, 'index'])
@@ -471,6 +474,26 @@ Route::put('/admin/kategori-konten/{id}', [AdminKategoriKontenController::class,
 Route::delete('/admin/kategori-konten/{id}', [AdminKategoriKontenController::class, 'destroy'])
     ->name('admin.kategori-konten.destroy')
     ->middleware('admin');
+// Admin Pembayaran
+Route::get('/admin/pembayaran', [PembayaranController::class, 'index'])
+    ->name('admin.pembayaran.index')
+    ->middleware('admin');
+
+// Admin Retur
+Route::get('/admin/retur', [ReturController::class, 'index'])
+    ->name('admin.retur.index')
+    ->middleware('admin');
+
+// Admin Promosi
+Route::get('/admin/promosi', [PromosiController::class, 'index'])
+    ->name('admin.promosi.index')
+    ->middleware('admin');
+
+// Admin Laporan
+Route::get('/admin/laporan', [LaporanController::class, 'index'])
+    ->name('admin.laporan.index')
+    ->middleware('admin');
+
 
 //public website
 Route::get('/', [HomeController::class, 'index'])
@@ -488,5 +511,5 @@ Route::get('/resep', [ResepController::class, 'index'])
 Route::get('/outlet', [OutletController::class, 'index'])
     ->name('outlet.public');
 
-Route::get('/kontak', [KontakController::class, 'index'])
+Route::view('/kontak', 'kontak.index')
     ->name('kontak.public');

@@ -485,9 +485,6 @@ Route::get('/bahan', [BahanController::class, 'index'])
 Route::get('/resep', [ResepController::class, 'index'])
     ->name('resep.public');
 
-Route::get('/resep/{id}', [ResepController::class, 'show'])
-    ->name('resep.detail');
-
 Route::get('/outlet', [OutletController::class, 'index'])
     ->name('outlet.public');
 

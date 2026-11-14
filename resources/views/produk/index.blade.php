@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Produk - TWFood</title>
 
+    {{-- 1) Gaya bersama: warna, header & footer --}}
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    {{-- 2) Gaya khusus halaman produk (dimuat setelah layout.css) --}}
     <link rel="stylesheet" href="{{ asset('css/produk.css') }}">
 </head>
 <body>
@@ -16,6 +18,10 @@
     // Link unduh aplikasi TWFood (Play Store / APK). Ganti '#' kalau linknya sudah ada.
     $linkAplikasi = '#';
 
+    // ===== KATEGORI PRODUK (sesuai Figma) =====
+    // Kiri : nama produk (huruf besar/kecil boleh beda). Kanan : kategori.
+    // Dipakai kalau database belum punya kolom kategori yang terbaca.
+    // Produk baru: tambah satu baris di sini.
     $daftarKategori = [
         'Kaldu Jamur Tiram dan Shitake' => 'Bumbu',
         'Kaldu Jamur Tiram MPASI'       => 'Bumbu',
@@ -72,6 +78,14 @@
             </div>
         </div>
 
+        {{-- ===== INFO: produk untuk resep tertentu (dari tombol "Beli bahannya") ===== --}}
+        @if (!empty($resepDipilih))
+            <div class="produk-info">
+                <span>Produk untuk membuat <strong>{{ $resepDipilih->judul }}</strong></span>
+                <a href="{{ route('produk.public') }}">Lihat semua produk</a>
+            </div>
+        @endif
+
         {{-- ===== CARI & FILTER ===== --}}
         <input type="search" id="produk-cari" class="produk-cari" placeholder="Cari produk, Misalnya kaldu" autocomplete="off">
 
@@ -96,20 +110,10 @@
                         $e = $v->daftarHarga->where('jenis_harga', 'ecer')->first();
                         $g = $v->daftarHarga->where('jenis_harga', 'grosir')->first();
                         if ($e) {
-                            // Satuan di belakang harga eceran:
-                            // 1) Varian punya berat (berat_gram)            -> "/ 185 gr"
-                            // 2) Minimal pembelian ecer dalam gram          -> "/ 185 gr"
-                            // 3) Selain itu pakai satuan varian             -> "/pc"
-                            $satE = strtolower(trim((string) $e->satuan_minimal));
-
-                            if ($v->berat_gram) {
-                                $unit = ' / ' . number_format($v->berat_gram, 0, ',', '.') . ' gr';
-                            } elseif (in_array($satE, ['g', 'gr', 'gram']) && $e->minimal_pembelian) {
-                                $unit = ' / ' . number_format($e->minimal_pembelian, 0, ',', '.') . ' gr';
-                            } else {
-                                $unit = '/' . $v->satuan_jual;
-                            }
-
+                            // Kalau varian punya berat (berat_gram), tampil "/ 185 gr". Kalau tidak, tampil satuan ("/pc").
+                            $unit = $v->berat_gram
+                                ? ' / ' . number_format($v->berat_gram, 0, ',', '.') . ' gr'
+                                : '/' . $v->satuan_jual;
                             $ecer[] = ['nama' => $v->nama_varian, 'harga' => $e->harga, 'satuan' => $v->satuan_jual, 'unit' => $unit];
                         }
                         if ($g) {

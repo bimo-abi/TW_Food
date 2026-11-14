@@ -1,105 +1,160 @@
-@extends('layouts.public')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resep - TWFood</title>
 
-@section('title', 'Resep - TWFood')
+    {{-- 1) Gaya bersama: warna, header & footer --}}
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    {{-- 2) Gaya khusus halaman resep (dimuat setelah layout.css) --}}
+    <link rel="stylesheet" href="{{ asset('css/resep.css') }}">
+</head>
+<body>
 
-@section('content')
+@include('partials.header')
 
-    <section class="section">
+@php
+    // Foto produk TWFood (public/images/) untuk gambar kartu kalau resep tidak punya foto sendiri.
+    // Kiri: nama produk (huruf besar/kecil boleh beda). Kanan: nama file.
+    $daftarFoto = [
+        'Kaldu Jamur Tiram dan Shitake' => 'kaldu-jamur-tiram-shitake.jpg',
+        'Kaldu Jamur Tiram MPASI'       => 'kaldu-jamur-tiram-mpasi.jpg',
+        'Kecap Jamur Tiram'             => 'kecap-jamur-tiram.jpg',
+        'Abon Jamur Tiram'              => 'abon-jamur-tiram.jpg',
+        'Jamur Tiram Krispi'            => 'jamur-tiram-krispi.jpg',
+        'Stik Jantung Pisang'           => 'stik-jantung-pisang.jpg',
+        'Kerupuk Jamur Tiram'           => 'kerupuk-jamur-tiram.jpg',
+        'Mie Instan Jamur Tiram'        => 'mie-instan-jamur-tiram.jpg',
+    ];
+    $daftarFoto = array_change_key_case($daftarFoto, CASE_LOWER);
 
-        <div class="container">
+    // Foto per resep (nama file di public/images/). Kiri: judul resep (huruf besar/kecil boleh beda).
+    // Resep baru: tambah satu baris di sini, atau upload foto resep lewat admin.
+    $fotoResep = [
+        'Sup Kuah Kaldu Jamur'    => 'kaldu-jamur-tiram-shitake.jpg',
+        'Nasi Goreng Kecap Jamur'  => 'nasi-goreng-kecap-jamur.jpg',
+        'Mie Kelor Tumis Sayur'   => 'mie-instan-jamur-tiram.jpg',
+        'Bubur dengan Abon Jamur' => 'bubur-abon-jamur.png',
+        'Jamur Tiram Krispi Pedas' => 'jamur-tiram-krispi-pedas.jpg',
+    ];
+    $fotoResep = array_change_key_case($fotoResep, CASE_LOWER);
 
-            <div class="section-title">
+    // Pecah teks per baris jadi daftar. Tanda "-", "•", atau "1." di depan baris dibuang.
+    $pecah = function ($teks) {
+        $hasil = [];
+        foreach (preg_split('/\r\n|\r|\n/', strip_tags((string) $teks)) as $baris) {
+            $baris = trim(preg_replace('/^\s*(?:[-•*·]+|\d+[.)])\s*/u', '', trim($baris)));
+            if ($baris !== '') {
+                $hasil[] = $baris;
+            }
+        }
+        return $hasil;
+    };
+@endphp
 
-                <h1>
-                    Resep TWFood
-                </h1>
+<div class="resep-page">
+    <section class="resep-wrap">
 
-                <p>
-                    Temukan berbagai inspirasi resep
-                    menggunakan produk TWFood.
-                </p>
-
+        {{-- ===== JUDUL ===== --}}
+        <div class="resep-head">
+            <a href="{{ url('/') }}" class="resep-back" aria-label="Kembali ke beranda">&larr;</a>
+            <div>
+                <h1>Resep</h1>
+                <p>Contoh ide masakan dari produk TW FOOD. Takaran bisa disesuaikan selera.</p>
             </div>
+        </div>
 
+        {{-- ===== DAFTAR RESEP ===== --}}
+        <div class="resep-grid">
 
-            <div class="content-list">
+            @forelse ($resep as $item)
+                @php
+                    $daftarBahan = $pecah($item->bahan);
+                    $daftarLangkah = $pecah($item->langkah_pembuatan);
 
-                @forelse ($resep as $item)
+                    // Foto: 1) foto resep (upload admin), 2) daftar $fotoResep di atas,
+                    //       3) foto produk TWFood yang dipakai di resep
+                    $fotoUrl = null;
+                    $fileResep = $fotoResep[strtolower(trim($item->judul))] ?? null;
+                    if ($item->foto && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->foto)) {
+                        $fotoUrl = asset('storage/' . $item->foto);
+                    } elseif ($fileResep && file_exists(public_path('images/' . $fileResep))) {
+                        $fotoUrl = asset('images/' . $fileResep);
+                    } else {
+                        foreach ($item->produk as $rp) {
+                            $nama = strtolower((string) data_get($rp, 'produk.nama_produk', ''));
+                            $file = $daftarFoto[$nama] ?? null;
+                            if ($file && file_exists(public_path('images/' . $file))) {
+                                $fotoUrl = asset('images/' . $file);
+                                break;
+                            }
+                        }
+                    }
 
-                    <div class="content-card">
+                    // Porsi: tampil kalau tabel resep punya kolom "porsi"
+                    $porsi = data_get($item, 'porsi');
+                @endphp
 
-                        <h3>
-                            {{ $item->judul }}
-                        </h3>
+                <article class="resep-card">
 
-
-                        @if ($item->deskripsi)
-                            <p>
-                                {{ $item->deskripsi }}
-                            </p>
+                    <div class="resep-img">
+                        @if ($fotoUrl)
+                            <img src="{{ $fotoUrl }}" alt="{{ $item->judul }}" loading="lazy"
+                                 onerror="this.style.display='none'">
+                        @else
+                            <span class="resep-emoji">🍲</span>
                         @endif
-
-
-                        @if ($item->waktu_memasak)
-                            <p>
-
-                                <strong>
-                                    Waktu memasak:
-                                </strong>
-
-                                {{ $item->waktu_memasak }}
-                                menit
-
-                            </p>
-                        @endif
-
-
-                        @if ($item->produk->count() > 0)
-                            <p>
-
-                                <strong>
-                                    Produk TWFood:
-                                </strong>
-
-                                @foreach ($item->produk as $produk)
-                                    {{ $produk->produk->nama_produk }}
-
-                                    @if (!$loop->last)
-                                        ,
-                                    @endif
-                                @endforeach
-
-                            </p>
-                        @endif
-
-
-                        <a href="{{ route('resep.detail', $item->id_resep) }}"
-                            class="button">
-                            Lihat Resep
-                        </a>
-
                     </div>
 
-                @empty
+                    <div class="resep-body">
+                        <h3>{{ $item->judul }}</h3>
 
-                    <div class="content-card">
-
-                        <h3>
-                            Belum Ada Resep
-                        </h3>
-
-                        <p>
-                            Data resep belum tersedia.
+                        <p class="resep-meta">
+                            @if ($item->waktu_memasak)
+                                <span>⏱ {{ $item->waktu_memasak }} menit</span>
+                            @endif
+                            @if ($porsi)
+                                <span>🍽 {{ $porsi }} porsi</span>
+                            @endif
                         </p>
 
+                        {{-- Bahan --}}
+                        @if (count($daftarBahan) > 0)
+                            <h4>Bahan</h4>
+                            <ul class="resep-bahan">
+                                @foreach ($daftarBahan as $b)
+                                    <li>{{ $b }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        {{-- Langkah (dibuka lewat tombol) --}}
+                        @if (count($daftarLangkah) > 0)
+                            <details class="resep-langkah">
+                                <summary>Lihat langkah</summary>
+                                <ol>
+                                    @foreach ($daftarLangkah as $l)
+                                        <li>{{ $l }}</li>
+                                    @endforeach
+                                </ol>
+                            </details>
+                        @endif
+
+                        <a href="{{ route('produk.public', ['resep' => $item->id_resep]) }}" class="resep-btn">Beli bahannya &rarr;</a>
                     </div>
 
-                @endforelse
-
-            </div>
+                </article>
+            @empty
+                <p class="resep-kosong">Belum ada resep.</p>
+            @endforelse
 
         </div>
 
     </section>
+</div>
 
-@endsection
+@include('partials.footer')
+
+</body>
+</html>

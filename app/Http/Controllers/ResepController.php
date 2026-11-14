@@ -1,22 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Resep;
-use Illuminate\Http\Request;
 
 class ResepController extends Controller
 {
-    public function index() {
-        $resep = Resep::with('produk')
-        ->orderBy('judul')
-        ->get();
-        return view('resep.index', compact('resep'));
-    }
-    public function show($id)
+    /**
+     * Halaman publik daftar resep (bahan dan langkah tampil di kartu).
+     */
+    public function index()
     {
-        $resep = Resep::with('produk')
-            ->findOrFail($id);
+        $resep = Resep::with('produk.produk')
+            ->orderBy('judul')
+            ->get();
 
-        return view('resep.show', compact('resep'));
+        return view('resep.index', compact('resep'));
     }
 }

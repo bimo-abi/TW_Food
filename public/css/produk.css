@@ -1,3 +1,7 @@
+/* public/css/produk.css — halaman Daftar Produk (sesuai Figma).
+   Warna diambil dari layout.css (var --tw-...), jadi harus dimuat setelah layout.css.
+   Semua class diawali "produk-" supaya tidak bentrok dengan CSS lain. */
+
 .produk-page {
     background: var(--tw-bg);
     color: var(--tw-tx);
@@ -30,6 +34,22 @@
     text-decoration: none;
 }
 .produk-back:hover { background: var(--tw-cream); }
+
+/* ---------- Info produk untuk resep ---------- */
+.produk-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: var(--tw-cream);
+    color: var(--tw-no);
+    border-radius: 14px;
+    padding: 14px 22px;
+    margin-bottom: 18px;
+    font-size: 14.5px;
+}
+.produk-info a { color: var(--tw-or); font-weight: 700; text-decoration: underline; }
 
 /* ---------- Cari ---------- */
 .produk-cari {

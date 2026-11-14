@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produk;
+use App\Models\Resep;
+use Illuminate\Http\Request;
 
 class ProdukController extends Controller
 {
-    
-    public function index()
+    /**
+     * Menampilkan katalog produk public.
+     * Kalau ada ?resep=ID (dari tombol "Beli bahannya"), hanya produk yang dipakai resep itu yang tampil.
+     */
+    public function index(Request $request)
     {
-        $produk = Produk::where('status_aktif', true)
+        $query = Produk::where('status_aktif', true)
             ->with([
                 'varian' => function ($query) {
                     $query->where('status_aktif', true)
@@ -20,10 +25,41 @@ class ProdukController extends Controller
                         ]);
                 }
             ])
-            ->orderBy('nama_produk')
-            ->get();
+            ->orderBy('nama_produk');
 
-        return view('produk.index', compact('produk'));
+        $resepDipilih = null;
+
+        if ($request->filled('resep')) {
+            $resepDipilih = Resep::with('produk')->find($request->query('resep'));
+
+            if ($resepDipilih) {
+                // 1) Produk yang dihubungkan lewat admin (tabel resep_produk)
+                $idProduk = $resepDipilih->produk->pluck('id_produk')->filter()->all();
+
+                // 2) Cadangan: kalau admin belum menghubungkan produk sama sekali,
+                //    cari produk yang namanya disebut di daftar bahan resep.
+                //    Contoh: bahan "1 sdt Kaldu Jamur Tiram dan Shitake" -> produk
+                //    "Kaldu Jamur Tiram dan Shitake".
+                $teksBahan = strtolower((string) $resepDipilih->bahan);
+
+                if (empty($idProduk) && $teksBahan !== '') {
+                    $semua = Produk::where('status_aktif', true)->get(['id_produk', 'nama_produk']);
+
+                    foreach ($semua as $p) {
+                        $nama = strtolower(trim($p->nama_produk));
+                        if ($nama !== '' && str_contains($teksBahan, $nama)) {
+                            $idProduk[] = $p->id_produk;
+                        }
+                    }
+                }
+
+                $query->whereIn('id_produk', array_unique($idProduk));
+            }
+        }
+
+        $produk = $query->get();
+
+        return view('produk.index', compact('produk', 'resepDipilih'));
     }
 
     /**

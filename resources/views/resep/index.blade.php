@@ -26,17 +26,20 @@
         'Stik Jantung Pisang'           => 'stik-jantung-pisang.jpg',
         'Kerupuk Jamur Tiram'           => 'kerupuk-jamur-tiram.jpg',
         'Mie Instan Jamur Tiram'        => 'mie-instan-jamur-tiram.jpg',
+        
     ];
     $daftarFoto = array_change_key_case($daftarFoto, CASE_LOWER);
 
     // Foto per resep (nama file di public/images/). Kiri: judul resep (huruf besar/kecil boleh beda).
     // Resep baru: tambah satu baris di sini, atau upload foto resep lewat admin.
     $fotoResep = [
-        'Sup Kuah Kaldu Jamur'    => 'kaldu-jamur-tiram-shitake.jpg',
+        'Sup Kuah Kaldu Jamur'    => 'sup-kuah-kaldu-jamur.png',
         'Nasi Goreng Kecap Jamur'  => 'nasi-goreng-kecap-jamur.jpg',
-        'Mie Kelor Tumis Sayur'   => 'mie-instan-jamur-tiram.jpg',
+        'Mie Kelor Tumis Sayur'   => 'mie-kelor-tumis-sayur.png',
         'Bubur dengan Abon Jamur' => 'bubur-abon-jamur.png',
         'Jamur Tiram Krispi Pedas' => 'jamur-tiram-krispi-pedas.jpg',
+        'Nasi Gurih dengan Abon Jamur Tiram' => 'nasi-gurih-abon-jamur-tiram.png'
+
     ];
     $fotoResep = array_change_key_case($fotoResep, CASE_LOWER);
 

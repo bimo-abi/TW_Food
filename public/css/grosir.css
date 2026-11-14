@@ -1,0 +1,196 @@
+/* public/css/grosir.css — halaman Harga Grosir (sesuai Figma).
+   Warna diambil dari layout.css (var --tw-...), jadi harus dimuat setelah layout.css.
+   Semua class diawali "grosir-" supaya tidak bentrok dengan CSS lain. */
+
+.grosir-page {
+    background: var(--tw-bg);
+    color: var(--tw-tx);
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    min-height: 70vh;
+    padding: 44px 0 80px;
+}
+
+.grosir-page *, .grosir-page *::before, .grosir-page *::after { box-sizing: border-box; }
+
+.grosir-wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 5vw;
+}
+
+/* ---------- Judul + tombol kembali ---------- */
+.grosir-head { display: flex; align-items: center; gap: 18px; margin-bottom: 34px; }
+.grosir-head h1 { font-size: 26px; font-weight: 700; margin: 0; line-height: 1.2; }
+.grosir-head p { margin: 2px 0 0; color: var(--tw-no); font-size: 15px; }
+
+.grosir-back {
+    flex: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--tw-or-l);
+    color: var(--tw-or);
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    text-decoration: none;
+}
+.grosir-back:hover { background: var(--tw-cream); }
+
+/* ---------- Tabel ---------- */
+.grosir-tabel-wrap {
+    border: 1px solid var(--tw-bd);
+    border-radius: 26px;
+    overflow: hidden;
+    background: var(--tw-sf);
+}
+
+.grosir-tabel { width: 100%; border-collapse: collapse; }
+
+.grosir-tabel thead th {
+    background: var(--tw-or-l);
+    color: var(--tw-or);
+    font-size: 18px;
+    font-weight: 700;
+    text-align: left;
+    padding: 22px 26px;
+}
+
+.grosir-tabel tbody td {
+    padding: 20px 26px;
+    font-size: 15.5px;
+    border-top: 1px solid var(--tw-bd);
+    vertical-align: middle;
+    line-height: 1.45;
+}
+.grosir-tabel tbody tr:first-child td { border-top: 0; }
+.grosir-tabel tbody tr:hover td { background: rgba(255, 255, 255, .02); }
+
+.grosir-tabel th:nth-child(1), .grosir-tabel td:nth-child(1) { width: 27%; }
+.grosir-nama { font-weight: 600; }
+
+.grosir-kosong td { text-align: center; color: var(--tw-mu); padding: 40px 26px; }
+
+.grosir-tanya { color: var(--tw-tx); text-decoration: none; border-bottom: 1px dashed var(--tw-mu); }
+.grosir-tanya:hover { color: var(--tw-or); border-color: var(--tw-or); }
+
+.grosir-catatan { margin: 16px 4px 0; color: var(--tw-no); font-size: 14px; }
+
+/* ---------- Langkah 1-2-3 ---------- */
+.grosir-langkah {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-top: 34px;
+}
+.grosir-kartu {
+    background: var(--tw-sf);
+    border: 1.5px solid var(--tw-bd);
+    border-radius: 18px;
+    padding: 20px 22px;
+}
+.grosir-kartu h3 { margin: 0 0 6px; font-size: 16.5px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+.grosir-kartu h3 span {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--tw-or);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+}
+.grosir-kartu p { margin: 0; color: var(--tw-mu); font-size: 13px; line-height: 1.55; }
+
+/* ---------- Tombol ---------- */
+.grosir-aksi { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 34px; }
+
+.grosir-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 14px;
+    padding: 15px 28px;
+    font: 700 15px "Plus Jakarta Sans", sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.grosir-btn-app {
+    color: #fff;
+    background: linear-gradient(180deg, #FF9A24 0%, #FF7A00 100%);
+    box-shadow: 0 6px 22px rgba(255, 122, 0, .35);
+}
+.grosir-btn-app:hover { background: linear-gradient(180deg, #FFA53B 0%, #FF8A1A 100%); box-shadow: 0 8px 26px rgba(255, 122, 0, .5); }
+
+.grosir-btn-wa { background: var(--tw-wa); color: #fff; }
+.grosir-btn-wa:hover { background: #178A45; }
+
+.grosir-btn-cetak { background: var(--tw-cream); color: var(--tw-no); }
+.grosir-btn-cetak:hover { background: var(--tw-or-l); }
+
+/* ---------- HP / tablet: tabel jadi kartu per produk ---------- */
+@media (max-width: 860px) {
+    .grosir-langkah { grid-template-columns: 1fr; gap: 14px; }
+}
+
+@media (max-width: 760px) {
+    .grosir-tabel-wrap { border: 0; background: transparent; border-radius: 0; }
+    .grosir-tabel, .grosir-tabel tbody, .grosir-tabel tr, .grosir-tabel td { display: block; width: 100%; }
+    .grosir-tabel thead { display: none; }
+
+    .grosir-tabel tbody tr {
+        background: var(--tw-sf);
+        border: 1px solid var(--tw-bd);
+        border-radius: 18px;
+        padding: 14px 18px;
+        margin-bottom: 14px;
+    }
+    .grosir-tabel tbody td, .grosir-tabel th:nth-child(1), .grosir-tabel td:nth-child(1) {
+        width: auto;
+        border: 0;
+        padding: 6px 0;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        text-align: right;
+        font-size: 14.5px;
+    }
+    .grosir-tabel tbody td::before {
+        content: attr(data-label);
+        color: var(--tw-mu);
+        text-align: left;
+        flex: none;
+    }
+    .grosir-tabel tbody td.grosir-nama {
+        font-size: 16px;
+        padding-bottom: 10px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid var(--tw-bd);
+    }
+    .grosir-tabel tbody td.grosir-nama::before { display: none; }
+    .grosir-tabel tbody tr:hover td { background: none; }
+    .grosir-kosong td { display: block; text-align: center; }
+    .grosir-kosong td::before { display: none; }
+
+    .grosir-head h1 { font-size: 22px; }
+    .grosir-aksi { flex-direction: column; }
+    .grosir-btn { width: 100%; }
+}
+
+/* ---------- Cetak / Simpan PDF ---------- */
+@media print {
+    .tw-nav, .tw-footer, .grosir-back, .grosir-aksi, .grosir-langkah { display: none !important; }
+    body, .grosir-page { background: #fff !important; color: #000 !important; padding: 0 !important; }
+    .grosir-wrap { max-width: none; padding: 0; }
+    .grosir-head p, .grosir-catatan, .grosir-nama, .grosir-tabel tbody td { color: #000 !important; }
+    .grosir-tabel-wrap { border: 1px solid #999; background: #fff; border-radius: 0; }
+    .grosir-tabel thead th { background: #eee !important; color: #000 !important; border-bottom: 2px solid #999; }
+    .grosir-tabel tbody td { border-top: 1px solid #ccc; padding: 10px 14px; }
+    .grosir-tanya { color: #000; border: 0; }
+    .grosir-tabel tbody tr { break-inside: avoid; }
+}

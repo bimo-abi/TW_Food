@@ -24,6 +24,7 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\ReturController;
 use App\Http\Controllers\PromosiController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\GrosirController;
 
 // //Dashboard
 // Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -507,6 +508,9 @@ Route::get('/bahan', [BahanController::class, 'index'])
 
 Route::get('/resep', [ResepController::class, 'index'])
     ->name('resep.public');
+
+Route::get('/grosir', [GrosirController::class, 'index'])
+    ->name('grosir.public');
 
 Route::get('/outlet', [OutletController::class, 'index'])
     ->name('outlet.public');

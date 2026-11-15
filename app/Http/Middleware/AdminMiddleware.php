@@ -13,15 +13,28 @@ class AdminMiddleware
         Request $request,
         Closure $next
     ): Response {
-
-        // Cek apakah pengguna sudah login
+        // Pengguna harus memiliki sesi login yang valid.
         if (!Auth::check()) {
             return redirect()->route('admin.login');
         }
 
-        // Cek apakah pengguna memiliki peran sebagai mitra
-        if (Auth::user()->peran !== 'mitra') {
+        $pengguna = Auth::user();
+
+        // TWFOOD saat ini menggunakan peran mitra untuk akses Admin Website.
+        if ($pengguna->peran !== 'mitra') {
             abort(403, 'Anda tidak memiliki akses ke halaman admin.');
+        }
+
+        // Akun mitra yang dinonaktifkan tidak boleh mengakses halaman maupun
+        // aksi Admin Website, termasuk pengelolaan retur dan pencatatan refund.
+        if (!$pengguna->status_aktif) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('admin.login')
+                ->withErrors(['email' => 'Akun Anda sedang dinonaktifkan.']);
         }
 
         return $next($request);

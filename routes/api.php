@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\RiwayatReturController;
 use App\Http\Controllers\Api\NotifikasiController;
 use App\Http\Controllers\Api\MitraPesananController;
 use App\Http\Controllers\Api\MitraReturController;
+use App\Http\Controllers\RefundRiwayatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,7 @@ Route::get('/outlet', [OutletController::class, 'index']);
 Route::post(
     '/midtrans/notifikasi',
     [PembayaranController::class, 'notification']
-);
+)->middleware('throttle:60,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pesanan/{id_pesanan}/pembayaran', [StatusPembayaranController::class, 'show']);
     Route::get('/retur', [RiwayatReturController::class, 'index']);
     Route::get('/retur/{id_retur}', [RiwayatReturController::class, 'show']);
+    Route::get('/retur/bukti/{id_bukti_retur}', [RiwayatReturController::class, 'downloadBukti'])->name('retur.bukti');
 
     // Notifikasi akun yang sedang login
     Route::get('/notifikasi', [NotifikasiController::class, 'index']);
@@ -88,6 +90,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/mitra/pesanan/{id_pesanan}/pengiriman', [MitraPesananController::class, 'updatePengiriman']);
     Route::get('/mitra/retur', [MitraReturController::class, 'index']);
     Route::get('/mitra/retur/{id_retur}', [MitraReturController::class, 'show']);
+    Route::patch('/mitra/retur/{id_retur}/keputusan', [MitraReturController::class, 'updateKeputusan']);
+    Route::patch('/mitra/retur/{id_retur}/instruksi-pengembalian', [MitraReturController::class, 'kirimInstruksiPengembalian']);
+    Route::patch('/mitra/retur/{id_retur}/barang-diterima', [MitraReturController::class, 'konfirmasiBarangDiterima']);
+    Route::patch('/mitra/retur/{id_retur}/pemeriksaan', [MitraReturController::class, 'periksaBarangRetur']);
+    Route::post('/mitra/refund/{id_refund}/manual', [MitraReturController::class, 'catatRefundManual']);
+    Route::get('/mitra/refund', [RefundRiwayatController::class, 'indexMitra'])->name('mitra.refund.index');
+    Route::get('/mitra/refund/{id_refund}', [RefundRiwayatController::class, 'showMitra'])->name('mitra.refund.show');
+    Route::get('/mitra/refund/percobaan/{id_percobaan_refund}/bukti', [RefundRiwayatController::class, 'downloadBuktiMitra'])->name('mitra.refund.bukti');
 
     // Pembayaran pesanan
     Route::post(

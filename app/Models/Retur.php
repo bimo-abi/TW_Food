@@ -21,11 +21,6 @@ class Retur extends Model
         'status_pengembalian_dana',
         'nominal_pengembalian',
         'diajukan_pada',
-        'disetujui_pada',
-        'barang_diterima_pada',
-        'diperiksa_pada',
-        'selesai_pada',
-        'alasan_penolakan',
     ];
 
     protected function casts(): array
@@ -33,10 +28,6 @@ class Retur extends Model
         return [
             'nominal_pengembalian' => 'integer',
             'diajukan_pada' => 'datetime',
-            'disetujui_pada' => 'datetime',
-            'barang_diterima_pada' => 'datetime',
-            'diperiksa_pada' => 'datetime',
-            'selesai_pada' => 'datetime',
         ];
     }
 

@@ -11,11 +11,20 @@ class BuktiRetur extends Model
 
     protected $primaryKey = 'id_bukti_retur';
 
+    protected $hidden = ['file_bukti'];
+
+    protected $appends = ['url_bukti'];
+
     protected $fillable = [
         'id_retur',
         'jenis_media',
         'file_bukti',
     ];
+
+    public function getUrlBuktiAttribute(): string
+    {
+        return route('retur.bukti', ['id_bukti_retur' => $this->id_bukti_retur]);
+    }
 
     public function retur(): BelongsTo
     {

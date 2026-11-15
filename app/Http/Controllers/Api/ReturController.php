@@ -25,13 +25,22 @@ class ReturController extends Controller
      */
     public function store(Request $request, int $id_pesanan)
     {
+        $pengguna = $request->user();
+
+        // Endpoint retur hanya boleh digunakan pelanggan aktif.
+        if (!$pengguna || !$pengguna->status_aktif || $pengguna->peran !== 'pelanggan') {
+            return response()->json([
+                'message' => 'Pengajuan retur hanya dapat dilakukan oleh akun pelanggan aktif.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'alasan_retur' => ['required', 'string', 'min:5', 'max:2000'],
             'detail_retur' => ['required', 'array', 'min:1'],
             'detail_retur.*.id_detail_pesanan' => ['required', 'integer', 'distinct'],
             'detail_retur.*.jumlah_diminta' => ['required', 'integer', 'min:1', 'max:65535'],
             'detail_retur.*.alasan_item' => ['nullable', 'string', 'max:1000'],
-            'bukti' => ['required', 'array', 'min:1'],
+            'bukti' => ['required', 'array', 'min:1', 'max:5'],
             'bukti.*' => [
                 'required',
                 'file',
@@ -40,12 +49,15 @@ class ReturController extends Controller
             ],
         ]);
 
-        $pengguna = $request->user();
+        // Maksimal 5 bukti, masing-masing 20 MB dan total 50 MB.
+        // Batas total mencegah satu pengajuan membebani penyimpanan server.
+        $totalUkuranBukti = collect($request->file('bukti', []))
+            ->sum(fn ($file) => (int) $file->getSize());
 
-        if (!$pengguna || !$pengguna->status_aktif) {
+        if ($totalUkuranBukti > 50 * 1024 * 1024) {
             return response()->json([
-                'message' => 'Akun tidak aktif atau belum login.',
-            ], 403);
+                'message' => 'Total ukuran seluruh bukti retur tidak boleh melebihi 50 MB.',
+            ], 422);
         }
 
         $nomorRetur = 'RTR-' . now()->format('Ymd') . '-' . Str::upper(Str::random(8));
@@ -105,14 +117,52 @@ class ReturController extends Controller
                     ];
                 }
 
-                $statusReturAktif = [
+                // PRD v1.6 membatasi satu permintaan retur aktif per pesanan.
+                // Baris pesanan sudah dikunci dengan lockForUpdate(), sehingga
+                // dua pengajuan bersamaan untuk pesanan yang sama tidak lolos.
+                $adaReturAktif = Retur::query()
+                    ->where('id_pesanan', $pesanan->id_pesanan)
+                    ->whereIn('status_retur', [
+                        'diajukan',
+                        'diproses',
+                        'menunggu_persetujuan',
+                        'disetujui',
+                        'menunggu_pengembalian_barang',
+                        'barang_diterima',
+                        'sedang_diperiksa',
+                    ])
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($adaReturAktif) {
+                    return [
+                        'error' => 'Pesanan ini masih memiliki pengajuan retur aktif. Selesaikan atau tunggu keputusan pengajuan tersebut sebelum mengajukan retur baru.',
+                        'status' => 422,
+                    ];
+                }
+
+                // Pengajuan yang masih menunggu keputusan Mitra menahan
+                // jumlah yang diminta. Setelah disetujui, yang dihitung
+                // hanya jumlah_disetujui, bukan seluruh jumlah_diminta.
+                // Retur ditolak/dibatalkan tidak mengurangi kuota retur.
+                $statusReturMenungguKeputusan = [
+                    'diajukan',
+                    'diproses',
                     'menunggu_persetujuan',
+                ];
+
+                $statusReturSudahDisetujui = [
                     'disetujui',
                     'menunggu_pengembalian_barang',
                     'barang_diterima',
                     'sedang_diperiksa',
                     'selesai',
                 ];
+
+                $statusReturPenghitung = array_merge(
+                    $statusReturMenungguKeputusan,
+                    $statusReturSudahDisetujui
+                );
 
                 $detailIds = collect($validated['detail_retur'])
                     ->pluck('id_detail_pesanan')
@@ -137,12 +187,23 @@ class ReturController extends Controller
                     $jumlahDiminta = (int) $item['jumlah_diminta'];
                     $detail = $detailPesanan->get($idDetail);
 
-                    $jumlahSebelumnya = (int) DetailRetur::whereHas('retur', function ($query) use ($pesanan, $statusReturAktif) {
-                        $query->where('id_pesanan', $pesanan->id_pesanan)
-                            ->whereIn('status_retur', $statusReturAktif);
-                    })
-                        ->where('id_detail_pesanan', $idDetail)
-                        ->sum(DB::raw('COALESCE(jumlah_diminta, jumlah_diretur)'));
+                    $statusDisetujuiSql = implode(',', array_map(
+                        fn ($status) => DB::getPdo()->quote($status),
+                        $statusReturSudahDisetujui
+                    ));
+
+                    $jumlahSebelumnya = (int) DB::table('detail_retur')
+                        ->join('retur', 'retur.id_retur', '=', 'detail_retur.id_retur')
+                        ->where('retur.id_pesanan', $pesanan->id_pesanan)
+                        ->where('detail_retur.id_detail_pesanan', $idDetail)
+                        ->whereIn('retur.status_retur', $statusReturPenghitung)
+                        ->sum(DB::raw(
+                            'CASE '
+                            . 'WHEN retur.status_retur IN (' . $statusDisetujuiSql . ') '
+                            . 'THEN COALESCE(detail_retur.jumlah_disetujui, detail_retur.jumlah_diminta, detail_retur.jumlah_diretur) '
+                            . 'ELSE COALESCE(detail_retur.jumlah_diminta, detail_retur.jumlah_diretur) '
+                            . 'END'
+                        ));
 
                     $sisaJumlah = (int) $detail->jumlah - $jumlahSebelumnya;
 
@@ -181,7 +242,7 @@ class ReturController extends Controller
                 }
 
                 foreach ($request->file('bukti', []) as $file) {
-                    $path = $file->store('retur/' . $nomorRetur, 'public');
+                    $path = $file->store('retur/' . $nomorRetur, 'local');
                     if (!$path) {
                         throw new \RuntimeException('Gagal menyimpan file bukti retur.');
                     }
@@ -243,7 +304,7 @@ class ReturController extends Controller
 
             if (isset($hasil['error'])) {
                 foreach ($fileTersimpan as $path) {
-                    Storage::disk('public')->delete($path);
+                    Storage::disk('local')->delete($path);
                 }
 
                 return response()->json([
@@ -257,7 +318,7 @@ class ReturController extends Controller
             ], 201);
         } catch (Throwable $e) {
             foreach ($fileTersimpan as $path) {
-                Storage::disk('public')->delete($path);
+                Storage::disk('local')->delete($path);
             }
 
             report($e);

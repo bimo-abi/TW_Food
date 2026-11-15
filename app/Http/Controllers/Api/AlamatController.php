@@ -74,20 +74,35 @@ class AlamatController extends Controller
             'kode_pos' => [
                 'required',
                 'string',
+                'max:10',
             ],
+            'kode_provinsi' => ['nullable', 'string', 'regex:/^\d{2}$/'],
+            'kode_kabupaten_kota' => ['nullable', 'string', 'regex:/^\d{2}\.\d{2}$/'],
+            'kode_kecamatan' => ['nullable', 'string', 'regex:/^\d{2}\.\d{2}\.\d{2}$/'],
+            'kode_desa_kelurahan' => ['nullable', 'string', 'regex:/^\d{2}\.\d{2}\.\d{2}\.\d{4}$/'],
+            'kabupaten_kota' => ['nullable', 'string', 'max:100'],
+            'kecamatan' => ['nullable', 'string', 'max:100'],
+            'desa_kelurahan' => ['nullable', 'string', 'max:100'],
             'latitude' => [
                 'nullable',
                 'numeric',
+                'between:-90,90',
             ],
             'longitude' => [
                 'nullable',
                 'numeric',
+                'between:-180,180',
             ],
             'alamat_utama' => [
                 'sometimes',
                 'boolean',
             ],
         ]);
+
+        $this->validateAdministrativeRegion($validated);
+
+        // Nama wilayah tingkat kabupaten/kota menjadi sumber untuk kolom kota lama.
+        $validated['kota'] = $validated['kabupaten_kota'] ?? $validated['kota'];
 
         $idPengguna = $request->user()->id_pengguna;
 
@@ -194,6 +209,13 @@ class AlamatController extends Controller
                     $validated['provinsi'],
                     'kode_pos' =>
                     $validated['kode_pos'],
+                    'kode_provinsi' => $validated['kode_provinsi'] ?? null,
+                    'kode_kabupaten_kota' => $validated['kode_kabupaten_kota'] ?? null,
+                    'kode_kecamatan' => $validated['kode_kecamatan'] ?? null,
+                    'kode_desa_kelurahan' => $validated['kode_desa_kelurahan'] ?? null,
+                    'kabupaten_kota' => $validated['kabupaten_kota'] ?? $validated['kota'],
+                    'kecamatan' => $validated['kecamatan'] ?? null,
+                    'desa_kelurahan' => $validated['desa_kelurahan'] ?? null,
                     'latitude' =>
                     $validated['latitude'] ?? null,
                     'longitude' =>
@@ -274,20 +296,35 @@ class AlamatController extends Controller
             'kode_pos' => [
                 'required',
                 'string',
+                'max:10',
             ],
+            'kode_provinsi' => ['nullable', 'string', 'regex:/^\d{2}$/'],
+            'kode_kabupaten_kota' => ['nullable', 'string', 'regex:/^\d{2}\.\d{2}$/'],
+            'kode_kecamatan' => ['nullable', 'string', 'regex:/^\d{2}\.\d{2}\.\d{2}$/'],
+            'kode_desa_kelurahan' => ['nullable', 'string', 'regex:/^\d{2}\.\d{2}\.\d{2}\.\d{4}$/'],
+            'kabupaten_kota' => ['nullable', 'string', 'max:100'],
+            'kecamatan' => ['nullable', 'string', 'max:100'],
+            'desa_kelurahan' => ['nullable', 'string', 'max:100'],
             'latitude' => [
                 'nullable',
                 'numeric',
+                'between:-90,90',
             ],
             'longitude' => [
                 'nullable',
                 'numeric',
+                'between:-180,180',
             ],
             'alamat_utama' => [
                 'sometimes',
                 'boolean',
             ],
         ]);
+
+        $this->validateAdministrativeRegion($validated);
+
+        // Nama wilayah tingkat kabupaten/kota menjadi sumber untuk kolom kota lama.
+        $validated['kota'] = $validated['kabupaten_kota'] ?? $validated['kota'];
 
         $idPengguna = $request->user()->id_pengguna;
 
@@ -379,10 +416,17 @@ class AlamatController extends Controller
                     $validated['provinsi'],
                     'kode_pos' =>
                     $validated['kode_pos'],
-                    'latitude' =>
-                    $validated['latitude'] ?? null,
-                    'longitude' =>
-                    $validated['longitude'] ?? null,
+                    // Pertahankan metadata wilayah/koordinat jika request berasal
+                    // dari aplikasi lama yang belum mengirim field baru.
+                    'kode_provinsi' => $validated['kode_provinsi'] ?? $alamat->kode_provinsi,
+                    'kode_kabupaten_kota' => $validated['kode_kabupaten_kota'] ?? $alamat->kode_kabupaten_kota,
+                    'kode_kecamatan' => $validated['kode_kecamatan'] ?? $alamat->kode_kecamatan,
+                    'kode_desa_kelurahan' => $validated['kode_desa_kelurahan'] ?? $alamat->kode_desa_kelurahan,
+                    'kabupaten_kota' => $validated['kabupaten_kota'] ?? $alamat->kabupaten_kota ?? $validated['kota'],
+                    'kecamatan' => $validated['kecamatan'] ?? $alamat->kecamatan,
+                    'desa_kelurahan' => $validated['desa_kelurahan'] ?? $alamat->desa_kelurahan,
+                    'latitude' => $validated['latitude'] ?? $alamat->latitude,
+                    'longitude' => $validated['longitude'] ?? $alamat->longitude,
                     'alamat_utama' =>
                     $alamatUtama,
                 ]);
@@ -463,5 +507,52 @@ class AlamatController extends Controller
         return response()->json([
             'message' => 'Alamat berhasil dihapus.',
         ], 200);
+    }
+
+    /**
+     * Kode wilayah harus dikirim lengkap sebagai satu hierarki.
+     * Pemeriksaan ini memvalidasi bentuk kode; verifikasi kecocokan
+     * nama dan hubungan parent-child dengan sumber wilayah dilakukan
+     * pada tahap integrasi layanan wilayah berikutnya.
+     */
+    private function validateAdministrativeRegion(array $validated): void
+    {
+        $keys = [
+            'kode_provinsi',
+            'kode_kabupaten_kota',
+            'kode_kecamatan',
+            'kode_desa_kelurahan',
+        ];
+
+        $provided = collect($keys)
+            ->filter(fn (string $key) => !empty($validated[$key] ?? null))
+            ->count();
+
+        if ($provided !== 0 && $provided !== count($keys)) {
+            throw ValidationException::withMessages([
+                'kode_wilayah' => [
+                    'Kode provinsi, kabupaten/kota, kecamatan, dan desa/kelurahan harus dikirim lengkap.',
+                ],
+            ]);
+        }
+
+        if ($provided === count($keys)) {
+            $province = $validated['kode_provinsi'];
+            $regency = $validated['kode_kabupaten_kota'];
+            $district = $validated['kode_kecamatan'];
+            $village = $validated['kode_desa_kelurahan'];
+
+            if (
+                !str_starts_with($regency, $province . '.') ||
+                !str_starts_with($district, $regency . '.') ||
+                !str_starts_with($village, $district . '.')
+            ) {
+                throw ValidationException::withMessages([
+                    'kode_wilayah' => [
+                        'Hierarki kode wilayah tidak saling berhubungan.',
+                    ],
+                ]);
+            }
+        }
     }
 }

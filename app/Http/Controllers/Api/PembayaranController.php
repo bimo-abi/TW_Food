@@ -563,7 +563,8 @@ class PembayaranController extends Controller
     }
 
     /**
-     * Menerima notifikasi Midtrans dan memverifikasi status transaksi.
+     * Menerima notifikasi Midtrans dan memverifikasi transaksi melalui Status API.
+     * Payload webhook hanya menjadi pemicu rekonsiliasi, bukan bukti pembayaran.
      */
     public function notification(Request $request)
     {
@@ -572,53 +573,19 @@ class PembayaranController extends Controller
         $orderId = $payload['order_id'] ?? null;
         $statusCode = $payload['status_code'] ?? null;
         $grossAmount = $payload['gross_amount'] ?? null;
-        $signatureKey = $payload['signature_key'] ?? null;
 
         if (
             !is_string($orderId) ||
             $orderId === '' ||
             !is_scalar($statusCode) ||
-            !is_scalar($grossAmount) ||
-            !is_string($signatureKey) ||
-            $signatureKey === ''
+            !is_scalar($grossAmount)
         ) {
             return response()->json([
                 'message' => 'Data notifikasi tidak lengkap atau formatnya tidak valid.',
             ], 400);
         }
 
-        /*
-         * Validasi signature dari notifikasi Midtrans.
-         */
-        $serverKey = config('services.midtrans.server_key');
-
-        if (!$serverKey) {
-            Log::error('Server key Midtrans belum dikonfigurasi.');
-
-            return response()->json([
-                'message' => 'Konfigurasi pembayaran belum tersedia.',
-            ], 500);
-        }
-
-
-        $expectedSignature = hash(
-            'sha512',
-            $orderId . $statusCode . $grossAmount . $serverKey
-        );
-
-        if (
-            !is_string($signatureKey) ||
-            !hash_equals($expectedSignature, $signatureKey)
-        ) {
-            Log::warning('Signature notifikasi Midtrans tidak valid.', [
-                'order_id' => $orderId,
-            ]);
-
-            return response()->json([
-                'message' => 'Signature notifikasi tidak valid.',
-            ], 403);
-        }
-
+        // Hanya transaksi yang sudah tercatat di database yang boleh direkonsiliasi.
         $pembayaran = Pembayaran::where(
             'id_transaksi',
             $orderId
@@ -634,9 +601,7 @@ class PembayaranController extends Controller
             ], 404);
         }
 
-        /*
-         * Cocokkan nominal notifikasi dengan nominal transaksi lokal.
-         */
+        // Cocokkan nominal notifikasi dengan catatan transaksi lokal.
         $nominalLokal = number_format(
             (float) $pembayaran->jumlah_pembayaran,
             2,
@@ -662,12 +627,14 @@ class PembayaranController extends Controller
         }
 
         /*
-         * Status API dan seluruh dampak bisnis diproses oleh service bersama.
-         * Rekonsiliasi Artisan memanggil service yang sama tanpa membuat webhook palsu.
+         * Status API Midtrans menjadi sumber verifikasi transaksi.
+         * Service memeriksa order_id, gross_amount, currency, merchant_id,
+         * status gateway, dan menerapkan perubahan secara idempoten.
          */
         try {
-            $hasilRekonsiliasi = app(\App\Services\MidtransPaymentReconciliationService::class)
-                ->reconcile($pembayaran, $payload);
+            $hasilRekonsiliasi = app(
+                \App\Services\MidtransPaymentReconciliationService::class
+            )->reconcile($pembayaran, $payload);
         } catch (Throwable $e) {
             Log::error('Rekonsiliasi pembayaran melalui webhook gagal.', [
                 'order_id' => $orderId,
@@ -679,15 +646,19 @@ class PembayaranController extends Controller
             ], 503);
         }
 
-        if ($hasilRekonsiliasi['status'] === 'invalid') {
+        if (($hasilRekonsiliasi['status'] ?? null) === 'invalid') {
             return response()->json([
-                'message' => $hasilRekonsiliasi['message'],
+                'message' => $hasilRekonsiliasi['message'] ?? 'Data transaksi tidak valid.',
             ], 422);
         }
 
-
         return response()->json([
-            'message' => 'Notifikasi pembayaran berhasil diverifikasi dan diproses.',
+            'message' => 'Notifikasi diterima dan transaksi diverifikasi melalui Midtrans Status API.',
+            'data' => [
+                'status' => $hasilRekonsiliasi['status'] ?? null,
+                'status_pembayaran' => $hasilRekonsiliasi['payment_status'] ?? null,
+                'status_gateway' => $hasilRekonsiliasi['gateway_status'] ?? null,
+            ],
         ], 200);
     }
 }

@@ -22,6 +22,7 @@ use App\Http\Controllers\AdminKategoriKontenController;
 use App\Http\Controllers\AdminVerifikasiPelangganController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\ReturController;
+use App\Http\Controllers\RefundRiwayatController;
 use App\Http\Controllers\PromosiController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\GrosirController;
@@ -483,6 +484,22 @@ Route::get('/admin/pembayaran', [PembayaranController::class, 'index'])
 // Admin Retur
 Route::get('/admin/retur', [ReturController::class, 'index'])
     ->name('admin.retur.index')
+    ->middleware('admin');
+
+Route::post('/admin/refund/{id_refund}/manual', [ReturController::class, 'catatRefundManual'])
+    ->name('admin.refund.manual')
+    ->middleware('admin');
+
+Route::get('/admin/refund', [RefundRiwayatController::class, 'indexAdmin'])
+    ->name('admin.refund.index')
+    ->middleware('admin');
+
+Route::get('/admin/refund/{id_refund}', [RefundRiwayatController::class, 'showAdmin'])
+    ->name('admin.refund.show')
+    ->middleware('admin');
+
+Route::get('/admin/refund/percobaan/{id_percobaan_refund}/bukti', [RefundRiwayatController::class, 'downloadBuktiAdmin'])
+    ->name('admin.refund.bukti')
     ->middleware('admin');
 
 // Admin Promosi

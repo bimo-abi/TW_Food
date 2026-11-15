@@ -21,6 +21,7 @@ class DetailRetur extends Model
         'jumlah_disetujui',
         'diskon_dialokasikan',
         'status_kelayakan_stok',
+        'jumlah_layak_dijual',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class DetailRetur extends Model
             'jumlah_disetujui' => 'integer',
             'nominal_refund' => 'integer',
             'diskon_dialokasikan' => 'integer',
+            'jumlah_layak_dijual' => 'integer',
         ];
     }
 

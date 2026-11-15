@@ -12,11 +12,9 @@ use App\Models\ReservasiStok;
 use App\Models\RiwayatAktivitasTransaksi;
 use App\Models\VarianProduk;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
-use Throwable;
 
 class PesananController extends Controller
 {
@@ -180,13 +178,17 @@ class PesananController extends Controller
                 }
 
                 if ($isPreOrder) {
-                    $tanggalMulai = $varian->tanggal_mulai_pre_order;
-                    $tanggalSelesai = $varian->tanggal_selesai_pre_order;
-                    $hariIni = today();
+                    // Kolom tanggal pada model VarianProduk menggunakan cast `date`.
+                    // Bandingkan string ISO (YYYY-MM-DD) agar batas tanggal inklusif
+                    // dan tidak bergantung pada perbandingan objek Carbon di Intelephense.
+                    $tanggalMulai = $varian->getRawOriginal('tanggal_mulai_pre_order');
+                    $tanggalSelesai = $varian->getRawOriginal('tanggal_selesai_pre_order');
+                    $hariIni = today()->toDateString();
 
-                    $periodeAktif = $tanggalMulai && $tanggalSelesai
-                        && $hariIni->greaterThanOrEqualTo($tanggalMulai->copy()->startOfDay())
-                        && $hariIni->lessThanOrEqualTo($tanggalSelesai->copy()->startOfDay());
+                    $periodeAktif = $tanggalMulai !== null
+                        && $tanggalSelesai !== null
+                        && $hariIni >= (string) $tanggalMulai
+                        && $hariIni <= (string) $tanggalSelesai;
 
                     if (!$varian->tersedia_pre_order || !$periodeAktif) {
                         throw ValidationException::withMessages([
@@ -262,6 +264,15 @@ class PesananController extends Controller
                 'kota_saat_pesan' => $alamat?->kota,
                 'provinsi_saat_pesan' => $alamat?->provinsi,
                 'kode_pos_saat_pesan' => $alamat?->kode_pos,
+                'kode_provinsi_saat_pesan' => $alamat?->kode_provinsi,
+                'kode_kabupaten_kota_saat_pesan' => $alamat?->kode_kabupaten_kota,
+                'kode_kecamatan_saat_pesan' => $alamat?->kode_kecamatan,
+                'kode_desa_kelurahan_saat_pesan' => $alamat?->kode_desa_kelurahan,
+                'kabupaten_kota_saat_pesan' => $alamat?->kabupaten_kota,
+                'kecamatan_saat_pesan' => $alamat?->kecamatan,
+                'desa_kelurahan_saat_pesan' => $alamat?->desa_kelurahan,
+                'latitude_saat_pesan' => $alamat?->latitude,
+                'longitude_saat_pesan' => $alamat?->longitude,
                 'saluran_pesanan' => $saluranPesanan,
                 'jenis_pesanan' => $validated['jenis_pesanan'],
                 'jenis_pemenuhan' => $validated['jenis_pemenuhan'],

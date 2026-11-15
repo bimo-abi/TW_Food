@@ -55,16 +55,26 @@ class MidtransPaymentReconciliationService
 
         $nominalLokal = number_format((float) $pembayaran->jumlah_pembayaran, 2, '.', '');
 
-        // Payload hanya berasal dari webhook asli yang telah lolos validasi signature.
+
+        // Payload webhook bukan bukti pembayaran.
+        // Cocokkan identitas dan nominalnya dengan transaksi lokal.
         if ($payload !== null) {
+            $payloadOrderId = $payload['order_id'] ?? null;
             $grossAmount = $payload['gross_amount'] ?? null;
+
             if (
+                !is_string($payloadOrderId) ||
+                $payloadOrderId !== $orderId ||
                 !is_scalar($grossAmount) ||
                 number_format((float) $grossAmount, 2, '.', '') !== $nominalLokal
             ) {
-                return ['status' => 'invalid', 'message' => 'Nominal transaksi tidak cocok.'];
+                return [
+                    'status' => 'invalid',
+                    'message' => 'Identitas atau nominal notifikasi tidak cocok.',
+                ];
             }
         }
+
 
         $merchantId = config('services.midtrans.merchant_id');
         $gatewayChecks = [
@@ -183,8 +193,15 @@ class MidtransPaymentReconciliationService
                 : [];
 
             if ($payload !== null) {
-                $responsGateway['notifikasi'] = $payload;
+                // Simpan hanya informasi minimum, bukan seluruh payload webhook.
+                $responsGateway['notifikasi'] = [
+                    'order_id' => $payload['order_id'] ?? null,
+                    'status_code' => $payload['status_code'] ?? null,
+                    'gross_amount' => $payload['gross_amount'] ?? null,
+                    'diterima_pada' => now()->toDateTimeString(),
+                ];
             }
+
             $responsGateway['status_gateway'] = $statusGateway;
             if ($statusPembayaran !== 'pending') {
                 unset(

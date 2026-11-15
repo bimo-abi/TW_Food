@@ -7,7 +7,6 @@ use App\Models\Pembayaran;
 use App\Models\Pesanan;
 use App\Models\Refund;
 use App\Models\ReservasiStok;
-use App\Services\TransaksiIntegrasiService;
 use App\Models\RiwayatAktivitasTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -371,11 +370,8 @@ class AdminPesananController extends Controller
                 'disetujui_pada' => now(),
             ]);
 
-            // Panggilan gateway dijalankan setelah transaksi pembatalan commit.
-            // Catatan refund tetap tersimpan walaupun gateway sedang tidak tersedia.
-            DB::afterCommit(function () use ($refund) {
-                app(TransaksiIntegrasiService::class)->prosesRefund($refund->id_refund);
-            });
+            // Refund diproses manual oleh Admin melalui Dashboard Midtrans.
+            // Laravel hanya menyimpan permintaan dan menyinkronkan konfirmasi gateway.
 
             $totalRefundDiajukan += $nominalRefund;
         }

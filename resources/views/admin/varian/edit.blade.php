@@ -151,7 +151,9 @@
                                id="tanggal_mulai_pre_order"
                                name="tanggal_mulai_pre_order"
                                value="{{ old('tanggal_mulai_pre_order', optional($varian->tanggal_mulai_pre_order)->format('Y-m-d')) }}"
-                               min="{{ now()->format('Y-m-d') }}"
+                               min="{{ optional($varian->tanggal_mulai_pre_order)->isPast()
+                                    ? optional($varian->tanggal_mulai_pre_order)->format('Y-m-d')
+                                    : now()->format('Y-m-d') }}"
                                class="form-control @error('tanggal_mulai_pre_order') is-invalid @enderror">
                         @error('tanggal_mulai_pre_order')
                             <div class="invalid-feedback">{{ $message }}</div>

@@ -17,33 +17,6 @@
         </div>
     </div>
 
-    {{-- ===== Dummy data (ganti saat transaksi sudah final) ===== --}}
-    @php
-        $dummyPenjualanHariIni = 1250000;
-
-        $dummyProdukTerlaris = [
-            ['nama' => 'Kaldu Jamur Tiram dan Shitake', 'terjual' => 48],
-            ['nama' => 'Kaldu Jamur Tiram MPASI', 'terjual' => 35],
-            ['nama' => 'Kerupuk Jamur Tiram', 'terjual' => 22],
-        ];
-
-        $dummySales = [
-            'minggu' => [
-                'labels' => ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                'data' => [420000, 380000, 510000, 465000, 620000, 780000, 690000],
-            ],
-            'bulan' => [
-                'labels' => ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
-                'data' => [2850000, 3120000, 2640000, 3390000],
-            ],
-            'tahun' => [
-                'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                'data' => [18200000, 16500000, 19800000, 21000000, 20100000, 22400000,
-                    23900000, 21700000, 24300000, 25100000, 0, 0],
-            ],
-        ];
-    @endphp
-
     {{-- ===== KPI ===== --}}
     <div class="row row-cards mb-3">
         <div class="col-sm-6 col-lg-3">
@@ -67,8 +40,8 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <div class="text-secondary">Penjualan Hari Ini</div>
-                            <div class="h1 mb-0">Rp {{ number_format($dummyPenjualanHariIni, 0, ',', '.') }}</div>
+                            <div class="text-secondary">Pembayaran Diterima Hari Ini</div>
+                            <div class="h1 mb-0">Rp {{ number_format($pembayaranHariIni, 0, ',', '.') }}</div>
                         </div>
                         <div class="col-auto">
                             <span class="bg-green-lt avatar"><i class="ti ti-cash icon"></i></span>
@@ -148,16 +121,18 @@
             <div class="card h-100">
                 <div class="card-header">
                     <h3 class="card-title">Produk Terlaris</h3>
-                    <div class="card-actions text-secondary small">Data contoh</div>
+                    
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled mb-0">
-                        @foreach ($dummyProdukTerlaris as $produk)
+                        @forelse ($produkTerlaris as $produk)
                             <li class="d-flex align-items-center justify-content-between py-1">
-                                <span>{{ $produk['nama'] }}</span>
-                                <span class="text-secondary">{{ $produk['terjual'] }} terjual</span>
+                                <span>{{ $produk->nama_produk_saat_pesan }}</span>
+                                <span class="text-secondary">{{ (int) $produk->total_terjual }} terjual</span>
                             </li>
-                        @endforeach
+                        @empty
+                            <li class="text-secondary">Belum ada produk dari pesanan yang pembayarannya berhasil.</li>
+                        @endforelse
                     </ul>
                 </div>
             </div>
@@ -269,7 +244,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sales = @json($dummySales);
+            const sales = @json($salesChart);
             const canvas = document.getElementById('salesChart');
             const select = document.getElementById('salesRange');
             if (!canvas || !select || typeof Chart === 'undefined') return;

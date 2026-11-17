@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -199,4 +200,43 @@ class AuthController extends Controller
             ],
         ], 200);
     }
+
+    /**
+     * Memperbarui data profil dasar pengguna yang sedang login.
+     */
+    public function updateProfile(Request $request)
+    {
+        $pengguna = $request->user();
+
+        $validated = $request->validate([
+            'nama' => ['required', 'string', 'max:100'],
+            'email' => [
+                'required',
+                'email',
+                'max:150',
+                Rule::unique('pengguna', 'email')->ignore(
+                    $pengguna->id_pengguna,
+                    'id_pengguna'
+                ),
+            ],
+            'nomor_telepon' => ['required', 'string', 'max:20'],
+        ]);
+
+        $pengguna->update($validated);
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'data' => [
+                'id_pengguna' => $pengguna->id_pengguna,
+                'nama' => $pengguna->nama,
+                'email' => $pengguna->email,
+                'nomor_telepon' => $pengguna->nomor_telepon,
+                'peran' => $pengguna->peran,
+                'jenis_pelanggan' => $pengguna->jenis_pelanggan,
+                'status_aktif' => $pengguna->status_aktif,
+                'status_verifikasi' => $pengguna->status_verifikasi,
+            ],
+        ], 200);
+    }
+
 }

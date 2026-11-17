@@ -307,7 +307,11 @@ class AdminVarianProdukController extends Controller
                     'nullable',
                     Rule::requiredIf($preOrderAktif),
                     'date',
-                    'after_or_equal:today',
+                    Rule::when(
+                        $request->input('tanggal_mulai_pre_order') !==
+                            optional($varian->tanggal_mulai_pre_order)->format('Y-m-d'),
+                        ['after_or_equal:today']
+                    ),
                 ],
 
                 'tanggal_selesai_pre_order' => [

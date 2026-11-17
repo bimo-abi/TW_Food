@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use App\Models\Notifikasi;
 use App\Models\Pembayaran;
 use App\Models\PengaturanMitra;
@@ -203,6 +204,20 @@ class MidtransPaymentReconciliationService
             }
 
             $responsGateway['status_gateway'] = $statusGateway;
+
+            // Simpan waktu kedaluwarsa resmi dari Midtrans, bukan perkiraan lokal.
+            $expiryTimeGateway = $statusGateway['expiry_time'] ?? null;
+            if (is_string($expiryTimeGateway) && trim($expiryTimeGateway) !== '') {
+                try {
+                    $pembayaran->waktu_kadaluarsa = Carbon::parse($expiryTimeGateway);
+                } catch (\Throwable $e) {
+                    Log::warning('Format expiry_time Midtrans tidak dapat dibaca.', [
+                        'order_id' => $pembayaran->id_transaksi,
+                        'expiry_time' => $expiryTimeGateway,
+                    ]);
+                }
+            }
+
             if ($statusPembayaran !== 'pending') {
                 unset(
                     $responsGateway['status_pembuatan_transaksi'],

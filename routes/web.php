@@ -486,6 +486,14 @@ Route::get('/admin/retur', [ReturController::class, 'index'])
     ->name('admin.retur.index')
     ->middleware('admin');
 
+Route::get('/admin/retur/{id_retur}', [ReturController::class, 'show'])
+    ->name('admin.retur.show')
+    ->middleware('admin');
+
+Route::get('/admin/retur/bukti/{id_bukti_retur}', [ReturController::class, 'downloadBukti'])
+    ->name('admin.retur.bukti')
+    ->middleware('admin');
+
 Route::post('/admin/refund/{id_refund}/manual', [ReturController::class, 'catatRefundManual'])
     ->name('admin.refund.manual')
     ->middleware('admin');

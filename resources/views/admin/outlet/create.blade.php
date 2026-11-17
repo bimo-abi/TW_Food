@@ -116,6 +116,30 @@
                         @enderror
                     </div>
 
+                    <div class="col-12">
+                        <label for="link_google_maps" class="form-label">
+                            Link Google Maps
+                        </label>
+
+                        <input
+                            type="url"
+                            name="link_google_maps"
+                            id="link_google_maps"
+                            class="form-control @error('link_google_maps') is-invalid @enderror"
+                            value="{{ old('link_google_maps') }}"
+                            maxlength="2048"
+                            placeholder="https://maps.app.goo.gl/..."
+                        >
+
+                        <small class="form-hint">
+                            Tempelkan tautan berbagi lokasi outlet dari Google Maps. Kolom ini opsional.
+                        </small>
+
+                        @error('link_google_maps')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <div class="col-md-6">
                         <label for="foto" class="form-label">
                             Foto Outlet

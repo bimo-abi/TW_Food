@@ -302,19 +302,25 @@
                     <span>Produk</span>
                 </a>
 
-                {{-- 4. Pesanan --}}
-                <a href="{{ route('admin.pesanan.index') }}"
-                    class="{{ request()->routeIs('admin.pesanan.*') ? 'active' : '' }}">
+                {{-- 4. Pesanan dipisahkan berdasarkan tipe pemenuhan --}}
+                <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => 'reguler']) }}"
+                    class="{{ request()->routeIs('admin.pesanan.*') && request('jenis_pemenuhan', 'reguler') === 'reguler' ? 'active' : '' }}">
                     <i class="ti ti-shopping-cart"></i>
-                    <span>Pesanan</span>
+                    <span>Pesanan Reguler</span>
+                </a>
+
+                <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => 'pre_order']) }}"
+                    class="{{ request()->routeIs('admin.pesanan.*') && request('jenis_pemenuhan') === 'pre_order' ? 'active' : '' }}">
+                    <i class="ti ti-calendar-event"></i>
+                    <span>Pesanan Pre-order</span>
                 </a>
 
                 {{-- 5. Pembayaran --}}
-                <a href="{{ route('admin.pembayaran.index') }}"
+                {{-- <a href="{{ route('admin.pembayaran.index') }}"
                     class="{{ request()->routeIs('admin.pembayaran.*') ? 'active' : '' }}">
                     <i class="ti ti-credit-card"></i>
                     <span>Pembayaran</span>
-                </a>
+                </a> --}}
 
                 {{-- 6. Retur --}}
                 <a href="{{ route('admin.retur.index') }}"

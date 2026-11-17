@@ -17,7 +17,7 @@
             </div>
 
             <div class="col-auto">
-                <a href="{{ route('admin.pesanan.index') }}" class="btn btn-outline-secondary">
+                <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $pesanan->jenis_pemenuhan ?? 'reguler']) }}" class="btn btn-outline-secondary">
                     <i class="ti ti-arrow-left me-1"></i>
                     Kembali
                 </a>
@@ -79,8 +79,19 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <div class="text-secondary small">Tipe Pesanan</div>
+                        <div>
+                            @if ($pesanan->jenis_pemenuhan === 'pre_order')
+                                <span class="badge bg-purple-lt">Pre-order</span>
+                            @else
+                                <span class="badge bg-blue-lt">Reguler</span>
+                            @endif
+                        </div>
+                    </div>
+
                     <div>
-                        <div class="text-secondary small">Jenis Pesanan</div>
+                        <div class="text-secondary small">Metode Pemenuhan</div>
                         <div>
                             @if ($pesanan->jenis_pesanan === 'pickup')
                                 <span class="badge bg-secondary-lt">Pickup</span>
@@ -109,18 +120,12 @@
                         $statusPesanan = $pesanan->status_pesanan;
 
                         $kelasStatus = match ($statusPesanan) {
-                            'selesai',
-                            'diterima',
-                            'pesanan_diambil' => 'bg-success-lt',
-
+                            'diterima' => 'bg-success-lt',
                             'dibatalkan' => 'bg-danger-lt',
-
                             'sedang_diproses',
-                            'pesanan_siap',
-                            'menunggu_pengiriman',
-                            'dalam_pengiriman',
-                            'siap_diambil' => 'bg-info-lt',
-
+                            'siap_diambil',
+                            'siap_dikirim',
+                            'dalam_pengiriman' => 'bg-info-lt',
                             default => 'bg-secondary-lt',
                         };
                     @endphp
@@ -161,6 +166,12 @@
             <p class="text-secondary">
                 Pilih tindakan sesuai dengan kondisi pesanan saat ini.
             </p>
+
+            @error('status_pesanan')
+                <div class="alert alert-danger" role="alert">
+                    {{ $message }}
+                </div>
+            @enderror
 
             @php
                 $status = $pesanan->status_pesanan;
@@ -210,15 +221,21 @@
 
                     {{-- SIAP DIAMBIL --}}
                 @elseif ($status === 'siap_diambil')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                    @if ($pesanan->status_pembayaran === 'lunas')
+                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
+                            @csrf
+                            @method('PUT')
 
-                        <button type="submit" name="status_pesanan" value="diterima" class="btn btn-primary">
-                            <i class="ti ti-check me-1"></i>
-                            Tandai Diterima
-                        </button>
-                    </form>
+                            <button type="submit" name="status_pesanan" value="diterima" class="btn btn-primary">
+                                <i class="ti ti-check me-1"></i>
+                                Tandai Diterima
+                            </button>
+                        </form>
+                    @else
+                        <div class="alert alert-warning w-100 mb-0">
+                            Pesanan belum dapat ditandai diterima karena pembayaran belum lunas dan terverifikasi.
+                        </div>
+                    @endif
 
                     {{-- SIAP DIKIRIM --}}
                 @elseif ($status === 'siap_dikirim')
@@ -238,15 +255,21 @@
 
                     {{-- DALAM PENGIRIMAN --}}
                 @elseif ($status === 'dalam_pengiriman')
-                    <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                    @if ($pesanan->status_pembayaran === 'lunas')
+                        <form action="{{ route('admin.pesanan.update-status', $pesanan->id_pesanan) }}" method="POST">
+                            @csrf
+                            @method('PUT')
 
-                        <button type="submit" name="status_pesanan" value="diterima" class="btn btn-primary">
-                            <i class="ti ti-check me-1"></i>
-                            Tandai Diterima
-                        </button>
-                    </form>
+                            <button type="submit" name="status_pesanan" value="diterima" class="btn btn-primary">
+                                <i class="ti ti-check me-1"></i>
+                                Tandai Diterima
+                            </button>
+                        </form>
+                    @else
+                        <div class="alert alert-warning w-100 mb-0">
+                            Pesanan belum dapat ditandai diterima karena pembayaran belum lunas dan terverifikasi.
+                        </div>
+                    @endif
 
                     {{-- DITERIMA --}}
                 @elseif ($status === 'diterima')
@@ -360,13 +383,14 @@
                     </div>
                 @endif
 
-                <hr>
+                @if ($pesanan->status_pesanan === 'siap_dikirim')
+                    <hr>
 
-                <h4 class="mb-3">Perbarui Informasi Pengiriman</h4>
+                    <h4 class="mb-3">Perbarui Informasi Pengiriman</h4>
 
-                <form action="{{ route('admin.pesanan.update-pengiriman', $pesanan->id_pesanan) }}" method="POST">
-                    @csrf
-                    @method('PUT')
+                    <form action="{{ route('admin.pesanan.update-pengiriman', $pesanan->id_pesanan) }}" method="POST">
+                        @csrf
+                        @method('PUT')
 
                     @if ($pesanan->kurir === 'gosend')
                         <div class="mb-3">
@@ -377,7 +401,7 @@
                             <input type="url" name="tautan_pelacakan" id="tautan_pelacakan"
                                 value="{{ old('tautan_pelacakan', $pesanan->tautan_pelacakan) }}"
                                 class="form-control @error('tautan_pelacakan') is-invalid @enderror" placeholder="https://..."
-                                maxlength="2048">
+                                maxlength="255">
 
                             @error('tautan_pelacakan')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -409,11 +433,16 @@
                         </div>
                     @endif
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-device-floppy me-1"></i>
-                        Simpan Informasi Pengiriman
-                    </button>
-                </form>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti ti-device-floppy me-1"></i>
+                            Simpan Informasi Pengiriman
+                        </button>
+                    </form>
+                @else
+                    <div class="text-secondary small">
+                        Informasi tracking hanya dapat diperbarui saat pesanan berstatus Siap Dikirim.
+                    </div>
+                @endif
             </div>
         </div>
     @endif
@@ -465,31 +494,44 @@
         @endforelse
     </div>
 
-    {{-- ALAMAT PENGIRIMAN --}}
-    @if ($pesanan->alamat)
+    {{-- ALAMAT PENGIRIMAN: gunakan snapshot saat pesanan dibuat --}}
+    @if ($pesanan->jenis_pesanan === 'delivery')
         <div class="card mb-3">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="ti ti-map-pin me-2"></i>
-                    Alamat Pengiriman
+                    Alamat Pengiriman Saat Pemesanan
                 </h3>
             </div>
 
             <div class="card-body">
                 <div class="fw-bold">
-                    {{ $pesanan->alamat->nama_penerima }}
+                    {{ $pesanan->nama_penerima_saat_pesan ?? $pesanan->alamat?->nama_penerima ?? '-' }}
                 </div>
-
                 <div class="text-secondary mt-1">
-                    {{ $pesanan->alamat->nomor_telepon }}
+                    {{ $pesanan->nomor_telepon_saat_pesan ?? $pesanan->alamat?->nomor_telepon ?? '-' }}
                 </div>
-
                 <div class="mt-2">
-                    {{ $pesanan->alamat->alamat_lengkap }},
-                    {{ $pesanan->alamat->kota }},
-                    {{ $pesanan->alamat->provinsi }}
-                    {{ $pesanan->alamat->kode_pos }}
+                    {{ $pesanan->alamat_lengkap_saat_pesan ?? $pesanan->alamat?->alamat_lengkap ?? '-' }}
+                    @if ($pesanan->desa_kelurahan_saat_pesan ?? false)
+                        , {{ $pesanan->desa_kelurahan_saat_pesan }}
+                    @endif
+                    @if ($pesanan->kecamatan_saat_pesan ?? false)
+                        , {{ $pesanan->kecamatan_saat_pesan }}
+                    @endif
+                    @if ($pesanan->kabupaten_kota_saat_pesan ?? $pesanan->kota_saat_pesan ?? false)
+                        , {{ $pesanan->kabupaten_kota_saat_pesan ?? $pesanan->kota_saat_pesan }}
+                    @endif
+                    @if ($pesanan->provinsi_saat_pesan ?? false)
+                        , {{ $pesanan->provinsi_saat_pesan }}
+                    @endif
+                    @if ($pesanan->kode_pos_saat_pesan ?? false)
+                        {{ $pesanan->kode_pos_saat_pesan }}
+                    @endif
                 </div>
+                <small class="text-secondary d-block mt-2">
+                    Alamat ditampilkan berdasarkan data saat pesanan dibuat agar perubahan alamat pelanggan tidak mengubah riwayat transaksi.
+                </small>
             </div>
         </div>
     @endif
@@ -531,9 +573,142 @@
         </div>
     </div>
 
+    {{-- INFORMASI DP BERDASARKAN SNAPSHOT PESANAN --}}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="ti ti-wallet me-2"></i>
+                Ketentuan Pembayaran Pesanan
+            </h3>
+        </div>
+        <div class="card-body">
+            @if ($pesanan->menggunakan_dp)
+                <div class="row mb-2">
+                    <div class="col text-secondary">Skema Pembayaran</div>
+                    <div class="col-auto fw-semibold">DP {{ number_format((float) ($pesanan->persentase_dp ?? 50), 0) }}%</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col text-secondary">Dasar Perhitungan DP</div>
+                    <div class="col-auto">Rp {{ number_format($pesanan->dasar_perhitungan_dp ?? 0, 0, ',', '.') }}</div>
+                </div>
+                <div class="row">
+                    <div class="col text-secondary">Nominal DP Saat Pemesanan</div>
+                    <div class="col-auto fw-bold">Rp {{ number_format($pesanan->nominal_dp ?? 0, 0, ',', '.') }}</div>
+                </div>
+            @else
+                <div class="text-secondary">
+                    Pesanan ini menggunakan pembayaran penuh dan tidak menggunakan skema DP.
+                </div>
+            @endif
+            <small class="text-secondary d-block mt-2">
+                Informasi ini merupakan snapshot transaksi saat pesanan dibuat, bukan nilai pengaturan DP saat ini.
+            </small>
+        </div>
+    </div>
+
+    {{-- RIWAYAT PEMBAYARAN --}}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="ti ti-credit-card me-2"></i>
+                Riwayat Pembayaran
+            </h3>
+        </div>
+        @forelse ($pesanan->pembayaran->sortBy('created_at') as $pembayaran)
+            @php
+                $kelasPembayaran = match ($pembayaran->status_pembayaran) {
+                    'paid' => 'bg-success-lt',
+                    'failed', 'expired' => 'bg-danger-lt',
+                    'refunded' => 'bg-warning-lt',
+                    default => 'bg-secondary-lt',
+                };
+                $labelJenisPembayaran = match ($pembayaran->jenis_pembayaran) {
+                    'penuh' => 'Pembayaran Penuh',
+                    'dp' => 'Pembayaran DP',
+                    'pelunasan' => 'Pelunasan',
+                    'refund' => 'Refund',
+                    default => ucwords(str_replace('_', ' ', $pembayaran->jenis_pembayaran)),
+                };
+            @endphp
+            <div class="card-body border-bottom">
+                <div class="row g-2 align-items-start">
+                    <div class="col">
+                        <div class="fw-semibold">{{ $labelJenisPembayaran }}</div>
+                        <div class="text-secondary small">
+                            {{ $pembayaran->penyedia_pembayaran ?? '-' }}
+                            @if ($pembayaran->metode_pembayaran)
+                                · {{ strtoupper($pembayaran->metode_pembayaran) }}
+                            @endif
+                        </div>
+                        <div class="text-secondary small">
+                            ID Transaksi: {{ $pembayaran->id_transaksi ?: '-' }}
+                        </div>
+                        <div class="text-secondary small">
+                            {{ $pembayaran->dibayar_pada?->format('d/m/Y H:i') ?? 'Belum ada waktu pembayaran' }}
+                        </div>
+                    </div>
+                    <div class="col-auto text-end">
+                        <div class="fw-bold">Rp {{ number_format($pembayaran->jumlah_pembayaran, 0, ',', '.') }}</div>
+                        <span class="badge {{ $kelasPembayaran }}">
+                            {{ strtoupper($pembayaran->status_pembayaran) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="card-body text-center text-secondary">
+                Belum ada catatan pembayaran untuk pesanan ini.
+            </div>
+        @endforelse
+    </div>
+
+    {{-- RIWAYAT AKTIVITAS TRANSAKSI --}}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="ti ti-history me-2"></i>
+                Riwayat Aktivitas Pesanan
+            </h3>
+        </div>
+        @forelse ($pesanan->riwayatAktivitas->sortByDesc('created_at') as $aktivitas)
+            <div class="card-body border-bottom">
+                <div class="d-flex justify-content-between gap-3">
+                    <div>
+                        <div class="fw-semibold">
+                            {{ ucwords(str_replace('_', ' ', $aktivitas->jenis_aktivitas)) }}
+                        </div>
+                        <div class="text-secondary small">
+                            {{ $aktivitas->deskripsi }}
+                        </div>
+                        @if ($aktivitas->status_sebelum || $aktivitas->status_sesudah)
+                            <div class="small mt-1">
+                                {{ $aktivitas->status_sebelum ? ucwords(str_replace('_', ' ', $aktivitas->status_sebelum)) : '—' }}
+                                →
+                                {{ $aktivitas->status_sesudah ? ucwords(str_replace('_', ' ', $aktivitas->status_sesudah)) : '—' }}
+                            </div>
+                        @endif
+                        <div class="text-secondary small">
+                            Aktor: {{ $aktivitas->jenis_aktor }}
+                            @if ($aktivitas->pengguna)
+                                · {{ $aktivitas->pengguna->nama }}
+                            @endif
+                        </div>
+                    </div>
+                    <div class="text-secondary small text-nowrap">
+                        {{ $aktivitas->created_at?->format('d/m/Y H:i') ?? '-' }}
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="card-body text-center text-secondary">
+                Belum ada riwayat aktivitas yang tercatat.
+            </div>
+        @endforelse
+    </div>
+
     {{-- KEMBALI --}}
     <div class="mt-3">
-        <a href="{{ route('admin.pesanan.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $pesanan->jenis_pemenuhan ?? 'reguler']) }}" class="btn btn-outline-secondary">
             <i class="ti ti-arrow-left me-1"></i>
             Kembali ke Daftar Pesanan
         </a>

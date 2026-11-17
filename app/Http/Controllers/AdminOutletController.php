@@ -52,6 +52,13 @@ class AdminOutletController extends Controller
                 'max:20',
             ],
 
+            'link_google_maps' => [
+                'nullable',
+                'string',
+                'max:2048',
+                'url',
+            ],
+
             'latitude' => [
                 'nullable',
                 'numeric',
@@ -84,6 +91,8 @@ class AdminOutletController extends Controller
             'alamat.required' => 'Alamat wajib diisi.',
 
             'nomor_telepon.max' => 'Nomor telepon maksimal 20 karakter.',
+            'link_google_maps.url' => 'Link Google Maps harus berupa URL yang valid.',
+            'link_google_maps.max' => 'Link Google Maps maksimal 2048 karakter.',
 
             'latitude.numeric' => 'Latitude harus berupa angka.',
             'latitude.between' => 'Latitude harus berada antara -90 sampai 90.',
@@ -168,6 +177,13 @@ class AdminOutletController extends Controller
                 'max:20',
             ],
 
+            'link_google_maps' => [
+                'nullable',
+                'string',
+                'max:2048',
+                'url',
+            ],
+
             'latitude' => [
                 'nullable',
                 'numeric',
@@ -200,6 +216,8 @@ class AdminOutletController extends Controller
             'alamat.required' => 'Alamat wajib diisi.',
 
             'nomor_telepon.max' => 'Nomor telepon maksimal 20 karakter.',
+            'link_google_maps.url' => 'Link Google Maps harus berupa URL yang valid.',
+            'link_google_maps.max' => 'Link Google Maps maksimal 2048 karakter.',
 
             'latitude.numeric' => 'Latitude harus berupa angka.',
             'latitude.between' => 'Latitude harus berada antara -90 sampai 90.',
@@ -214,17 +232,23 @@ class AdminOutletController extends Controller
             'foto.max' => 'Ukuran foto maksimal 2 MB.',
         ]);
 
-        if ($request->hasFile('foto')) {
-            if ($outlet->foto) {
-                Storage::disk('public')->delete($outlet->foto);
-            }
+        $fotoLama = $outlet->foto;
+        $fotoBaru = null;
 
-            $data['foto'] = $request->file('foto')
+        if ($request->hasFile('foto')) {
+            $fotoBaru = $request->file('foto')
                 ->store('outlet', 'public');
+
+            $data['foto'] = $fotoBaru;
         }
 
         try {
             $outlet->update($data);
+
+            // Hapus foto lama hanya setelah perubahan database berhasil.
+            if ($fotoBaru && $fotoLama) {
+                Storage::disk('public')->delete($fotoLama);
+            }
 
             return redirect()
                 ->route('admin.outlet.index')
@@ -234,6 +258,11 @@ class AdminOutletController extends Controller
                 );
         } catch (Throwable $e) {
             report($e);
+
+            // Bersihkan file baru jika penyimpanan database gagal.
+            if ($fotoBaru) {
+                Storage::disk('public')->delete($fotoBaru);
+            }
 
             return back()
                 ->withInput()

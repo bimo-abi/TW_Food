@@ -97,37 +97,25 @@
                                 @enderror   
 
                                 <div class="form-hint">
-                                    Contoh: 500000. Nominal ini menjadi batas
-                                    minimum jumlah pembelian untuk memenuhi
-                                    ketentuan DP.
+                                    DP dapat dipilih jika subtotal produk setelah diskon
+                                    mencapai batas ini. Ongkos kirim tidak dihitung.
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label for="persentase_dp" class="form-label required">
-                                    Persentase DP (%)
+                                <label class="form-label">
+                                    Persentase DP
                                 </label>
 
-                                <div class="input-group">
-                                    <input type="number" id="persentase_dp" name="persentase_dp"
-                                        value="{{ old('persentase_dp', $pengaturan->persentase_dp) }}" min="0.01" max="100"
-                                        step="0.01" required
-                                        class="form-control @error('persentase_dp') is-invalid @enderror">
-
-                                    <span class="input-group-text">%</span>
-
-                                    @error('persentase_dp')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                <div class="form-control bg-light" aria-readonly="true">
+                                    50%
                                 </div>
 
                                 <div class="form-hint">
-                                    Masukkan nilai antara 0,01 hingga 100.
-                                    Contoh: 50 berarti DP sebesar 50% dari
-                                    total pesanan yang memenuhi ketentuan.
+                                    Persentase DP ditetapkan sebesar 50% sesuai PRD TWFOOD
+                                    dan tidak dapat diubah melalui pengaturan.
                                 </div>
+                            </div>
                             </div>
                         </div>
                     </div>

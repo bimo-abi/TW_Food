@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Autentikasi pengguna
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::patch('/profile', [AuthController::class, 'updateProfile']);
 
     // Alamat pengguna
     Route::get('/alamat', [AlamatController::class, 'index']);

@@ -148,6 +148,13 @@ class PembayaranController extends Controller
              * diverifikasi oleh backend.
              */
             if ($jenisPembayaran === 'pelunasan') {
+                if (!in_array($pesanan->status_pesanan, ['siap_diambil', 'siap_dikirim'], true)) {
+                    return [
+                        'error' => 'Pelunasan hanya dapat dilakukan setelah pesanan siap diambil atau siap dikirim.',
+                        'status' => 422,
+                    ];
+                }
+
                 if (
                     !$pesanan->menggunakan_dp ||
                     !in_array(
@@ -332,7 +339,7 @@ class PembayaranController extends Controller
                     );
 
                     if (
-                        $nominalDP <
+                        $dasarTagihan <
                         (int) $pengaturan->minimal_nominal_dp
                     ) {
                         return [
@@ -413,7 +420,6 @@ class PembayaranController extends Controller
                 'jumlah_pembayaran' => $jumlahPembayaran,
                 'status_pembayaran' => 'pending',
                 'kunci_idempotensi' => $kunciIdempotensi,
-                'waktu_kadaluarsa' => now()->addHours(24),
             ]);
 
             /*
@@ -566,6 +572,11 @@ class PembayaranController extends Controller
      * Menerima notifikasi Midtrans dan memverifikasi transaksi melalui Status API.
      * Payload webhook hanya menjadi pemicu rekonsiliasi, bukan bukti pembayaran.
      */
+
+    /**
+     * Menerima notifikasi Midtrans dan memverifikasi transaksi melalui Status API.
+     * Payload webhook hanya menjadi pemicu rekonsiliasi, bukan bukti pembayaran.
+     */
     public function notification(Request $request)
     {
         $payload = $request->json()->all();
@@ -627,14 +638,13 @@ class PembayaranController extends Controller
         }
 
         /*
-         * Status API Midtrans menjadi sumber verifikasi transaksi.
-         * Service memeriksa order_id, gross_amount, currency, merchant_id,
-         * status gateway, dan menerapkan perubahan secara idempoten.
-         */
+     * Verifikasi transaksi langsung melalui Midtrans Status API.
+     * Tidak menggunakan signature_key dari payload webhook.
+     */
         try {
             $hasilRekonsiliasi = app(
                 \App\Services\MidtransPaymentReconciliationService::class
-            )->reconcile($pembayaran, $payload);
+            )->reconcile($pembayaran);
         } catch (Throwable $e) {
             Log::error('Rekonsiliasi pembayaran melalui webhook gagal.', [
                 'order_id' => $orderId,

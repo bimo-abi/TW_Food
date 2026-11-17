@@ -121,6 +121,7 @@ class PesananController extends Controller
 
             $subtotalProduk = 0;
             $detailItems = [];
+            $estimasiSelesaiPesanan = null;
             $reservasiKadaluarsa = now()->addHours(24);
 
             foreach ($validated['items'] as $index => $item) {
@@ -197,6 +198,29 @@ class PesananController extends Controller
                             ],
                         ]);
                     }
+
+                    $estimasiTersedia = $varian->getRawOriginal('estimasi_tersedia');
+
+                    if (
+                        $estimasiTersedia === null ||
+                        (string) $estimasiTersedia <= (string) $tanggalSelesai
+                    ) {
+                        throw ValidationException::withMessages([
+                            "items.$index.id_varian" => [
+                                'Estimasi tersedia varian Pre-order belum valid. Silakan hubungi Admin/Mitra.',
+                            ],
+                        ]);
+                    }
+
+                    // Simpan tanggal estimasi per item sebagai snapshot pesanan.
+                    // Untuk estimasi tingkat pesanan, gunakan tanggal terlama
+                    // dari seluruh varian agar tidak menjanjikan pesanan lebih cepat.
+                    if (
+                        $estimasiSelesaiPesanan === null ||
+                        (string) $estimasiTersedia > (string) $estimasiSelesaiPesanan
+                    ) {
+                        $estimasiSelesaiPesanan = (string) $estimasiTersedia;
+                    }
                 } else {
                     // Stok tersedia dikurangi reservasi aktif yang belum kedaluwarsa.
                     // Stok fisik tidak dikurangi saat checkout; reservasi dikonversi
@@ -245,6 +269,9 @@ class PesananController extends Controller
                     'subtotal' => $subtotalItem,
                     'diskon_item' => 0,
                     'subtotal_setelah_diskon' => $subtotalItem,
+                    'estimasi_selesai_pre_order' => $isPreOrder
+                        ? $varian->getRawOriginal('estimasi_tersedia')
+                        : null,
                 ];
             }
 
@@ -281,10 +308,16 @@ class PesananController extends Controller
                 'total_pesanan' => $totalPesanan,
                 'status_pembayaran' => 'belum_dibayar',
                 'status_pesanan' => 'menunggu_pembayaran',
+                'estimasi_selesai' => $isPreOrder
+                    ? $estimasiSelesaiPesanan
+                    : null,
                 'catatan' => $validated['catatan'] ?? null,
             ]);
 
             foreach ($detailItems as $detail) {
+                $estimasiSelesaiItem = $detail['estimasi_selesai_pre_order'] ?? null;
+                unset($detail['estimasi_selesai_pre_order']);
+
                 $detailPesanan = $pesanan->detailPesanan()->create($detail);
 
                 if (!$isPreOrder) {
@@ -304,6 +337,9 @@ class PesananController extends Controller
                         'id_detail_pesanan' => $detailPesanan->id_detail_pesanan,
                         'jumlah_produksi' => $detailPesanan->jumlah,
                         'status_produksi' => 'menunggu',
+                        'estimasi_selesai' => $estimasiSelesaiItem
+                            ? $estimasiSelesaiItem . ' 00:00:00'
+                            : null,
                     ]);
                 }
             }

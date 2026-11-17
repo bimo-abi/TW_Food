@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Notifikasi;
 use App\Models\Pesanan;
 use App\Models\RiwayatAktivitasTransaksi;
+use App\Services\ProduksiPreOrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -47,7 +48,7 @@ class MitraPesananController extends Controller
     }
 
     /** Perubahan status operasional mengikuti transisi PRD dan mengunci record pesanan. */
-    public function updateStatus(Request $request, int $id_pesanan)
+    public function updateStatus(Request $request, int $id_pesanan, ProduksiPreOrderService $produksiPreOrderService)
     {
         $this->pastikanMitra($request);
         $data = $request->validate([
@@ -55,7 +56,7 @@ class MitraPesananController extends Controller
         ]);
         $aktor = $request->user();
 
-        $pesanan = DB::transaction(function () use ($id_pesanan, $data, $aktor) {
+        $pesanan = DB::transaction(function () use ($id_pesanan, $data, $aktor, $produksiPreOrderService) {
             $pesanan = Pesanan::where('id_pesanan', $id_pesanan)->lockForUpdate()->firstOrFail();
             $lama = $pesanan->status_pesanan;
             $baru = $data['status_pesanan'];
@@ -88,6 +89,10 @@ class MitraPesananController extends Controller
                 if (!in_array($pesanan->kurir, ['gosend', 'jnt'], true)) {
                     throw ValidationException::withMessages(['kurir' => ['Kurir pesanan belum ditentukan.']]);
                 }
+            }
+
+            if (in_array($baru, ['siap_diambil', 'siap_dikirim'], true)) {
+                $produksiPreOrderService->selesaikanUntukPesanan($pesanan, $aktor, 'Flutter Mitra');
             }
 
             $pesanan->status_pesanan = $baru;

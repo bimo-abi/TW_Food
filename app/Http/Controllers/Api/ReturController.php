@@ -7,7 +7,6 @@ use App\Models\DetailPesanan;
 use App\Models\DetailRetur;
 use App\Models\Pembayaran;
 use App\Models\Notifikasi;
-use App\Models\PengaturanMitra;
 use App\Models\Pesanan;
 use App\Models\Retur;
 use App\Models\BuktiRetur;
@@ -281,19 +280,17 @@ class ReturController extends Controller
                     'created_at' => now(),
                 ];
 
-                $pengaturanMitraAktif = PengaturanMitra::whereHas('pengguna', function ($query) {
-                    $query->where('peran', 'mitra')
-                        ->where('status_aktif', true);
-                })->with('pengguna')->get();
+                // Kirim notifikasi in-app ke seluruh akun Mitra aktif,
+                // termasuk Mitra yang belum memiliki baris pengaturan_mitra.
+                $idMitraAktif = DB::table('pengguna')
+                    ->where('peran', 'mitra')
+                    ->where('status_aktif', true)
+                    ->pluck('id_pengguna');
 
-                foreach ($pengaturanMitraAktif as $pengaturanMitra) {
-                    $mitra = $pengaturanMitra->pengguna;
-
-                    if ($mitra) {
-                        Notifikasi::create(array_merge($dataNotifikasi, [
-                            'id_pengguna' => $mitra->id_pengguna,
-                        ]));
-                    }
+                foreach ($idMitraAktif as $idPenggunaMitra) {
+                    Notifikasi::create(array_merge($dataNotifikasi, [
+                        'id_pengguna' => $idPenggunaMitra,
+                    ]));
                 }
 
                 return [

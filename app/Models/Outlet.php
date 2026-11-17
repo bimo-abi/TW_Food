@@ -14,6 +14,7 @@ class Outlet extends Model
         'nama_outlet',
         'alamat',
         'nomor_telepon',
+        'link_google_maps',
         'latitude',
         'longitude',
         'deskripsi',

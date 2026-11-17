@@ -81,6 +81,7 @@
                             <th>Nama Outlet</th>
                             <th>Alamat</th>
                             <th>Telepon</th>
+                            <th>Google Maps</th>
                             <th>Latitude</th>
                             <th>Longitude</th>
                             <th>Deskripsi</th>
@@ -119,6 +120,18 @@
 
                                 <td class="text-nowrap">
                                     {{ $item->nomor_telepon ?? '-' }}
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @if ($item->link_google_maps)
+                                        <a href="{{ $item->link_google_maps }}"
+                                           target="_blank"
+                                           rel="noopener noreferrer">
+                                            Lihat Lokasi
+                                        </a>
+                                    @else
+                                        -
+                                    @endif
                                 </td>
 
                                 <td class="text-nowrap">

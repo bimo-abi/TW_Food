@@ -521,11 +521,12 @@ class TransaksiIntegrasiService
     private function notifikasiOperasional(Pesanan $pesanan, string $judul, string $pesan): void
     {
         $ids = collect([$pesanan->id_pengguna]);
-        $idMitra = DB::table('pengaturan_mitra')
-            ->join('pengguna', 'pengguna.id_pengguna', '=', 'pengaturan_mitra.id_pengguna')
-            ->where('pengguna.peran', 'mitra')
-            ->where('pengguna.status_aktif', true)
-            ->pluck('pengguna.id_pengguna');
+        // Notifikasi in-app tetap dikirim ke seluruh Mitra aktif,
+        // tanpa mensyaratkan baris pengaturan_mitra.
+        $idMitra = DB::table('pengguna')
+            ->where('peran', 'mitra')
+            ->where('status_aktif', true)
+            ->pluck('id_pengguna');
 
         foreach ($ids->merge($idMitra)->unique() as $idPengguna) {
             Notifikasi::create([

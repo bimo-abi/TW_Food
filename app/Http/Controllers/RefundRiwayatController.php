@@ -148,8 +148,9 @@ class RefundRiwayatController extends Controller
      */
     public function indexAdmin(Request $request)
     {
-        $data = $request->validate([
+        $filter = $request->validate([
             'status_refund' => ['nullable', 'in:belum_diajukan,menunggu_diproses,diproses,berhasil,gagal,perlu_diproses_ulang'],
+            'q' => ['nullable', 'string', 'max:100'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
@@ -158,19 +159,30 @@ class RefundRiwayatController extends Controller
             ->with(['retur', 'pesanan.pengguna', 'pembayaran', 'percobaanRefund'])
             ->latest('created_at');
 
-        if (!empty($data['status_refund'])) {
-            $query->where('status_refund', $data['status_refund']);
+        if (!empty($filter['status_refund'])) {
+            $query->where('status_refund', $filter['status_refund']);
         }
 
-        $paginator = $query->paginate($data['per_page'] ?? 30);
-        $paginator->getCollection()->transform(
-            fn (Refund $refund) => $this->detailRefund($refund, 'admin.refund.bukti')
-        );
+        if (!empty($filter['q'])) {
+            $kataKunci = trim($filter['q']);
+            $query->where(function ($builder) use ($kataKunci) {
+                $builder->where('id_refund', 'like', '%' . $kataKunci . '%')
+                    ->orWhereHas('pesanan', function ($pesanan) use ($kataKunci) {
+                        $pesanan->where('nomor_pesanan', 'like', '%' . $kataKunci . '%')
+                            ->orWhereHas('pengguna', function ($pengguna) use ($kataKunci) {
+                                $pengguna->where('nama', 'like', '%' . $kataKunci . '%');
+                            });
+                    })
+                    ->orWhereHas('retur', function ($retur) use ($kataKunci) {
+                        $retur->where('nomor_retur', 'like', '%' . $kataKunci . '%');
+                    });
+            });
+        }
 
-        return response()->json([
-            'message' => 'Daftar riwayat refund Admin berhasil diambil.',
-            'data' => $paginator,
-        ]);
+        $refunds = $query->paginate((int) ($filter['per_page'] ?? 30))
+            ->withQueryString();
+
+        return view('admin.refund.index', compact('refunds', 'filter'));
     }
 
     /**
@@ -180,12 +192,17 @@ class RefundRiwayatController extends Controller
     {
         $refund = Refund::query()
             ->where('jenis_refund', 'retur')
+            ->with([
+                'pesanan.pengguna',
+                'pembayaran',
+                'retur.detailRetur.detailPesanan',
+                'retur.buktiRetur',
+                'penggunaPenyetuju',
+                'percobaanRefund',
+            ])
             ->findOrFail($id_refund);
 
-        return response()->json([
-            'message' => 'Detail refund Admin berhasil diambil.',
-            'data' => $this->detailRefund($refund, 'admin.refund.bukti'),
-        ]);
+        return view('admin.refund.show', compact('refund'));
     }
 
     /**
@@ -227,6 +244,11 @@ class RefundRiwayatController extends Controller
             'Bukti refund tidak ditemukan.'
         );
 
-        return Storage::disk('local')->download($path);
+        $disk = Storage::disk('local');
+
+        return response()->download(
+            $disk->path($path),
+            basename($path)
+        );
     }
 }

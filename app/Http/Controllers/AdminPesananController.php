@@ -7,23 +7,94 @@ use App\Models\Pembayaran;
 use App\Models\Pesanan;
 use App\Models\Refund;
 use App\Models\ReservasiStok;
+use App\Services\ProduksiPreOrderService;
 use App\Models\RiwayatAktivitasTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Midtrans\Config;
 use Midtrans\Transaction as MidtransTransaction;
 use Throwable;
 
 class AdminPesananController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pesanan = Pesanan::with('pengguna')
-            ->latest('created_at')
-            ->get();
+        $filter = $request->validate([
+            'jenis_pemenuhan' => ['nullable', 'in:reguler,pre_order'],
+            'status_pesanan' => [
+                'nullable',
+                'in:menunggu_pembayaran,sedang_diproses,siap_diambil,siap_dikirim,dalam_pengiriman,diterima,dibatalkan',
+            ],
+            'status_pembayaran' => [
+                'nullable',
+                'in:belum_dibayar,menunggu_pembayaran,dp_dibayar,sebagian_dibayar,lunas,gagal,kadaluarsa,dibatalkan,dikembalikan',
+            ],
+            'saluran_pesanan' => ['nullable', 'in:online,toko,horeca'],
+            'jenis_pesanan' => ['nullable', 'in:pickup,delivery'],
+            'tanggal_mulai' => ['nullable', 'date'],
+            'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
+            'q' => ['nullable', 'string', 'max:100'],
+        ]);
 
-        return view('admin.pesanan.index', compact('pesanan'));
+        // Menu default adalah pesanan reguler. Pre-order dipisahkan melalui tab.
+        $jenisPemenuhan = $filter['jenis_pemenuhan'] ?? 'reguler';
+
+        $query = Pesanan::query()
+            ->with('pengguna')
+            ->where('jenis_pemenuhan', $jenisPemenuhan);
+
+        if (!empty($filter['status_pesanan'])) {
+            $query->where('status_pesanan', $filter['status_pesanan']);
+        }
+
+        if (!empty($filter['status_pembayaran'])) {
+            $query->where('status_pembayaran', $filter['status_pembayaran']);
+        }
+
+        if (!empty($filter['saluran_pesanan'])) {
+            $query->where('saluran_pesanan', $filter['saluran_pesanan']);
+        }
+
+        if (!empty($filter['jenis_pesanan'])) {
+            $query->where('jenis_pesanan', $filter['jenis_pesanan']);
+        }
+
+        if (!empty($filter['tanggal_mulai'])) {
+            $query->whereDate('created_at', '>=', $filter['tanggal_mulai']);
+        }
+
+        if (!empty($filter['tanggal_selesai'])) {
+            $query->whereDate('created_at', '<=', $filter['tanggal_selesai']);
+        }
+
+        if (!empty($filter['q'])) {
+            $kataKunci = $filter['q'];
+
+            $query->where(function ($subQuery) use ($kataKunci) {
+                $subQuery->where('nomor_pesanan', 'like', '%' . $kataKunci . '%')
+                    ->orWhereHas('pengguna', function ($penggunaQuery) use ($kataKunci) {
+                        $penggunaQuery->where('nama', 'like', '%' . $kataKunci . '%');
+                    });
+            });
+        }
+
+        $pesanan = $query
+            ->latest('created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $jumlahReguler = Pesanan::where('jenis_pemenuhan', 'reguler')->count();
+        $jumlahPreOrder = Pesanan::where('jenis_pemenuhan', 'pre_order')->count();
+
+        return view('admin.pesanan.index', compact(
+            'pesanan',
+            'jenisPemenuhan',
+            'jumlahReguler',
+            'jumlahPreOrder',
+            'filter'
+        ));
     }
 
     public function show($id)
@@ -37,7 +108,7 @@ class AdminPesananController extends Controller
             'retur',
             'refund',
             'reservasiStok',
-            'riwayatAktivitas',
+            'riwayatAktivitas.pengguna',
         ])->findOrFail($id);
 
         return view('admin.pesanan.show', compact('pesanan'));
@@ -46,7 +117,7 @@ class AdminPesananController extends Controller
     /**
      * Memperbarui status pesanan sesuai tujuh status resmi PRD v1.6.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, ProduksiPreOrderService $produksiPreOrderService)
     {
         $data = $request->validate([
             'status_pesanan' => [
@@ -65,7 +136,7 @@ class AdminPesananController extends Controller
         $statusBaru = $data['status_pesanan'];
 
         try {
-            $hasil = DB::transaction(function () use ($id, $data, $aktor, $statusBaru) {
+            $hasil = DB::transaction(function () use ($id, $data, $aktor, $statusBaru, $produksiPreOrderService) {
                 $pesanan = Pesanan::where('id_pesanan', $id)
                     ->lockForUpdate()
                     ->firstOrFail();
@@ -123,6 +194,10 @@ class AdminPesananController extends Controller
                     $this->validasiInformasiPengiriman($pesanan);
                 }
 
+                if (in_array($statusBaru, ['siap_diambil', 'siap_dikirim'], true)) {
+                    $produksiPreOrderService->selesaikanUntukPesanan($pesanan, $aktor, 'Admin Website');
+                }
+
                 $pesanan->status_pesanan = $statusBaru;
 
                 if ($statusBaru === 'diterima') {
@@ -156,6 +231,8 @@ class AdminPesananController extends Controller
                 ->with('success', $hasil['message']);
         } catch (\DomainException $e) {
             return back()->withErrors(['status_pesanan' => $e->getMessage()])->withInput();
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (Throwable $e) {
             Log::error('Gagal memperbarui status pesanan.', [
                 'id_pesanan' => $id,
@@ -435,11 +512,13 @@ class AdminPesananController extends Controller
     {
         $penerima = collect([$pesanan->id_pengguna]);
 
-        $idMitra = DB::table('pengaturan_mitra')
-            ->join('pengguna', 'pengguna.id_pengguna', '=', 'pengaturan_mitra.id_pengguna')
-            ->where('pengguna.peran', 'mitra')
-            ->where('pengguna.status_aktif', true)
-            ->pluck('pengguna.id_pengguna');
+        // Notifikasi in-app ditujukan kepada seluruh akun Mitra aktif.
+        // Jangan bergantung pada pengaturan_mitra karena akun Mitra dapat aktif
+        // meskipun belum memiliki preferensi/pengaturan operasional.
+        $idMitra = DB::table('pengguna')
+            ->where('peran', 'mitra')
+            ->where('status_aktif', true)
+            ->pluck('id_pengguna');
 
         $penerima = $penerima->merge($idMitra)->unique();
 

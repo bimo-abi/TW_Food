@@ -40,8 +40,15 @@ class MitraPesananController extends Controller
 
         $pesanan = Pesanan::with([
             'pengguna:id_pengguna,nama,email,nomor_telepon,jenis_pelanggan',
-            'detailPesanan', 'pembayaran', 'retur.detailRetur', 'retur.buktiRetur',
-            'reservasiStok', 'refund', 'riwayatAktivitas', 'outlet',
+            'detailPesanan.produksiPreOrder',
+            'detailPesanan.reservasiStok',
+            'pembayaran',
+            'retur.detailRetur',
+            'retur.buktiRetur',
+            'reservasiStok',
+            'refund',
+            'riwayatAktivitas',
+            'outlet',
         ])->findOrFail($id_pesanan);
 
         return response()->json(['message' => 'Detail pesanan operasional berhasil diambil.', 'data' => $pesanan]);

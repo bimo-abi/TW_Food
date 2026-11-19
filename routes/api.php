@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\StatusPembayaranController;
 use App\Http\Controllers\Api\RiwayatReturController;
 use App\Http\Controllers\Api\NotifikasiController;
 use App\Http\Controllers\Api\MitraPesananController;
+use App\Http\Controllers\Api\MitraProdukController;
+use App\Http\Controllers\Api\MitraVarianProdukController;
 use App\Http\Controllers\Api\MitraReturController;
 use App\Http\Controllers\RefundRiwayatController;
 
@@ -83,6 +85,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifikasi', [NotifikasiController::class, 'index']);
     Route::patch('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllRead']);
     Route::patch('/notifikasi/{id_notifikasi}/baca', [NotifikasiController::class, 'markRead']);
+
+    // Manajemen produk Flutter Mitra (controller memeriksa peran mitra aktif)
+    Route::get('/mitra/produk', [MitraProdukController::class, 'index']);
+    Route::get('/mitra/produk/{id_produk}', [MitraProdukController::class, 'show']);
+    Route::post('/mitra/produk', [MitraProdukController::class, 'store']);
+    Route::put('/mitra/produk/{id_produk}', [MitraProdukController::class, 'update']);
+    Route::patch('/mitra/produk/{id_produk}/status', [MitraProdukController::class, 'toggleStatus']);
+
+    // Manajemen varian dan harga Flutter Mitra
+    Route::get('/mitra/produk/{id_produk}/varian', [MitraVarianProdukController::class, 'index']);
+    Route::post('/mitra/produk/{id_produk}/varian', [MitraVarianProdukController::class, 'store']);
+    Route::put('/mitra/varian/{id_varian}', [MitraVarianProdukController::class, 'update']);
+    Route::patch('/mitra/varian/{id_varian}/status', [MitraVarianProdukController::class, 'toggleStatusVarian']);
+    Route::patch('/mitra/varian/{id_varian}/stok', [MitraVarianProdukController::class, 'updateStok']);
+    Route::patch('/mitra/varian/{id_varian}/pre-order', [MitraVarianProdukController::class, 'updatePreOrder']);
+    Route::post('/mitra/varian/{id_varian}/harga', [MitraVarianProdukController::class, 'storeHarga']);
+    Route::put('/mitra/harga/{id_daftar_harga}', [MitraVarianProdukController::class, 'updateHarga']);
+    Route::patch('/mitra/harga/{id_daftar_harga}/status', [MitraVarianProdukController::class, 'toggleStatusHarga']);
 
     // Operasional Flutter Mitra (controller memeriksa peran mitra aktif)
     Route::get('/mitra/pesanan', [MitraPesananController::class, 'index']);

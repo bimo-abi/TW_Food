@@ -192,6 +192,58 @@
             color: #206bc4;
             text-decoration: underline;
         }
+
+        /* Thumbnail & empty state */
+.produk-thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+}
+
+.produk-empty-icon {
+    font-size: 2rem;
+}
+
+/* Switch status */
+.produk-status-form {
+    display: inline-flex;
+    align-items: center;
+    width: 150px;
+}
+
+.produk-status-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.produk-status-switch .form-check-input {
+    margin: 0;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.produk-status-switch .form-check-input:checked {
+    background-color: #2fb344;
+    border-color: #2fb344;
+}
+
+.produk-status-switch .form-check-input:not(:checked) {
+    background-color: #d63939;
+    border-color: #d63939;
+}
+
+.produk-status-label {
+    width: 64px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.produk-status-label.is-aktif    { color: #2fb344; }
+.produk-status-label.is-nonaktif { color: #d63939; }
     </style>
 
     {{-- 1) Gaya bersama: warna, header, footer, tombol (public/css/layout.css) --}}

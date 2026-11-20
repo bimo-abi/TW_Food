@@ -4,6 +4,13 @@
 @section('page-title', 'Varian Produk')
 
 @section('content')
+    @php
+        // Format tanggal d-m-Y, '-' kalau kosong
+        $tgl = fn ($tanggal) => $tanggal
+            ? \Carbon\Carbon::parse($tanggal)->format('d-m-Y')
+            : '-';
+    @endphp
+
     <div class="page-header mb-3">
         <div class="row align-items-center">
             <div class="col">
@@ -15,8 +22,7 @@
             </div>
 
             <div class="col-auto">
-                <a href="{{ route('admin.varian.create', $produk->id_produk) }}"
-                   class="btn btn-primary">
+                <a href="{{ route('admin.varian.create', $produk->id_produk) }}" class="btn btn-primary">
                     <i class="ti ti-plus me-1"></i>
                     Tambah Varian
                 </a>
@@ -24,25 +30,20 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success" role="alert">
-            <i class="ti ti-check-circle me-2"></i>
-            {{ session('success') }}
-        </div>
-    @endif
+    {{-- Pesan sukses & error --}}
+    @foreach (['success' => ['success', 'check-circle'], 'error' => ['danger', 'alert-circle']] as $key => [$warna, $ikon])
+        @if (session($key))
+            <div class="alert alert-{{ $warna }}" role="alert">
+                <i class="ti ti-{{ $ikon }} me-2"></i>
+                {{ session($key) }}
+            </div>
+        @endif
+    @endforeach
 
-    @if (session('error'))
-        <div class="alert alert-danger" role="alert">
-            <i class="ti ti-alert-circle me-2"></i>
-            {{ session('error') }}
-        </div>
-    @endif
-
+    {{-- Error validasi --}}
     @if ($errors->any())
         <div class="alert alert-danger" role="alert">
-            <div class="fw-bold mb-2">
-                Periksa kembali data berikut:
-            </div>
+            <div class="fw-bold mb-2">Periksa kembali data berikut:</div>
             <ul class="mb-0">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -75,56 +76,44 @@
 
                 <tbody>
                     @forelse ($varian as $item)
+                        @php
+                            $aktif = (bool) $item->status_aktif;
+                            $po    = (bool) $item->tersedia_pre_order;
+                        @endphp
+
                         <tr>
                             <td>{{ $loop->iteration }}</td>
 
                             <td>
-                                <span class="fw-bold">
-                                    {{ $item->nama_varian }}
-                                </span>
+                                <span class="fw-bold">{{ $item->nama_varian }}</span>
                             </td>
 
                             <td>
-                                @if ($item->berat_gram !== null)
-                                    {{ number_format($item->berat_gram, 0, ',', '.') }} gram
-                                @else
-                                    -
-                                @endif
+                                {{ $item->berat_gram !== null
+                                    ? number_format($item->berat_gram, 0, ',', '.') . ' gram'
+                                    : '-' }}
                             </td>
 
                             <td>{{ $item->satuan_jual }}</td>
 
+                            <td>{{ number_format($item->stok, 0, ',', '.') }}</td>
+
                             <td>
-                                {{ number_format($item->stok, 0, ',', '.') }}
+                                <span class="badge {{ $po ? 'bg-info-lt' : 'bg-secondary-lt' }}">
+                                    {{ $po ? 'Aktif' : 'Tidak Aktif' }}
+                                </span>
                             </td>
 
                             <td>
-                                @if ($item->tersedia_pre_order)
-                                    <span class="badge bg-info-lt">
-                                        Aktif
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-lt">
-                                        Tidak Aktif
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td>
-                                @if ($item->tersedia_pre_order)
+                                @if ($po)
                                     <div class="text-nowrap">
                                         <div>
                                             <span class="text-secondary">Mulai:</span>
-                                            {{ $item->tanggal_mulai_pre_order
-                                                ? \Carbon\Carbon::parse($item->tanggal_mulai_pre_order)->format('d-m-Y')
-                                                : '-' }}
+                                            {{ $tgl($item->tanggal_mulai_pre_order) }}
                                         </div>
-
                                         <div>
                                             <span class="text-secondary">Selesai:</span>
-                                            {{ $item->tanggal_selesai_pre_order
-                                                ? \Carbon\Carbon::parse($item->tanggal_selesai_pre_order)->format('d-m-Y')
-                                                : '-' }}
+                                            {{ $tgl($item->tanggal_selesai_pre_order) }}
                                         </div>
                                     </div>
                                 @else
@@ -133,27 +122,21 @@
                             </td>
 
                             <td>
-                                @if ($item->tersedia_pre_order && $item->estimasi_tersedia)
-                                    {{ \Carbon\Carbon::parse($item->estimasi_tersedia)->format('d-m-Y') }}
+                                @if ($po && $item->estimasi_tersedia)
+                                    {{ $tgl($item->estimasi_tersedia) }}
                                 @else
                                     <span class="text-secondary">-</span>
                                 @endif
                             </td>
 
                             <td>
-                                @if ($item->status_aktif)
-                                    <span class="badge bg-success-lt">
-                                        Aktif
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-lt">
-                                        Tidak Aktif
-                                    </span>
-                                @endif
+                                <span class="badge {{ $aktif ? 'bg-success-lt' : 'bg-secondary-lt' }}">
+                                    {{ $aktif ? 'Aktif' : 'Tidak Aktif' }}
+                                </span>
                             </td>
 
                             <td>
-                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
                                     <a href="{{ route('admin.harga.index', $item->id_varian) }}"
                                        class="btn btn-sm btn-outline-info">
                                         <i class="ti ti-tags me-1"></i>Harga
@@ -164,20 +147,12 @@
                                         <i class="ti ti-edit me-1"></i>Edit
                                     </a>
 
-                                    <form action="{{ route('admin.varian.toggle-status', $item->id_varian) }}"
-                                          method="POST">
-                                        @csrf
-                                        @method('PATCH')
-
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-warning">
-                                            @if ($item->status_aktif)
-                                                <i class="ti ti-eye-off me-1"></i>Nonaktifkan
-                                            @else
-                                                <i class="ti ti-eye me-1"></i>Aktifkan
-                                            @endif
-                                        </button>
-                                    </form>
+                                    {{-- Switch aktif / nonaktif --}}
+                                    @include('admin.partials.status-switch', [
+                                        'action' => route('admin.varian.toggle-status', $item->id_varian),
+                                        'aktif'  => $aktif,
+                                        'nama'   => 'varian',
+                                    ])
 
                                     <form action="{{ route('admin.varian.destroy', $item->id_varian) }}"
                                           method="POST"
@@ -185,8 +160,7 @@
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
                                             <i class="ti ti-trash me-1"></i>Hapus
                                         </button>
                                     </form>
@@ -195,10 +169,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10"
-                                class="text-center text-secondary py-4">
-                                <i class="ti ti-package-off d-block mb-2"
-                                   style="font-size: 2rem;"></i>
+                            <td colspan="10" class="text-center text-secondary py-4">
+                                <i class="ti ti-package-off d-block mb-2 fs-1"></i>
                                 Belum ada varian untuk produk ini.
                             </td>
                         </tr>
@@ -209,8 +181,7 @@
     </div>
 
     <div class="mt-3">
-        <a href="{{ route('admin.produk.index') }}"
-           class="btn btn-outline-secondary">
+        <a href="{{ route('admin.produk.index') }}" class="btn btn-outline-secondary">
             <i class="ti ti-arrow-left me-1"></i>
             Kembali ke Produk
         </a>

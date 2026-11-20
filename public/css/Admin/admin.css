@@ -114,6 +114,12 @@ body {
     gap: 14px;
 }
 
+.topbar-user span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #354052;
+}
+
 .page-content {
     min-width: 0;
     padding: 28px;

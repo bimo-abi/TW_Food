@@ -13,7 +13,7 @@
     {{-- Tabler Icons --}}
     <link rel="stylesheet" href="{{ asset('assets/tabler/icons/tabler-icons.min.css') }}">
 
-    {{-- Admin layout CSS --}}
+    {{-- Admin layout CSS (pindah css admin ke public/css/admin/admin.css)--}}
     <link rel="stylesheet" href="{{ asset('css/admin/admin.css') }}">
     @stack('styles')
 

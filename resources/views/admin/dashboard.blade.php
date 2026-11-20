@@ -121,7 +121,7 @@
             <div class="card h-100">
                 <div class="card-header">
                     <h3 class="card-title">Produk Terlaris</h3>
-                    
+
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled mb-0">
@@ -203,45 +203,19 @@
     </div>
 
     {{-- ===== Tabel stok menipis (dituju dari card) ===== --}}
+    {{-- ===== Tabel stok menipis (dituju dari card) ===== --}}
     <div id="lowstocktable" class="card mb-3">
         <div class="card-header">
             <h3 class="card-title">Stok Menipis (stok ≤ 5)</h3>
         </div>
-        <div class="table-responsive">
-            <table class="table table-vcenter card-table">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Produk</th>
-                        <th>Varian</th>
-                        <th>Stok</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($stokList as $item)
-                        <tr>
-                            <td>{{ $stokList->firstItem() + $loop->index }}</td>
-                            <td>{{ $item->produk->nama_produk ?? '-' }}</td>
-                            <td>{{ $item->nama_varian ?? '-' }}</td>
-                            <td>
-                                <span class="badge bg-red-lt">{{ $item->stok }}</span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-secondary py-4">Semua stok aman.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer d-flex align-items-center">
-            {{ $stokList->links('pagination::bootstrap-5') }}
+        <div id="lowstock-wrapper">
+            @include('admin.partials.stok-menipis-table')
         </div>
     </div>
 
     {{-- ===== Chart script (dummy) ===== --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sales = @json($salesChart);
@@ -263,7 +237,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -285,4 +263,32 @@
             render(select.value);
         });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $(document).on('click', '#lowstock-wrapper .pagination a', function (e) {
+            e.preventDefault();
+
+            const url = $(this).attr('href');
+            const $wrapper = $('#lowstock-wrapper');
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                beforeSend: function () {
+                    $wrapper.css('opacity', 0.5);
+                },
+                success: function (html) {
+                    $wrapper.html(html);
+                    window.history.pushState({}, '', url); // optional: keeps URL in sync
+                },
+                error: function () {
+                    alert('Gagal memuat data stok.');
+                },
+                complete: function () {
+                    $wrapper.css('opacity', 1);
+                }
+            });
+        });
+    });
+</script>
 @endsection

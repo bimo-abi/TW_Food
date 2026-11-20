@@ -4,9 +4,42 @@
 @section('page-title', 'Promosi')
 
 @section('content')
-    <div class="page-header mb-3">
-        <h1>Promosi</h1>
-        <p class="text-secondary">Pantau promosi, periode berlaku, dan varian produk yang terkait.</p>
+    <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1>Promosi</h1>
+            <p class="text-secondary mb-0">Pantau promosi, periode berlaku, dan varian produk yang terkait.</p>
+        </div>
+        <a href="{{ route('admin.promosi.create') }}" class="btn btn-primary">+ Tambah Promosi</a>
+    </div>
+
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    <div class="card mb-3">
+        <div class="card-header"><h3 class="card-title">Kalender Tanggal Kembar {{ today()->year }}</h3></div>
+        <div class="card-body">
+            <div class="row g-2">
+                @foreach ($kalender as $k)
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="border rounded p-2 h-100 {{ $k['lewat'] ? 'bg-light' : '' }}">
+                            <div class="fw-bold">{{ $k['kode'] }}
+                                @if ($k['hariIni']) <span class="badge bg-success-lt">Hari ini</span> @endif
+                            </div>
+                            <div class="text-secondary small mb-2">{{ $k['tanggal']->locale('id')->translatedFormat('j F') }}</div>
+                            @if ($k['promo'])
+                                <a href="{{ route('admin.promosi.edit', $k['promo']->id_promosi) }}"
+                                   class="badge bg-success-lt text-decoration-none">Ada promo</a>
+                            @elseif ($k['lewat'])
+                                <span class="text-secondary small">Terlewat</span>
+                            @else
+                                <a href="{{ route('admin.promosi.create') }}" class="small">+ Buat promo</a>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
     </div>
 
     <div class="card mb-3">
@@ -63,6 +96,7 @@
                         <th>Periode</th>
                         <th>Varian Terkait</th>
                         <th>Status</th>
+                        <th class="text-end">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -125,10 +159,22 @@
                             </td>
                             <td>{{ $item->varian_count }}</td>
                             <td><span class="badge bg-{{ $warnaStatus }}-lt">{{ $labelStatus }}</span></td>
+                            <td class="text-end text-nowrap">
+                                <a href="{{ route('admin.promosi.edit', $item->id_promosi) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form method="POST" action="{{ route('admin.promosi.toggle-status', $item->id_promosi) }}" class="d-inline">
+                                    @csrf @method('PATCH')
+                                    <button class="btn btn-sm btn-outline-secondary">{{ $item->status_aktif ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.promosi.destroy', $item->id_promosi) }}" class="d-inline"
+                                      onsubmit="return confirm('Hapus promosi ini?')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger">Hapus</button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-secondary py-4">
+                            <td colspan="8" class="text-center text-secondary py-4">
                                 Tidak ada data promosi yang sesuai dengan filter.
                             </td>
                         </tr>

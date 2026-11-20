@@ -515,6 +515,30 @@ Route::get('/admin/promosi', [PromosiController::class, 'index'])
     ->name('admin.promosi.index')
     ->middleware('admin');
 
+Route::get('/admin/promosi/create', [PromosiController::class, 'create'])
+    ->name('admin.promosi.create')
+    ->middleware('admin');
+
+Route::post('/admin/promosi', [PromosiController::class, 'store'])
+    ->name('admin.promosi.store')
+    ->middleware('admin');
+
+Route::get('/admin/promosi/{id}/edit', [PromosiController::class, 'edit'])
+    ->name('admin.promosi.edit')
+    ->middleware('admin');
+
+Route::put('/admin/promosi/{id}', [PromosiController::class, 'update'])
+    ->name('admin.promosi.update')
+    ->middleware('admin');
+
+Route::patch('/admin/promosi/{id}/toggle-status', [PromosiController::class, 'toggleStatus'])
+    ->name('admin.promosi.toggle-status')
+    ->middleware('admin');
+
+Route::delete('/admin/promosi/{id}', [PromosiController::class, 'destroy'])
+    ->name('admin.promosi.destroy')
+    ->middleware('admin');
+
 // Admin Laporan
 Route::get('/admin/laporan', [LaporanController::class, 'index'])
     ->name('admin.laporan.index')

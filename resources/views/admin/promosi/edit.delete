@@ -1,0 +1,16 @@
+@extends('admin.layouts.app')
+
+@section('title', 'Edit Promosi - TWFood')
+@section('page-title', 'Edit Promosi')
+
+@section('content')
+    <div class="page-header mb-3">
+        <h1>Edit Promosi</h1>
+    </div>
+
+    <form method="POST" action="{{ route('admin.promosi.update', $promosi->id_promosi) }}">
+        @csrf
+        @method('PUT')
+        @include('admin.promosi._form')
+    </form>
+@endsection

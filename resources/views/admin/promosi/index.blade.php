@@ -4,7 +4,7 @@
 @section('page-title', 'Promosi')
 
 @section('content')
-    <div class="page-header mb-3 d-flex justify-content-between align-items-center">
+    <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
             <h1>Promosi</h1>
             <p class="text-secondary mb-0">Pantau promosi, periode berlaku, dan varian produk yang terkait.</p>

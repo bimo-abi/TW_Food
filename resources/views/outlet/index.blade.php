@@ -1,4 +1,3 @@
-{{-- resources/views/outlet/index.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -28,7 +27,7 @@
 
     @forelse ($outlets as $item)
         @php
-            // ----- Waktu sekarang (zona WIB) untuk menandai hari ini & status buka -----
+            // ===== Waktu sekarang (zona WIB) =====
             $sekarang = \Carbon\Carbon::now('Asia/Jakarta');
             $hariIni  = strtolower($sekarang->copy()->locale('id')->dayName);
             $jamIni   = $sekarang->format('H:i');
@@ -37,17 +36,22 @@
 
             // true = buka, false = tutup, null = jam hari ini belum diisi
             $statusBuka = null;
+            $keterangan = null;
             if ($jamHariIni) {
                 if ($jamHariIni->tutup) {
                     $statusBuka = false;
                 } else {
                     $buka  = substr($jamHariIni->jam_buka ?? '', 0, 5);
                     $tutup = substr($jamHariIni->jam_tutup ?? '', 0, 5);
-                    $statusBuka = ($buka !== '' && $tutup !== '') ? ($jamIni >= $buka && $jamIni < $tutup) : null;
+                    if ($buka !== '' && $tutup !== '') {
+                        $statusBuka = ($jamIni >= $buka && $jamIni < $tutup);
+                        if ($statusBuka)          { $keterangan = 'Tutup pukul ' . $tutup; }
+                        elseif ($jamIni < $buka)  { $keterangan = 'Buka pukul ' . $buka; }
+                    }
                 }
             }
 
-            // ----- Link peta & WhatsApp -----
+            // ===== Link peta & WhatsApp =====
             $query = ($item->latitude && $item->longitude)
                 ? $item->latitude . ',' . $item->longitude
                 : $item->alamat;
@@ -62,13 +66,17 @@
             }
         @endphp
 
-        <section class="outlet-layout">
+        <section class="outlet-item">
 
-            {{-- ===== KOLOM KIRI: info + jam operasional ===== --}}
-            <div class="outlet-left">
+            {{-- ============ PANEL: info di kiri + peta di kanan ============ --}}
+            <div class="outlet-stage">
 
-                {{-- Kartu info --}}
-                <div class="outlet-card">
+                <div class="outlet-mapbox">
+                    <iframe src="{{ $embedMap }}" title="Peta {{ $item->nama_outlet }}"
+                            loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+
+                <div class="outlet-float">
                     <div class="outlet-topline">
                         <span class="outlet-label">LOKASI KAMI</span>
 
@@ -81,7 +89,6 @@
 
                     <h2>{{ $item->nama_outlet }}</h2>
 
-                    {{-- Jam hari ini --}}
                     @if ($jamHariIni)
                         <div class="outlet-today">
                             <small>Hari ini &middot; {{ ucfirst($hariIni) }}</small>
@@ -89,9 +96,10 @@
                                 @if ($jamHariIni->tutup)
                                     Tutup
                                 @else
-                                    {{ substr($jamHariIni->jam_buka ?? '', 0, 5) }} &ndash; {{ substr($jamHariIni->jam_tutup ?? '', 0, 5) }}
+                                    {{ substr($jamHariIni->jam_buka ?? '', 0, 5) }}<span> &ndash; </span>{{ substr($jamHariIni->jam_tutup ?? '', 0, 5) }}
                                 @endif
                             </strong>
+                            @if ($keterangan)<em>{{ $keterangan }}</em>@endif
                         </div>
                     @endif
 
@@ -134,45 +142,36 @@
                         @endif
                     </div>
                 </div>
-
-                {{-- Kartu jam operasional --}}
-                <div class="outlet-card">
-                    <h3 class="outlet-judul">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-                        Jam Operasional
-                    </h3>
-
-                    @if ($item->jamOperasional->count() > 0)
-                        <ul class="jam-list">
-                            @foreach ($item->jamOperasional as $jam)
-                                @php $hariItu = strtolower($jam->hari) === $hariIni; @endphp
-
-                                <li class="jam-row {{ $hariItu ? 'ini' : '' }} {{ $jam->tutup ? 'libur' : '' }}">
-                                    <span class="jam-hari">
-                                        {{ ucfirst($jam->hari) }}
-                                        @if ($hariItu)<em>Hari ini</em>@endif
-                                    </span>
-
-                                    <span class="jam-waktu">
-                                        @if ($jam->tutup)
-                                            Tutup
-                                        @else
-                                            {{ substr($jam->jam_buka ?? '', 0, 5) }} &ndash; {{ substr($jam->jam_tutup ?? '', 0, 5) }}
-                                        @endif
-                                    </span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="outlet-kosong">Jam operasional belum tersedia.</p>
-                    @endif
-                </div>
             </div>
 
-            {{-- ===== KOLOM KANAN: peta ===== --}}
-            <div class="outlet-map">
-                <iframe src="{{ $embedMap }}" title="Peta {{ $item->nama_outlet }}"
-                        loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            {{-- ============ JAM OPERASIONAL: satu kotak per hari ============ --}}
+            <div class="outlet-jam">
+                <h3>Jam Operasional</h3>
+                <p>Jadwal buka outlet dalam seminggu.</p>
+
+                @if ($item->jamOperasional->count() > 0)
+                    <div class="jam-grid">
+                        @foreach ($item->jamOperasional as $jam)
+                            @php $hariItu = strtolower($jam->hari) === $hariIni; @endphp
+
+                            <div class="jam-tile {{ $hariItu ? 'ini' : '' }} {{ $jam->tutup ? 'libur' : '' }}">
+                                <span class="jam-nama">{{ ucfirst($jam->hari) }}</span>
+
+                                <strong class="jam-waktu">
+                                    @if ($jam->tutup)
+                                        Tutup
+                                    @else
+                                        {{ substr($jam->jam_buka ?? '', 0, 5) }} &ndash; {{ substr($jam->jam_tutup ?? '', 0, 5) }}
+                                    @endif
+                                </strong>
+
+                                @if ($hariItu)<em>Hari ini</em>@endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="outlet-kosong">Jam operasional belum tersedia.</p>
+                @endif
             </div>
 
         </section>

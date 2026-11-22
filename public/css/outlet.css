@@ -1,13 +1,22 @@
-/* =====================================================================
-   public/css/outlet.css — gaya khusus halaman Outlet (tanpa foto)
-   Dimuat setelah layout.css (memakai warna dari sana). Class berawalan "outlet-".
-   ===================================================================== */
-
 .outlet-page {
+    position: relative;
+    isolation: isolate;
     max-width: 1240px;
     margin: 0 auto;
-    padding: 36px 24px 64px;
+    padding: 36px 24px 72px;
     box-sizing: border-box;
+}
+/* cahaya oranye lembut di latar */
+.outlet-page::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -60px;
+    right: -120px;
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle, rgba(255, 122, 0, .16), transparent 65%);
+    pointer-events: none;
 }
 
 /* ---------- Judul ---------- */
@@ -30,30 +39,52 @@
 }
 .outlet-back:hover { filter: brightness(1.15); }
 
-/* ---------- Susunan: kiri (info + jam), kanan (peta tinggi) ---------- */
-.outlet-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    gap: 24px;
-    align-items: stretch;
-    margin-bottom: 48px;
-}
-.outlet-left { display: flex; flex-direction: column; gap: 24px; }
+.outlet-item { margin-bottom: 56px; }
 
-/* ---------- Kartu umum ---------- */
-.outlet-card {
-    background: var(--tw-sf);
+/* =====================================================================
+   PANEL: info di kiri, peta di kanan (peta terlihat penuh, tidak tertutup)
+   Keduanya berada dalam satu kotak besar bersudut bulat.
+   ===================================================================== */
+.outlet-stage {
+    display: grid;
+    grid-template-columns: 440px minmax(0, 1fr);
+    min-height: 600px;
+    border-radius: 28px;
+    overflow: hidden;
     border: 1px solid var(--tw-bd);
-    border-radius: 22px;
-    padding: 26px;
+    box-shadow: var(--tw-shadow);
+    background: var(--tw-sf);
+}
+
+/* peta (kolom kanan) dibuat gelap supaya menyatu dengan tema */
+.outlet-mapbox { grid-column: 2; grid-row: 1; position: relative; min-height: 600px; background: #1b150f; }
+.outlet-mapbox iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    filter: invert(92%) hue-rotate(180deg) saturate(.85) contrast(.95);
+}
+
+/* info (kolom kiri) dengan cahaya oranye lembut di pojok */
+.outlet-float {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 34px 32px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    background:
+        radial-gradient(circle at 0 0, rgba(255, 122, 0, .16), transparent 55%),
+        var(--tw-sf);
+    border-right: 1px solid var(--tw-bd);
 }
 
 .outlet-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.outlet-label { color: var(--tw-or-d); font-size: 11.5px; font-weight: 800; letter-spacing: .12em; }
-.outlet-card h2 { margin: 0; font-size: 30px; font-weight: 800; line-height: 1.2; }
+.outlet-label { color: var(--tw-or); font-size: 11.5px; font-weight: 800; letter-spacing: .14em; }
+.outlet-float h2 { margin: 0; font-size: 38px; font-weight: 800; line-height: 1.1; letter-spacing: -.02em; }
 
 /* label buka / tutup */
 .outlet-status {
@@ -68,22 +99,26 @@
 .outlet-status i { width: 8px; height: 8px; border-radius: 50%; display: block; background: currentColor; }
 .outlet-status.buka  { background: rgba(61, 220, 132, .14); color: #3ddc84; }
 .outlet-status.tutup { background: rgba(255, 107, 87, .14); color: #ff8a78; }
+.outlet-status.buka i { box-shadow: 0 0 0 4px rgba(61, 220, 132, .22); }
 
-/* kotak jam hari ini */
-.outlet-today {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    background: var(--tw-or-l);
-    border: 1px solid var(--tw-or);
-    border-radius: 16px;
-    padding: 14px 18px;
-}
+/* jam hari ini (angka besar) */
+.outlet-today { display: flex; flex-direction: column; gap: 2px; padding: 4px 0 6px; }
 .outlet-today small { color: var(--tw-mu); font-size: 13px; }
-.outlet-today strong { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.outlet-today strong {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(90deg, #ffb04d, var(--tw-or));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.outlet-today strong span { opacity: .6; }
+.outlet-today em { font-style: normal; color: var(--tw-mu); font-size: 13px; }
 
-/* baris alamat / telepon */
+/* alamat & telepon */
 .outlet-row { display: flex; gap: 14px; align-items: flex-start; }
 .outlet-ico {
     flex: none;
@@ -94,7 +129,7 @@
     display: grid;
     place-items: center;
 }
-.outlet-ico svg, .outlet-judul svg {
+.outlet-ico svg {
     width: 20px;
     height: 20px;
     fill: none;
@@ -104,17 +139,17 @@
     stroke-linejoin: round;
 }
 .outlet-row small { display: block; color: var(--tw-mu); font-size: 12px; margin-bottom: 2px; }
-.outlet-row p { margin: 0; font-size: 15px; line-height: 1.5; }
-.outlet-desc { margin: 0; color: var(--tw-mu); font-size: 14.5px; line-height: 1.6; }
+.outlet-row p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.outlet-desc { margin: 0; color: var(--tw-mu); font-size: 14px; line-height: 1.6; }
 
 /* tombol */
-.outlet-actions { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 4px; }
+.outlet-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px; }
 .outlet-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 22px;
+    padding: 12px 20px;
     border-radius: 14px;
     font-size: 14px;
     font-weight: 700;
@@ -127,47 +162,57 @@
 .outlet-btn.wa   { background: var(--tw-wa); }
 .outlet-btn.wa img { width: 20px; height: 20px; flex: none; }
 
-/* ---------- Jam operasional ---------- */
-.outlet-judul { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 18px; font-weight: 800; }
-
-.jam-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.jam-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    font-size: 14.5px;
+/* =====================================================================
+   JAM OPERASIONAL: satu kotak per hari
+   ===================================================================== */
+.outlet-jam {
+    margin-top: 24px;
+    background: var(--tw-sf);
+    border: 1px solid var(--tw-bd);
+    border-radius: 26px;
+    padding: 30px;
 }
-.jam-hari { font-weight: 700; display: inline-flex; align-items: center; gap: 10px; }
-.jam-hari em {
+.outlet-jam h3 { margin: 0; font-size: 22px; font-weight: 800; }
+.outlet-jam > p { margin: 4px 0 20px; color: var(--tw-mu); font-size: 14px; }
+
+.jam-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+
+.jam-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 8px;
+    text-align: center;
+    background: var(--tw-bg);
+    border: 1px solid var(--tw-bd);
+    border-radius: 18px;
+}
+.jam-nama  { color: var(--tw-mu); font-size: 13px; font-weight: 600; }
+.jam-waktu { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* hari ini */
+.jam-tile.ini {
+    background: var(--tw-or-l);
+    border-color: var(--tw-or);
+    box-shadow: 0 0 22px rgba(255, 122, 0, .25);
+}
+.jam-tile.ini .jam-nama { color: var(--tw-tx); }
+.jam-tile em {
     font-style: normal;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10.5px;
+    font-weight: 800;
     background: var(--tw-or);
     color: #fff;
     padding: 2px 9px;
     border-radius: 999px;
 }
-.jam-waktu { color: var(--tw-mu); font-variant-numeric: tabular-nums; }
-.jam-row.ini { background: var(--tw-or-l); border-color: var(--tw-or); }
-.jam-row.ini .jam-waktu { color: var(--tw-tx); font-weight: 700; }
-.jam-row.libur .jam-hari,
-.jam-row.libur .jam-waktu { opacity: .55; }
-.outlet-kosong { margin: 0; color: var(--tw-mu); }
 
-/* ---------- Peta (mengisi tinggi kolom kiri) ---------- */
-.outlet-map {
-    position: relative;
-    min-height: 420px;
-    background: var(--tw-sf);
-    border: 1px solid var(--tw-bd);
-    border-radius: 22px;
-    overflow: hidden;
-}
-.outlet-map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+/* hari libur */
+.jam-tile.libur .jam-waktu { color: var(--tw-mu); font-weight: 600; }
+.jam-tile.libur:not(.ini) { opacity: .6; }
+
+.outlet-kosong { margin: 0; color: var(--tw-mu); }
 
 /* data kosong */
 .outlet-kosong-card {
@@ -178,10 +223,21 @@
     color: var(--tw-mu);
 }
 
-/* ---------- Responsif ---------- */
+@media (max-width: 1100px) { .jam-grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* =====================================================================
+   RESPONSIF
+   ===================================================================== */
 @media (max-width: 960px) {
-    .outlet-layout { grid-template-columns: 1fr; }
-    .outlet-map { min-height: 340px; }
     .outlet-head h1 { font-size: 26px; }
-    .outlet-card { padding: 22px; }
+
+    /* HP: peta di atas, info di bawahnya (tidak saling menutupi) */
+    .outlet-stage { display: block; min-height: 0; }
+    .outlet-mapbox { min-height: 300px; height: 300px; }
+    .outlet-float { border-right: 0; border-top: 1px solid var(--tw-bd); padding: 24px 20px; }
+    .outlet-float h2 { font-size: 30px; }
+    .outlet-today strong { font-size: 36px; }
+
+    .outlet-jam { padding: 22px 16px; }
+    .jam-grid { grid-template-columns: repeat(2, 1fr); }
 }

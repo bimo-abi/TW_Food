@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -197,6 +198,7 @@ class AuthController extends Controller
                 'jenis_pelanggan' => $pengguna->jenis_pelanggan,
                 'status_aktif' => $pengguna->status_aktif,
                 'status_verifikasi' => $pengguna->status_verifikasi,
+                'foto_profil' => $this->profilePhotoUrl($pengguna->foto_profil),
             ],
         ], 200);
     }
@@ -235,8 +237,53 @@ class AuthController extends Controller
                 'jenis_pelanggan' => $pengguna->jenis_pelanggan,
                 'status_aktif' => $pengguna->status_aktif,
                 'status_verifikasi' => $pengguna->status_verifikasi,
+                'foto_profil' => $this->profilePhotoUrl($pengguna->foto_profil),
             ],
         ], 200);
+    }
+
+    /** Unggah foto profil milik pengguna yang sedang login. */
+    public function updateProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'foto_profil' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ], [
+            'foto_profil.required' => 'Pilih foto profil terlebih dahulu.',
+            'foto_profil.image' => 'File harus berupa gambar.',
+            'foto_profil.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
+            'foto_profil.max' => 'Ukuran foto maksimal 5 MB.',
+        ]);
+
+        $pengguna = $request->user();
+        $oldPath = $pengguna->foto_profil;
+        $newPath = $request->file('foto_profil')->store('profiles', 'public');
+
+        if (!$newPath) {
+            return response()->json(['message' => 'Foto profil gagal disimpan.'], 500);
+        }
+
+        $pengguna->foto_profil = $newPath;
+        $pengguna->save();
+
+        if ($oldPath && str_starts_with($oldPath, 'profiles/') && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        return response()->json([
+            'message' => 'Foto profil berhasil diperbarui.',
+            'data' => [
+                'foto_profil' => $this->profilePhotoUrl($newPath),
+            ],
+        ], 200);
+    }
+
+    private function profilePhotoUrl(?string $path): ?string
+    {
+        if (!$path || !str_starts_with($path, 'profiles/')) {
+            return null;
+        }
+
+        return '/api/media/profiles/' . basename($path);
     }
 
 }

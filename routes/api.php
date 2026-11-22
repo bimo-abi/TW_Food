@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 use App\Http\Controllers\Api\AlamatController;
 use App\Http\Controllers\Api\AuthController;
@@ -46,6 +47,44 @@ Route::get('/resep/{id}', [ResepController::class, 'show']);
 
 Route::get('/outlet', [OutletController::class, 'index']);
 
+// Gambar produk disajikan melalui route API agar respons melewati middleware CORS.
+Route::get('/media/products/{filename}', function (string $filename) {
+    abort_unless(
+        preg_match('/\\A[A-Za-z0-9][A-Za-z0-9._-]*\\.(?:png|jpe?g|webp)\\z/i', $filename) === 1,
+        404
+    );
+
+    $relativePath = 'products/' . $filename;
+    $disk = Storage::disk('public');
+
+    abort_unless($disk->exists($relativePath), 404);
+
+    $filePath = $disk->path($relativePath);
+
+    return response()->file($filePath, [
+        'Content-Type' => mime_content_type($filePath) ?: 'application/octet-stream',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->where('filename', '[A-Za-z0-9][A-Za-z0-9._-]*');
+
+// Foto profil disajikan melalui API dengan nama file yang tervalidasi.
+Route::get('/media/profiles/{filename}', function (string $filename) {
+    abort_unless(
+        preg_match('/\A[A-Za-z0-9][A-Za-z0-9._-]*\.(?:png|jpe?g|webp)\z/i', $filename) === 1,
+        404
+    );
+
+    $relativePath = 'profiles/' . $filename;
+    $disk = Storage::disk('public');
+    abort_unless($disk->exists($relativePath), 404);
+
+    $filePath = $disk->path($relativePath);
+    return response()->file($filePath, [
+        'Content-Type' => mime_content_type($filePath) ?: 'application/octet-stream',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->where('filename', '[A-Za-z0-9][A-Za-z0-9._-]*');
+
 // Webhook Midtrans
 // Tidak menggunakan auth:sanctum karena dipanggil oleh Midtrans.
 Route::post(
@@ -65,6 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::patch('/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/profile/photo', [AuthController::class, 'updateProfilePhoto']);
 
     // Alamat pengguna
     Route::get('/alamat', [AlamatController::class, 'index']);

@@ -8,21 +8,13 @@
 @endpush
 
 @section('content')
-    <div class="page-header d-print-none mb-3">
-        <div class="row align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Manajemen</div>
-                <h2 class="page-title">Produk</h2>
-                <div class="text-secondary mt-1">Kelola produk TWFood.</div>
-            </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 d-print-none">
+        <div class="text-secondary">Kelola produk TWFood: foto, deskripsi, varian, dan status.</div>
 
-            <div class="col-auto">
-                <a href="{{ route('admin.produk.create') }}" class="btn btn-primary">
-                    <i class="ti ti-plus me-1"></i>
-                    Tambah Produk
-                </a>
-            </div>
-        </div>
+        <a href="{{ route('admin.produk.create') }}" class="btn btn-primary">
+            <i class="ti ti-plus me-1"></i>
+            Tambah Produk
+        </a>
     </div>
 
     {{-- Pesan sukses & error --}}
@@ -56,11 +48,11 @@
             <table class="table table-vcenter card-table produk-table">
                 <thead>
                     <tr>
-                        <th>No.</th>
-                        <th>Foto</th>
+                        <th class="produk-col-no">No.</th>
+                        <th class="produk-col-foto">Foto</th>
                         <th class="produk-name">Nama Produk</th>
                         <th class="produk-description">Deskripsi</th>
-                        <th>Status</th>
+                        <th class="produk-col-status">Status</th>
                         <th class="produk-action-column">Aksi</th>
                     </tr>
                 </thead>
@@ -70,34 +62,47 @@
                         @php $aktif = (bool) $item->status_aktif; @endphp
 
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
+                            <td class="text-secondary">{{ $loop->iteration }}</td>
 
                             <td>
                                 @if ($item->foto_produk)
                                     <img src="{{ asset('storage/' . $item->foto_produk) }}" alt="{{ $item->nama_produk }}"
-                                        class="rounded produk-thumb">
+                                        class="produk-thumb">
                                 @else
-                                    <span class="text-secondary">Tidak ada foto</span>
+                                    <span class="produk-thumb produk-thumb-kosong" title="Belum ada foto">
+                                        <i class="ti ti-photo-off"></i>
+                                    </span>
                                 @endif
                             </td>
 
                             <td class="produk-name">
-                                <span class="fw-bold">{{ $item->nama_produk }}</span>
+                                <span class="produk-nama">{{ $item->nama_produk }}</span>
                             </td>
 
                             <td class="produk-description">
-                                {{ $item->deskripsi ? Str::limit($item->deskripsi, 80) : '-' }}
+                                <span class="produk-deskripsi">
+                                    {{ $item->deskripsi ? Str::limit($item->deskripsi, 140) : '-' }}
+                                </span>
                             </td>
 
-                            <td>
-                                <span class="badge {{ $aktif ? 'bg-success-lt' : 'bg-secondary-lt' }}">
-                                    {{ $aktif ? 'Aktif' : 'Tidak Aktif' }}
-                                </span>
+                            {{-- Status: switch (dipakai sebagai satu-satunya penanda status) --}}
+                            <td class="produk-col-status">
+                                @include('admin.partials.status-switch', [
+                                    'action' => route('admin.produk.toggle-status', $item->id_produk),
+                                    'aktif' => $aktif,
+                                    'nama' => 'produk',
+                                ])
+
+                                <noscript>
+                                    <button type="submit" class="btn btn-sm btn-outline-warning ms-2">
+                                        Simpan
+                                    </button>
+                                </noscript>
+                                </form>
                             </td>
 
                             <td class="produk-action-column">
                                 <div class="produk-actions">
-
                                     <a href="{{ route('admin.produk.edit', $item->id_produk) }}"
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="ti ti-edit me-1"></i>
@@ -105,38 +110,21 @@
                                     </a>
 
                                     <a href="{{ route('admin.varian.index', $item->id_produk) }}"
-                                        class="btn btn-sm btn-outline-info">
+                                        class="btn btn-sm btn-outline-secondary">
                                         <i class="ti ti-layers-intersect me-1"></i>
                                         Varian
                                     </a>
 
-                                    {{-- Switch aktif / nonaktif --}}
-
-                                        @include('admin.partials.status-switch', [
-                                            'action' => route('admin.produk.toggle-status', $item->id_produk),
-                                            'aktif' => $aktif,
-                                            'nama' => 'produk',
-                                        ])
-
-                                        <noscript>
-                                            <button type="submit" class="btn btn-sm btn-outline-warning ms-2">
-                                                Simpan
-                                            </button>
-                                        </noscript>
-                                    </form>
-
-                                    {{-- Hapus --}}
                                     <form action="{{ route('admin.produk.destroy', $item->id_produk) }}" method="POST"
-                                        class="d-inline" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
+                                        class="m-0" onsubmit="return confirm('Yakin ingin menghapus produk ini?')">
                                         @csrf
                                         @method('DELETE')
 
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="ti ti-trash me-1"></i>
-                                            Hapus
+                                        <button type="submit" class="btn btn-sm btn-icon btn-outline-danger"
+                                            title="Hapus produk" aria-label="Hapus produk">
+                                            <i class="ti ti-trash"></i>
                                         </button>
                                     </form>
-
                                 </div>
                             </td>
                         </tr>

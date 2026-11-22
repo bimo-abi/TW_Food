@@ -4,12 +4,8 @@
 @section('page-title', 'Edit Produk')
 
 @section('content')
-    <div class="page-header mb-3">
-        <div class="page-pretitle">Manajemen</div>
-        <h2 class="page-title">Edit Produk</h2>
-        <div class="text-secondary mt-1">
-            Perbarui informasi produk TWFood.
-        </div>
+    <div class="text-secondary mb-4">
+        Perbarui informasi produk TWFood.
     </div>
 
     {{-- Error validasi --}}

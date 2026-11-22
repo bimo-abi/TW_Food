@@ -5,26 +5,18 @@
 @section('page-title', 'Detail Verifikasi Pelanggan')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="row mb-4 align-items-center">
-            <div class="col">
-                <h2 class="mb-1">Detail Pelanggan</h2>
-                <p class="text-secondary mb-0">
-                    Periksa data akun dan profil bisnis sebelum melakukan verifikasi.
-                </p>
-            </div>
-
-            <div class="col-auto">
-                <a
-                    href="{{ route('admin.verifikasi-pelanggan.index') }}"
-                    class="btn btn-outline-secondary"
-                >
-                    <i class="ti ti-arrow-left me-1"></i>
-                    Kembali
-                </a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="text-secondary">
+            Periksa data akun dan profil bisnis sebelum melakukan verifikasi.
         </div>
 
+        <a href="{{ route('admin.verifikasi-pelanggan.index') }}" class="btn btn-outline-secondary">
+            <i class="ti ti-arrow-left me-1"></i>
+            Kembali
+        </a>
+    </div>
+
+    <div>
         @if (session('success'))
             <div class="alert alert-success" role="alert">
                 {{ session('success') }}
@@ -46,28 +38,28 @@
 
                     <div class="card-body">
                         <dl class="row mb-0">
-                            <dt class="col-sm-5 mb-3">Nama</dt>
-                            <dd class="col-sm-7 mb-3">
+                            <dt class="col-sm-5 mb-3 text-secondary fw-normal">Nama</dt>
+                            <dd class="col-sm-7 mb-3 fw-semibold">
                                 {{ $pelanggan->nama ?? '-' }}
                             </dd>
 
-                            <dt class="col-sm-5 mb-3">Email</dt>
-                            <dd class="col-sm-7 mb-3">
+                            <dt class="col-sm-5 mb-3 text-secondary fw-normal">Email</dt>
+                            <dd class="col-sm-7 mb-3 fw-semibold">
                                 {{ $pelanggan->email ?? '-' }}
                             </dd>
 
-                            <dt class="col-sm-5 mb-3">Jenis Pelanggan</dt>
-                            <dd class="col-sm-7 mb-3">
+                            <dt class="col-sm-5 mb-3 text-secondary fw-normal">Jenis Pelanggan</dt>
+                            <dd class="col-sm-7 mb-3 fw-semibold">
                                 {{ strtoupper($pelanggan->jenis_pelanggan) }}
                             </dd>
 
-                            <dt class="col-sm-5 mb-3">Status Akun</dt>
-                            <dd class="col-sm-7 mb-3">
+                            <dt class="col-sm-5 mb-3 text-secondary fw-normal">Status Akun</dt>
+                            <dd class="col-sm-7 mb-3 fw-semibold">
                                 {{ $pelanggan->status_aktif ? 'Aktif' : 'Tidak Aktif' }}
                             </dd>
 
-                            <dt class="col-sm-5 mb-3">Status Verifikasi</dt>
-                            <dd class="col-sm-7 mb-3">
+                            <dt class="col-sm-5 mb-3 text-secondary fw-normal">Status Verifikasi</dt>
+                            <dd class="col-sm-7 mb-3 fw-semibold">
                                 @switch($pelanggan->status_verifikasi)
                                     @case('menunggu_verifikasi')
                                         <span class="badge bg-yellow-lt">
@@ -107,53 +99,53 @@
                     <div class="card-body">
                         @if ($pelanggan->profilBisnis)
                             <dl class="row mb-0">
-                                <dt class="col-sm-5 mb-3">Nama Bisnis</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Nama Bisnis</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->nama_bisnis ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Jenis Bisnis</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Jenis Bisnis</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->jenis_bisnis ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Nama PIC</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Nama PIC</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->nama_pic ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Telepon Bisnis</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Telepon Bisnis</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->nomor_telepon_bisnis ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Alamat Bisnis</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Alamat Bisnis</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->alamat_bisnis ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Kota</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Kota</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->kota ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Provinsi</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Provinsi</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->provinsi ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">Kode Pos</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">Kode Pos</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->kode_pos ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">NIB</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">NIB</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->nib ?? '-' }}
                                 </dd>
 
-                                <dt class="col-sm-5 mb-3">NPWP</dt>
-                                <dd class="col-sm-7 mb-3">
+                                <dt class="col-sm-5 mb-3 text-secondary fw-normal">NPWP</dt>
+                                <dd class="col-sm-7 mb-3 fw-semibold">
                                     {{ $pelanggan->profilBisnis->npwp ?? '-' }}
                                 </dd>
                             </dl>

@@ -1,0 +1,228 @@
+/* Khusus halaman Dashboard admin
+   Taruh di public/css/admin/dashboard.css (dipanggil otomatis lewat @push di dashboard.blade.php) */
+
+/* ---------- banner sambutan ---------- */
+.dash-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.6rem 1.8rem;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(120deg, #E31E24 0%, #F05A22 55%, #F7941D 100%);
+    box-shadow: 0 10px 24px rgba(227, 30, 36, .22);
+}
+.dash-hero::before,
+.dash-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .12);
+}
+.dash-hero::before { width: 220px; height: 220px; right: -60px; top: -90px; }
+.dash-hero::after  { width: 140px; height: 140px; right: 140px; bottom: -80px; background: rgba(246, 214, 90, .25); }
+
+.dash-hero-isi { position: relative; z-index: 1; }
+.dash-hero-sub {
+    font-size: .8rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity: .9;
+}
+.dash-hero-title {
+    margin: .25rem 0;
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #fff;
+}
+.dash-hero-text { opacity: .95; }
+.dash-hero-btn {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    color: #E31E24;
+    font-weight: 700;
+    padding: .6rem 1.2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+}
+.dash-hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .15);
+    color: #B8161B;
+}
+
+/* ---------- kartu KPI ---------- */
+.main-content .card.kpi {
+    border-top: 4px solid var(--kpi);
+    transition: transform .15s, box-shadow .15s;
+}
+.main-content a.card.kpi:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(16, 24, 40, .10);
+}
+.kpi-oranye { --kpi: #F7941D; }
+.kpi-hijau  { --kpi: #2fb344; }
+.kpi-merah  { --kpi: #E31E24; }
+.kpi-ungu   { --kpi: #ae3ec9; }
+
+.kpi .h1 { font-weight: 800; }
+.kpi .text-secondary { font-weight: 600; }
+.kpi .avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 14px;
+    font-size: 1.4rem;
+}
+
+/* ---------- daftar (stok menipis & produk terlaris) ---------- */
+.rank {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    font-weight: 800;
+    background: #f1f3f6;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+.rank-1 { background: #F6D65A; color: #7a5a00; }
+.rank-2 { background: #e6e8ec; color: #4b5563; }
+.rank-3 { background: #f7c9a0; color: #8a4a12; }
+
+/* ---------- tabel ---------- */
+.main-content .card-footer {
+    background: #f8f9fb;
+    border-top: 1px solid #eceff3;
+}
+
+
+/* ---------- grafik penjualan ---------- */
+.sales-wrap {
+    position: relative;
+    height: 300px;
+}
+.sales-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    color: #9aa3af;
+    font-weight: 600;
+    pointer-events: none;
+}
+.sales-empty[hidden] { display: none; }
+.sales-empty i { font-size: 2rem; color: #F7941D; }
+
+
+/* ---------- header kartu dengan ikon ---------- */
+.main-content .card-title {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+.judul-ikon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+.ikon-merah  { background: #FDECEC; color: #E31E24; }
+.ikon-oranye { background: #FFF0DC; color: #F7941D; }
+.lihat-semua {
+    font-size: .82rem;
+    font-weight: 700;
+    color: #E31E24;
+    text-decoration: none;
+}
+.lihat-semua:hover { text-decoration: underline; }
+
+/* ---------- daftar ---------- */
+.dash-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.dash-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem 0;
+}
+.dash-item + .dash-item {
+    border-top: 1px solid #f1f3f6;
+}
+.dash-item:first-child { padding-top: .2rem; }
+.dash-item-nama {
+    font-weight: 700;
+    color: #2b2b2b;
+    line-height: 1.25;
+}
+.dash-item-sub {
+    font-size: .8rem;
+    color: #8b95a3;
+    margin-top: 2px;
+}
+.dash-lainnya {
+    margin-top: .6rem;
+    padding-top: .8rem;
+    border-top: 1px solid #f1f3f6;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #8b95a3;
+}
+
+/* pil status stok */
+.stok-pil,
+.terjual-pil {
+    flex-shrink: 0;
+    font-size: .76rem;
+    font-weight: 700;
+    padding: .3rem .75rem;
+    border-radius: 999px;
+}
+.stok-habis { background: #FDECEC; color: #D12027; }
+.stok-sisa  { background: #FFF4D6; color: #9a6a00; }
+.terjual-pil { background: #f1f3f6; color: #4b5563; }
+
+/* ---------- keadaan kosong di tengah kartu ---------- */
+.dash-kosong-tengah {
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: .35rem;
+    padding: 1rem;
+}
+.dash-kosong-tengah i {
+    font-size: 2.6rem;
+    line-height: 1;
+}
+.dash-kosong-tengah .judul {
+    font-weight: 800;
+    color: #2b2b2b;
+}
+.dash-kosong-tengah .sub {
+    font-size: .85rem;
+    color: #8b95a3;
+    max-width: 320px;
+}
+.ikon-hijau        { color: #2fb344; }
+.ikon-oranye-teks  { color: #F7941D; }

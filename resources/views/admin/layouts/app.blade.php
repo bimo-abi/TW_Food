@@ -15,6 +15,8 @@
 
     {{-- Admin layout CSS (pindah css admin ke public/css/admin/admin.css)--}}
     <link rel="stylesheet" href="{{ asset('css/admin/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/tema.css') }}">
     @stack('styles')
 
 </head>
@@ -26,8 +28,8 @@
         <aside class="sidebar">
 
             <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-                <i class="ti ti-leaf"></i>
-                TWFood
+                <span class="tw-logo">TWfood</span>
+                <span class="tw-logo-teks">TWFood<small>Tewil Food</small></span>
             </a>
 
             <div class="sidebar-label">Menu Utama</div>

@@ -1,0 +1,159 @@
+/* Tema umum admin TWFood (topbar, kartu, tabel, tombol, form)
+   Taruh di public/css/admin/tema.css (dipanggil SETELAH sidebar.css) */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --tw-merah: #E31E24;
+    --tw-oranye: #F7941D;
+}
+
+/* =====================================================
+   TAMPILAN UMUM ADMIN (dashboard & semua halaman)
+   ===================================================== */
+
+/* warna utama Tabler -> merah TWFood (tombol, link, pagination) */
+:root {
+    --tblr-primary: #E31E24;
+    --tblr-primary-rgb: 227, 30, 36;
+    --tblr-link-color: #E31E24;
+    --tblr-link-hover-color: #B8161B;
+}
+
+/* area konten */
+.main-content {
+    background: #f5f7fb;
+}
+.page-content {
+    padding-top: 1.25rem;
+}
+
+/* topbar */
+.topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #eceff3;
+    box-shadow: 0 1px 6px rgba(16, 24, 40, .04);
+}
+.topbar h3 {
+    font-weight: 800;
+    color: #2b2b2b;
+}
+.topbar-user > span {
+    font-weight: 600;
+    color: #4b4b4b;
+}
+.logout-button {
+    background: var(--tw-merah);
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    padding: .45rem .9rem;
+    font-weight: 600;
+    transition: background .15s;
+}
+.logout-button:hover {
+    background: #B8161B;
+}
+
+/* kartu */
+.main-content .card {
+    border: 1px solid #eceff3;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(16, 24, 40, .04);
+    overflow: hidden;
+}
+.main-content .card-header {
+    background: #ffffff;
+    border-bottom: 1px solid #f1f3f6;
+}
+.main-content .card-title {
+    font-weight: 700;
+    color: #2b2b2b;
+}
+
+/* tabel */
+.main-content .table thead th {
+    background: #f8f9fb;
+    color: #6b7280;
+    font-size: .72rem;
+    letter-spacing: .04em;
+    font-weight: 700;
+    border-bottom: 1px solid #eceff3;
+}
+.main-content .table tbody tr:hover {
+    background: #fafbfc;
+}
+
+/* tombol utama */
+.main-content .btn-primary {
+    background: var(--tw-merah);
+    border-color: var(--tw-merah);
+    border-radius: 10px;
+    font-weight: 600;
+}
+.main-content .btn-primary:hover {
+    background: #B8161B;
+    border-color: #B8161B;
+}
+.main-content .btn-outline-primary {
+    color: var(--tw-merah);
+    border-color: var(--tw-merah);
+    border-radius: 10px;
+}
+.main-content .btn-outline-primary:hover {
+    background: var(--tw-merah);
+    color: #fff;
+}
+
+/* form */
+.main-content .form-control:focus,
+.main-content .form-select:focus {
+    border-color: var(--tw-oranye);
+    box-shadow: 0 0 0 .2rem rgba(247, 148, 29, .2);
+}
+
+/* pagination */
+.main-content .page-item.active .page-link {
+    background: var(--tw-merah);
+    border-color: var(--tw-merah);
+    color: #fff;
+}
+.main-content .page-link {
+    color: var(--tw-merah);
+}
+
+
+/* ---------- font ---------- */
+body,
+.main-content,
+.sidebar,
+button,
+input,
+select,
+textarea {
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+}
+.main-content {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- tabel lebih lega & rapi ---------- */
+.main-content .table th,
+.main-content .table td {
+    padding: .85rem 1.25rem;
+    vertical-align: middle;
+}
+.main-content .table td {
+    font-variant-numeric: tabular-nums;
+}
+.main-content .table tbody tr + tr td {
+    border-top: 1px solid #f1f3f6;
+}
+
+/* ---------- badge ---------- */
+.main-content .badge {
+    font-weight: 600;
+    padding: .35em .7em;
+    border-radius: 8px;
+    font-size: .75rem;
+}

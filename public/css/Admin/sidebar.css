@@ -1,0 +1,79 @@
+:root {
+    --tw-merah: #E31E24;
+    --tw-kuning: #F6D65A;
+    --tw-oranye: #F7941D;
+    --tw-krem: #FFF3E0;
+}
+
+aside.sidebar {
+    background: #ffffff;
+    border-right: 1px solid #eceff3;
+}
+
+/* logo */
+aside.sidebar .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    color: var(--tw-merah);
+    font-weight: 800;
+    font-size: 1.3rem;
+    text-decoration: none;
+}
+.tw-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--tw-merah);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: .7rem;
+    box-shadow: 0 0 0 3px var(--tw-kuning);
+    flex-shrink: 0;
+}
+.tw-logo-teks {
+    line-height: 1.1;
+}
+.tw-logo-teks small {
+    display: block;
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--tw-oranye);
+    margin-top: 2px;
+}
+
+/* label "Menu Utama" */
+aside.sidebar .sidebar-label {
+    color: #9aa3af;
+    font-weight: 700;
+}
+
+/* item menu */
+aside.sidebar .sidebar-menu a {
+    color: #3b3b3b;
+    border-radius: 12px;
+    transition: background .15s, color .15s;
+}
+aside.sidebar .sidebar-menu a i {
+    color: #8b95a3;
+}
+aside.sidebar .sidebar-menu a:hover {
+    background: #f6f7f9;
+    color: var(--tw-merah);
+}
+aside.sidebar .sidebar-menu a:hover i {
+    color: var(--tw-merah);
+}
+
+/* item aktif */
+aside.sidebar .sidebar-menu a.active {
+    background: #FDECEC;
+    color: var(--tw-merah);
+    font-weight: 700;
+}
+aside.sidebar .sidebar-menu a.active i {
+    color: var(--tw-merah);
+}

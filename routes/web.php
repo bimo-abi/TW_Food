@@ -490,6 +490,10 @@ Route::get('/admin/retur/{id_retur}', [ReturController::class, 'show'])
     ->name('admin.retur.show')
     ->middleware('admin');
 
+Route::get('/admin/retur/bukti/{id_bukti_retur}/preview', [ReturController::class, 'previewBukti'])
+    ->name('admin.retur.bukti.preview')
+    ->middleware('admin');
+
 Route::get('/admin/retur/bukti/{id_bukti_retur}', [ReturController::class, 'downloadBukti'])
     ->name('admin.retur.bukti')
     ->middleware('admin');

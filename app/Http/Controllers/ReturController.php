@@ -67,6 +67,36 @@ class ReturController extends Controller
         return view('admin.retur.show', compact('retur'));
     }
 
+    public function previewBukti(int $id_bukti_retur)
+    {
+        $bukti = BuktiRetur::query()
+            ->with('retur.pesanan')
+            ->findOrFail($id_bukti_retur);
+
+        abort_unless($bukti->retur && $bukti->retur->pesanan, 404);
+
+        $path = $bukti->file_bukti;
+        abort_unless(is_string($path) && str_starts_with($path, 'retur/'), 404);
+
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($path), 404, 'Bukti retur tidak ditemukan.');
+
+        $absolutePath = $disk->path($path);
+        $mime = mime_content_type($absolutePath) ?: 'application/octet-stream';
+        abort_unless(
+            str_starts_with($mime, 'image/') || str_starts_with($mime, 'video/'),
+            415,
+            'Format bukti tidak dapat ditampilkan.'
+        );
+
+        return response()->file($absolutePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store, max-age=0',
+        ]);
+    }
+
     public function downloadBukti(int $id_bukti_retur)
     {
         $bukti = BuktiRetur::query()

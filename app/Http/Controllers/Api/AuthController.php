@@ -283,7 +283,7 @@ class AuthController extends Controller
             return null;
         }
 
-        return '/api/media/profiles/' . basename($path);
+        return '/storage/profiles/' . basename($path);
     }
 
 }

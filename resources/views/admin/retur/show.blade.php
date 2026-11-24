@@ -62,14 +62,43 @@
                 </div>
                 <div class="card-body">
                     @forelse ($retur->buktiRetur as $bukti)
-                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom py-3 {{ $loop->first ? 'pt-0' : '' }}">
-                            <div class="min-w-0">
-                                <div class="fw-semibold">Bukti {{ $loop->iteration }} · {{ ucfirst($bukti->jenis_media) }}</div>
-                                <div class="text-secondary small">{{ $bukti->created_at?->format('d/m/Y H:i') ?? '-' }}</div>
+                        @php
+                            $previewUrl = route('admin.retur.bukti.preview', $bukti->id_bukti_retur);
+                            $downloadUrl = route('admin.retur.bukti', $bukti->id_bukti_retur);
+                            $isVideo = strtolower((string) $bukti->jenis_media) === 'video';
+                        @endphp
+                        <div class="border-bottom py-3 {{ $loop->first ? 'pt-0' : '' }}">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                <div class="min-w-0">
+                                    <div class="fw-semibold">Bukti {{ $loop->iteration }} · {{ ucfirst($bukti->jenis_media) }}</div>
+                                    <div class="text-secondary small">{{ $bukti->created_at?->format('d/m/Y H:i') ?? '-' }}</div>
+                                </div>
+                                <a class="btn btn-sm btn-outline-primary" href="{{ $downloadUrl }}">
+                                    <i class="ti ti-download me-1"></i>Unduh
+                                </a>
                             </div>
-                            <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.retur.bukti', $bukti->id_bukti_retur) }}">
-                                <i class="ti ti-download me-1"></i>Unduh
-                            </a>
+                            @if ($isVideo)
+                                <video
+                                    class="w-100 rounded border bg-dark"
+                                    style="max-height: 360px;"
+                                    controls
+                                    preload="metadata"
+                                    playsinline
+                                >
+                                    <source src="{{ $previewUrl }}">
+                                    Browser tidak mendukung pemutaran video.
+                                </video>
+                            @else
+                                <a href="{{ $previewUrl }}" target="_blank" rel="noopener" class="d-inline-block">
+                                    <img
+                                        src="{{ $previewUrl }}"
+                                        alt="Bukti foto retur {{ $loop->iteration }}"
+                                        class="img-fluid rounded border"
+                                        style="max-height: 300px; object-fit: contain;"
+                                        loading="lazy"
+                                    >
+                                </a>
+                            @endif
                         </div>
                     @empty
                         <div class="empty py-4">

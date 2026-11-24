@@ -392,46 +392,41 @@
                         @csrf
                         @method('PUT')
 
-                    @if ($pesanan->kurir === 'gosend')
                         <div class="mb-3">
-                            <label for="tautan_pelacakan" class="form-label">
-                                Tautan Pelacakan GoSend
-                            </label>
+                            <label for="kurir" class="form-label">Pilih Kurir</label>
+                            <select name="kurir" id="kurir" class="form-select @error('kurir') is-invalid @enderror" required>
+                                <option value="">Pilih kurir</option>
+                                <option value="gosend" @selected(old('kurir', $pesanan->kurir) === 'gosend')>GoSend</option>
+                                <option value="jnt" @selected(old('kurir', $pesanan->kurir) === 'jnt')>J&amp;T</option>
+                            </select>
+                            @error('kurir')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
 
+                        <div class="mb-3" id="field-tautan-gosend">
+                            <label for="tautan_pelacakan" class="form-label">Tautan Tracking GoSend</label>
                             <input type="url" name="tautan_pelacakan" id="tautan_pelacakan"
                                 value="{{ old('tautan_pelacakan', $pesanan->tautan_pelacakan) }}"
-                                class="form-control @error('tautan_pelacakan') is-invalid @enderror" placeholder="https://..."
-                                maxlength="255">
-
+                                class="form-control @error('tautan_pelacakan') is-invalid @enderror"
+                                placeholder="https://..." maxlength="255">
                             @error('tautan_pelacakan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-
-                            <small class="form-hint">
-                                Masukkan tautan tracking yang diberikan oleh GoSend.
-                            </small>
+                            <small class="form-hint">Masukkan tautan tracking dari GoSend.</small>
                         </div>
 
-                    @elseif ($pesanan->kurir === 'jnt')
-                        <div class="mb-3">
-                            <label for="nomor_resi" class="form-label">
-                                Nomor Resi J&T
-                            </label>
-
+                        <div class="mb-3" id="field-resi-jnt">
+                            <label for="nomor_resi" class="form-label">Nomor Resi J&amp;T</label>
                             <input type="text" name="nomor_resi" id="nomor_resi"
                                 value="{{ old('nomor_resi', $pesanan->nomor_resi) }}"
-                                class="form-control @error('nomor_resi') is-invalid @enderror" placeholder="Masukkan nomor resi J&T"
-                                maxlength="100">
-
+                                class="form-control @error('nomor_resi') is-invalid @enderror"
+                                placeholder="Masukkan nomor resi J&amp;T" maxlength="100">
                             @error('nomor_resi')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-
-                            <small class="form-hint">
-                                Masukkan nomor resi/AWB yang diberikan oleh J&T.
-                            </small>
+                            <small class="form-hint">Masukkan nomor resi/AWB dari J&amp;T.</small>
                         </div>
-                    @endif
 
                         <button type="submit" class="btn btn-primary">
                             <i class="ti ti-device-floppy me-1"></i>
@@ -713,4 +708,27 @@
             Kembali ke Daftar Pesanan
         </a>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const courier = document.getElementById('kurir');
+            const gosend = document.getElementById('field-tautan-gosend');
+            const jnt = document.getElementById('field-resi-jnt');
+            const tracking = document.getElementById('tautan_pelacakan');
+            const resi = document.getElementById('nomor_resi');
+            if (!courier || !gosend || !jnt) return;
+
+            function syncCourierFields() {
+                const isGosend = courier.value === 'gosend';
+                const isJnt = courier.value === 'jnt';
+                gosend.hidden = !isGosend;
+                jnt.hidden = !isJnt;
+                tracking.required = isGosend;
+                resi.required = isJnt;
+            }
+            courier.addEventListener('change', syncCourierFields);
+            syncCourierFields();
+        });
+    </script>
+
 @endsection

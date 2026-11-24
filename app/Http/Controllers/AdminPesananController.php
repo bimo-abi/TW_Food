@@ -255,40 +255,36 @@ class AdminPesananController extends Controller
         if ($pesanan->jenis_pesanan !== 'delivery') {
             return back()->withErrors([
                 'pengiriman' => 'Informasi pengiriman hanya tersedia untuk pesanan delivery.',
-            ]);
+            ])->withInput();
         }
 
         if ($pesanan->status_pesanan !== 'siap_dikirim') {
             return back()->withErrors([
                 'pengiriman' => 'Informasi tracking hanya dapat disimpan ketika pesanan berstatus siap_dikirim.',
-            ]);
+            ])->withInput();
         }
 
         $data = $request->validate([
+            'kurir' => ['required', 'in:gosend,jnt'],
             'nomor_resi' => ['nullable', 'string', 'max:100'],
             'tautan_pelacakan' => ['nullable', 'url', 'max:255'],
         ]);
 
-        if ($pesanan->kurir === 'gosend' && empty($data['tautan_pelacakan'])) {
+        if ($data['kurir'] === 'gosend' && empty($data['tautan_pelacakan'])) {
             return back()->withErrors([
                 'tautan_pelacakan' => 'Tautan tracking GoSend wajib diisi.',
             ])->withInput();
         }
 
-        if ($pesanan->kurir === 'jnt' && empty($data['nomor_resi'])) {
+        if ($data['kurir'] === 'jnt' && empty($data['nomor_resi'])) {
             return back()->withErrors([
                 'nomor_resi' => 'Nomor resi J&T wajib diisi.',
             ])->withInput();
         }
 
-        if (!in_array($pesanan->kurir, ['gosend', 'jnt'], true)) {
-            return back()->withErrors([
-                'pengiriman' => 'Kurir pesanan belum ditentukan dengan benar.',
-            ]);
-        }
-
-        $pesanan->nomor_resi = $pesanan->kurir === 'jnt' ? $data['nomor_resi'] : null;
-        $pesanan->tautan_pelacakan = $pesanan->kurir === 'gosend' ? $data['tautan_pelacakan'] : null;
+        $pesanan->kurir = $data['kurir'];
+        $pesanan->nomor_resi = $data['kurir'] === 'jnt' ? $data['nomor_resi'] : null;
+        $pesanan->tautan_pelacakan = $data['kurir'] === 'gosend' ? $data['tautan_pelacakan'] : null;
         $pesanan->save();
 
         $this->catatAktivitas(

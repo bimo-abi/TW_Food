@@ -119,6 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pesanan/{id_pesanan}/pembayaran', [StatusPembayaranController::class, 'show']);
     Route::get('/retur', [RiwayatReturController::class, 'index']);
     Route::get('/retur/{id_retur}', [RiwayatReturController::class, 'show']);
+    Route::get('/retur/bukti/{id_bukti_retur}/preview', [RiwayatReturController::class, 'previewBukti'])->name('retur.bukti.preview');
     Route::get('/retur/bukti/{id_bukti_retur}', [RiwayatReturController::class, 'downloadBukti'])->name('retur.bukti');
 
     // Notifikasi akun yang sedang login

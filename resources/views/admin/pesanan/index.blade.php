@@ -8,16 +8,8 @@
         $labelJenis = $jenisPemenuhan === 'pre_order' ? 'Pre-order' : 'Reguler';
     @endphp
 
-    <div class="page-header mb-3">
-        <div class="row align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Transaksi</div>
-                <h2 class="page-title">Pesanan {{ $labelJenis }}</h2>
-                <div class="text-secondary mt-1">
-                    Kelola pesanan {{ strtolower($labelJenis) }} pelanggan TWFood.
-                </div>
-            </div>
-        </div>
+    <div class="text-secondary mb-4">
+        Kelola pesanan {{ strtolower($labelJenis) }} pelanggan TWFood.
     </div>
 
     @if (session('success'))
@@ -30,7 +22,7 @@
     <div class="row row-cards mb-3">
         <div class="col-sm-6 col-lg-3">
             <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => 'reguler']) }}"
-               class="card card-link {{ $jenisPemenuhan === 'reguler' ? 'border-primary' : '' }}">
+               class="card card-link tab-ringkas {{ $jenisPemenuhan === 'reguler' ? 'aktif' : '' }}">
                 <div class="card-body">
                     <div class="subheader">Pesanan Reguler</div>
                     <div class="h1 mb-0">{{ number_format($jumlahReguler) }}</div>
@@ -39,7 +31,7 @@
         </div>
         <div class="col-sm-6 col-lg-3">
             <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => 'pre_order']) }}"
-               class="card card-link {{ $jenisPemenuhan === 'pre_order' ? 'border-primary' : '' }}">
+               class="card card-link tab-ringkas {{ $jenisPemenuhan === 'pre_order' ? 'aktif' : '' }}">
                 <div class="card-body">
                     <div class="subheader">Pesanan Pre-order</div>
                     <div class="h1 mb-0">{{ number_format($jumlahPreOrder) }}</div>
@@ -56,12 +48,12 @@
             <form method="GET" action="{{ route('admin.pesanan.index') }}">
                 <input type="hidden" name="jenis_pemenuhan" value="{{ $jenisPemenuhan }}">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label" for="q">Nomor Pesanan / Nama Pelanggan</label>
                         <input class="form-control" id="q" name="q" value="{{ $filter['q'] ?? '' }}"
                                placeholder="Cari pesanan atau pelanggan">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label" for="status_pesanan">Status Pesanan</label>
                         <select class="form-select" id="status_pesanan" name="status_pesanan">
                             <option value="">Semua status</option>
@@ -80,7 +72,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label" for="status_pembayaran">Status Pembayaran</label>
                         <select class="form-select" id="status_pembayaran" name="status_pembayaran">
                             <option value="">Semua pembayaran</option>
@@ -131,12 +123,14 @@
                                value="{{ $filter['tanggal_selesai'] ?? '' }}">
                     </div>
                 </div>
-                <div class="mt-3 d-flex gap-2">
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                    <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $jenisPemenuhan]) }}"
+                       class="btn btn-outline-secondary">
+                        <i class="ti ti-refresh me-1"></i> Reset
+                    </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="ti ti-filter me-1"></i> Terapkan Filter
                     </button>
-                    <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $jenisPemenuhan]) }}"
-                       class="btn btn-outline-secondary">Reset</a>
                 </div>
             </form>
         </div>
@@ -152,7 +146,7 @@
 
         @if ($pesanan->isEmpty())
             <div class="card-body text-center py-5">
-                <i class="ti ti-clipboard-off d-block mb-3" style="font-size: 3rem;"></i>
+                <i class="ti ti-clipboard-off d-block mb-3" style="font-size: 3rem; color: #F7941D;"></i>
                 <h3 class="mb-1">Belum Ada Pesanan {{ $labelJenis }}</h3>
                 <p class="text-secondary mb-0">Pesanan yang sesuai dengan filter akan ditampilkan di sini.</p>
             </div>
@@ -165,7 +159,7 @@
                             <th>Pelanggan</th>
                             <th>Jenis Pelanggan</th>
                             <th>Pemenuhan</th>
-                            <th>Total</th>
+                            <th class="text-end">Total</th>
                             <th>Pembayaran</th>
                             <th>Status Pesanan</th>
                             <th>Tanggal</th>
@@ -175,6 +169,13 @@
                     <tbody>
                         @foreach ($pesanan as $item)
                             @php
+                                $kelasBayar = match ($item->status_pembayaran) {
+                                    'lunas' => 'bg-success-lt',
+                                    'dp_dibayar', 'sebagian_dibayar' => 'bg-orange-lt',
+                                    'gagal', 'kadaluarsa', 'dibatalkan' => 'bg-danger-lt',
+                                    'dikembalikan' => 'bg-secondary-lt',
+                                    default => 'bg-yellow-lt',
+                                };
                                 $statusClass = match ($item->status_pesanan) {
                                     'diterima' => 'bg-success-lt',
                                     'dibatalkan' => 'bg-danger-lt',
@@ -187,9 +188,9 @@
                                 <td>{{ $item->pengguna->nama ?? $item->nama_penerima_saat_pesan ?? '-' }}</td>
                                 <td>
                                     @switch($item->saluran_pesanan)
-                                        @case('online') Umum / Retail @break
-                                        @case('toko') Toko @break
-                                        @case('horeca') Horeca @break
+                                        @case('online') <span class="badge bg-secondary-lt">Umum / Retail</span> @break
+                                        @case('toko') <span class="badge bg-purple-lt">Toko</span> @break
+                                        @case('horeca') <span class="badge bg-orange-lt">Horeca</span> @break
                                         @default -
                                     @endswitch
                                 </td>
@@ -202,10 +203,17 @@
                                         -
                                     @endif
                                 </td>
-                                <td class="text-nowrap">Rp {{ number_format($item->total_pesanan, 0, ',', '.') }}</td>
-                                <td>{{ ucwords(str_replace('_', ' ', $item->status_pembayaran)) }}</td>
+                                <td class="text-nowrap text-end fw-semibold">Rp {{ number_format($item->total_pesanan, 0, ',', '.') }}</td>
+                                <td><span class="badge {{ $kelasBayar }}">{{ ucwords(str_replace('_', ' ', $item->status_pembayaran)) }}</span></td>
                                 <td><span class="badge {{ $statusClass }}">{{ ucwords(str_replace('_', ' ', $item->status_pesanan)) }}</span></td>
-                                <td class="text-nowrap">{{ $item->created_at?->format('d/m/Y H:i') ?? '-' }}</td>
+                                <td class="text-nowrap">
+                                    @if ($item->created_at)
+                                        <div>{{ $item->created_at->locale('id')->translatedFormat('j M Y') }}</div>
+                                        <div class="text-secondary small">{{ $item->created_at->format('H:i') }} WIB</div>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     <a href="{{ route('admin.pesanan.show', $item->id_pesanan) }}"
                                        class="btn btn-sm btn-outline-primary">

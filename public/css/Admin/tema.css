@@ -1,15 +1,13 @@
-/* Tema umum admin TWFood (topbar, kartu, tabel, tombol, form)
-   Taruh di public/css/admin/tema.css (dipanggil SETELAH sidebar.css) */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
 :root {
     --tw-merah: #E31E24;
     --tw-oranye: #F7941D;
+    --font-isi: 'Inter', Arial, sans-serif;               /* teks biasa, tabel, form */
+    --font-judul: 'Plus Jakarta Sans', 'Inter', Arial, sans-serif; /* judul & angka besar */
 }
 
-/* =====================================================
-   TAMPILAN UMUM ADMIN (dashboard & semua halaman)
-   ===================================================== */
+/* TAMPILAN UMUM ADMIN (dashboard & semua halaman) */
 
 /* warna utama Tabler -> merah TWFood (tombol, link, pagination) */
 :root {
@@ -130,11 +128,52 @@ button,
 input,
 select,
 textarea {
-    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+    font-family: var(--font-isi);
 }
 .main-content {
     font-size: 14px;
-    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+    color: #1f2937;
+    letter-spacing: .005em;
+}
+
+/* judul memakai font berkarakter */
+.topbar h3,
+.main-content .card-title,
+.main-content h1,
+.main-content h2,
+.main-content h3,
+.main-content h4,
+.main-content .h1,
+.dash-hero-title,
+.sidebar-brand,
+.tw-logo-teks {
+    font-family: var(--font-judul);
+    letter-spacing: -.005em;
+}
+
+/* label & teks pendukung: kecil, tegas, abu-abu */
+.main-content .form-label,
+.main-content .subheader {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+.main-content .text-secondary,
+.main-content .form-hint {
+    color: #6b7280 !important;
+}
+
+/* isian form lebih jelas */
+.main-content .form-control,
+.main-content .form-select {
+    font-size: 14px;
+    color: #111827;
+    border-color: #dfe3ea;
+    border-radius: 10px;
+}
+.main-content .form-control::placeholder {
+    color: #9ca3af;
 }
 
 /* ---------- tabel lebih lega & rapi ---------- */
@@ -156,4 +195,46 @@ textarea {
     padding: .35em .7em;
     border-radius: 8px;
     font-size: .75rem;
+}
+
+
+/* ---------- kartu ringkasan berbentuk tab (halaman Pesanan) ---------- */
+.main-content .card.tab-ringkas {
+    border: 1px solid #eceff3;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.main-content .card.tab-ringkas:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(16, 24, 40, .08);
+}
+.main-content .card.tab-ringkas .subheader {
+    font-weight: 700;
+    color: #6b7280;
+}
+.main-content .card.tab-ringkas .h1 {
+    font-size: 2rem;
+    font-weight: 800;
+}
+.main-content .card.tab-ringkas.aktif {
+    background: #FDECEC;
+    border-color: #E31E24;
+}
+.main-content .card.tab-ringkas.aktif .subheader,
+.main-content .card.tab-ringkas.aktif .h1 {
+    color: #E31E24;
+}
+
+
+/* ---------- tombol sekunder (Reset, Kembali) lebih halus ---------- */
+.main-content .btn-outline-secondary {
+    color: #4b5563;
+    border-color: #d1d5db;
+    background: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.main-content .btn-outline-secondary:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    color: #111827;
 }

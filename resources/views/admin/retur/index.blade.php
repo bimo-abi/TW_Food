@@ -4,22 +4,33 @@
 @section('page-title', 'Retur')
 
 @section('content')
-    <div class="page-header mb-3">
-        <div class="row align-items-center g-3">
-            <div class="col">
-                <div class="page-pretitle">Manajemen Transaksi</div>
-                <h2 class="page-title">Retur</h2>
-                <div class="text-secondary mt-1">
-                    Pantau pengajuan retur pelanggan dan status pengembalian dananya.
-                </div>
-            </div>
-            <div class="col-12 col-sm-auto">
-                <a href="{{ route('admin.refund.index') }}" class="btn btn-outline-primary w-100">
-                    <i class="ti ti-history me-1"></i>
-                    Riwayat Refund
-                </a>
-            </div>
+    @php
+        $kelasRetur = fn ($st) => match ($st) {
+            'menunggu_persetujuan' => 'bg-yellow-lt',
+            'disetujui', 'selesai' => 'bg-success-lt',
+            'menunggu_pengembalian_barang' => 'bg-orange-lt',
+            'barang_diterima' => 'bg-azure-lt',
+            'sedang_diperiksa' => 'bg-purple-lt',
+            'ditolak' => 'bg-danger-lt',
+            default => 'bg-secondary-lt',
+        };
+        $kelasRefund = fn ($st) => match ($st) {
+            'berhasil', 'selesai', 'dicatat_manual', 'dikembalikan' => 'bg-success-lt',
+            'gagal', 'ditolak' => 'bg-danger-lt',
+            'menunggu', 'diproses', 'menunggu_refund' => 'bg-yellow-lt',
+            default => 'bg-secondary-lt',
+        };
+    @endphp
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="text-secondary">
+            Pantau pengajuan retur pelanggan dan status pengembalian dananya.
         </div>
+
+        <a href="{{ route('admin.refund.index') }}" class="btn btn-outline-primary">
+            <i class="ti ti-history me-1"></i>
+            Riwayat Refund
+        </a>
     </div>
 
     @if (session('success'))
@@ -86,7 +97,7 @@
 
         @if ($retur->count() === 0)
             <div class="card-body text-center py-5">
-                <i class="ti ti-package-export d-block text-secondary mb-3" style="font-size: 2.5rem;"></i>
+                <i class="ti ti-package-export d-block mb-3" style="font-size: 2.5rem; color: #F7941D;"></i>
                 <h3 class="h3 mb-1">Belum Ada Pengajuan Retur</h3>
                 <p class="text-secondary mb-0">
                     Belum ada pengajuan retur yang sesuai dengan pencarian atau filter yang dipilih.
@@ -121,14 +132,25 @@
                                 </td>
                                 <td class="text-nowrap">{{ $item->pesanan?->nomor_pesanan ?? '-' }}</td>
                                 <td>{{ $item->pesanan?->pengguna?->nama ?? '-' }}</td>
-                                <td class="text-nowrap">{{ $item->diajukan_pada?->format('d/m/Y H:i') ?? '-' }}</td>
+                                <td class="text-nowrap">
+                                    @if ($item->diajukan_pada)
+                                        <div>{{ $item->diajukan_pada->locale('id')->translatedFormat('j M Y') }}</div>
+                                        <div class="text-secondary small">{{ $item->diajukan_pada->format('H:i') }} WIB</div>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>
-                                    <span class="badge bg-azure-lt text-azure">
-                                        {{ ucfirst(str_replace('_', ' ', $item->status_retur)) }}
+                                    <span class="badge {{ $kelasRetur($item->status_retur) }}">
+                                        {{ ucwords(str_replace('_', ' ', $item->status_retur)) }}
                                     </span>
                                 </td>
-                                <td>{{ ucfirst($labelRefund) }}</td>
-                                <td class="text-end text-nowrap">Rp{{ number_format((int) $item->nominal_pengembalian, 0, ',', '.') }}</td>
+                                <td>
+                                    <span class="badge {{ $statusRefund->count() === 1 ? $kelasRefund($statusRefund->first()) : 'bg-secondary-lt' }}">
+                                        {{ ucwords($labelRefund) }}
+                                    </span>
+                                </td>
+                                <td class="text-end text-nowrap fw-semibold">Rp {{ number_format((int) $item->nominal_pengembalian, 0, ',', '.') }}</td>
                                 <td class="text-end">
                                     <a href="{{ route('admin.retur.show', $item->id_retur) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="ti ti-eye me-1"></i>Detail

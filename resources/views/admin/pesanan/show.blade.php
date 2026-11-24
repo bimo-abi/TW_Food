@@ -5,24 +5,16 @@
 
 @section('content')
     {{-- HEADER --}}
-    <div class="page-header mb-3">
-        <div class="row align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Transaksi</div>
-                <h2 class="page-title">Detail Pesanan</h2>
-                <div class="text-secondary mt-1">
-                    Nomor pesanan:
-                    <strong>{{ $pesanan->nomor_pesanan }}</strong>
-                </div>
-            </div>
-
-            <div class="col-auto">
-                <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $pesanan->jenis_pemenuhan ?? 'reguler']) }}" class="btn btn-outline-secondary">
-                    <i class="ti ti-arrow-left me-1"></i>
-                    Kembali
-                </a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="text-secondary">
+            Nomor pesanan:
+            <strong class="text-dark">{{ $pesanan->nomor_pesanan }}</strong>
         </div>
+
+        <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $pesanan->jenis_pemenuhan ?? 'reguler']) }}" class="btn btn-outline-secondary">
+            <i class="ti ti-arrow-left me-1"></i>
+            Kembali
+        </a>
     </div>
 
     {{-- NOTIFIKASI --}}
@@ -143,7 +135,16 @@
                         <div class="text-secondary small mb-1">
                             Status Pembayaran
                         </div>
-                        <span class="badge bg-secondary-lt">
+                        @php
+                            $kelasBayar = match ($pesanan->status_pembayaran) {
+                                'lunas' => 'bg-success-lt',
+                                'dp_dibayar', 'sebagian_dibayar' => 'bg-orange-lt',
+                                'gagal', 'kadaluarsa', 'dibatalkan' => 'bg-danger-lt',
+                                'dikembalikan' => 'bg-secondary-lt',
+                                default => 'bg-yellow-lt',
+                            };
+                        @endphp
+                        <span class="badge {{ $kelasBayar }}">
                             {{ ucwords(str_replace('_', ' ', $pesanan->status_pembayaran)) }}
                         </span>
                     </div>
@@ -699,14 +700,6 @@
                 Belum ada riwayat aktivitas yang tercatat.
             </div>
         @endforelse
-    </div>
-
-    {{-- KEMBALI --}}
-    <div class="mt-3">
-        <a href="{{ route('admin.pesanan.index', ['jenis_pemenuhan' => $pesanan->jenis_pemenuhan ?? 'reguler']) }}" class="btn btn-outline-secondary">
-            <i class="ti ti-arrow-left me-1"></i>
-            Kembali ke Daftar Pesanan
-        </a>
     </div>
 
     <script>

@@ -4,19 +4,32 @@
 @section('page-title', 'Detail Retur')
 
 @section('content')
-    <div class="page-header mb-3">
-        <div class="row align-items-center g-3">
-            <div class="col">
-                <div class="page-pretitle">Manajemen Transaksi</div>
-                <h2 class="page-title">Detail Retur</h2>
-                <div class="text-secondary mt-1">Nomor retur: <span class="fw-semibold">{{ $retur->nomor_retur }}</span></div>
-            </div>
-            <div class="col-12 col-sm-auto">
-                <a href="{{ route('admin.retur.index') }}" class="btn btn-outline-secondary w-100">
-                    <i class="ti ti-arrow-left me-1"></i>Kembali ke Daftar Retur
-                </a>
-            </div>
+    @php
+        $kelasRetur = fn ($st) => match ($st) {
+            'menunggu_persetujuan' => 'bg-yellow-lt',
+            'disetujui', 'selesai' => 'bg-success-lt',
+            'menunggu_pengembalian_barang' => 'bg-orange-lt',
+            'barang_diterima' => 'bg-azure-lt',
+            'sedang_diperiksa' => 'bg-purple-lt',
+            'ditolak' => 'bg-danger-lt',
+            default => 'bg-secondary-lt',
+        };
+        $kelasRefund = fn ($st) => match ($st) {
+            'berhasil', 'selesai', 'dicatat_manual', 'dikembalikan' => 'bg-success-lt',
+            'gagal', 'ditolak' => 'bg-danger-lt',
+            'menunggu', 'diproses', 'menunggu_refund' => 'bg-yellow-lt',
+            default => 'bg-secondary-lt',
+        };
+    @endphp
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="text-secondary">
+            Nomor retur: <span class="fw-semibold text-dark">{{ $retur->nomor_retur }}</span>
         </div>
+
+        <a href="{{ route('admin.retur.index') }}" class="btn btn-outline-secondary">
+            <i class="ti ti-arrow-left me-1"></i>Kembali ke Daftar Retur
+        </a>
     </div>
 
     <div class="row row-cards">
@@ -27,26 +40,26 @@
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
-                        <dt class="col-sm-5 text-secondary">Nomor Retur</dt>
-                        <dd class="col-sm-7 fw-semibold">{{ $retur->nomor_retur }}</dd>
-                        <dt class="col-sm-5 text-secondary">Nomor Pesanan</dt>
-                        <dd class="col-sm-7">{{ $retur->pesanan?->nomor_pesanan ?? '-' }}</dd>
-                        <dt class="col-sm-5 text-secondary">Pelanggan</dt>
-                        <dd class="col-sm-7">{{ $retur->pesanan?->pengguna?->nama ?? '-' }}</dd>
-                        <dt class="col-sm-5 text-secondary">Tanggal Pengajuan</dt>
-                        <dd class="col-sm-7">{{ $retur->diajukan_pada?->format('d/m/Y H:i') ?? '-' }}</dd>
-                        <dt class="col-sm-5 text-secondary">Status Retur</dt>
-                        <dd class="col-sm-7">
-                            <span class="badge bg-azure-lt text-azure">{{ ucfirst(str_replace('_', ' ', $retur->status_retur)) }}</span>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Nomor Retur</dt>
+                        <dd class="col-sm-7 mb-3 fw-semibold">{{ $retur->nomor_retur }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Nomor Pesanan</dt>
+                        <dd class="col-sm-7 mb-3">{{ $retur->pesanan?->nomor_pesanan ?? '-' }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Pelanggan</dt>
+                        <dd class="col-sm-7 mb-3">{{ $retur->pesanan?->pengguna?->nama ?? '-' }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Tanggal Pengajuan</dt>
+                        <dd class="col-sm-7 mb-3">{{ $retur->diajukan_pada?->locale('id')->translatedFormat('j M Y, H:i') ?? '-' }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Status Retur</dt>
+                        <dd class="col-sm-7 mb-3">
+                            <span class="badge {{ $kelasRetur($retur->status_retur) }}">{{ ucwords(str_replace('_', ' ', $retur->status_retur)) }}</span>
                         </dd>
-                        <dt class="col-sm-5 text-secondary">Alasan</dt>
-                        <dd class="col-sm-7 text-break">{{ $retur->alasan_retur }}</dd>
-                        <dt class="col-sm-5 text-secondary">Catatan Mitra</dt>
-                        <dd class="col-sm-7 text-break">{{ $retur->catatan_mitra ?: '-' }}</dd>
-                        <dt class="col-sm-5 text-secondary">Alasan Penolakan</dt>
-                        <dd class="col-sm-7 text-break">{{ $retur->alasan_penolakan ?: '-' }}</dd>
-                        <dt class="col-sm-5 text-secondary">Instruksi Pengembalian</dt>
-                        <dd class="col-sm-7 text-break">{{ $retur->instruksi_pengembalian ?: '-' }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Alasan</dt>
+                        <dd class="col-sm-7 mb-3 text-break">{{ $retur->alasan_retur }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Catatan Mitra</dt>
+                        <dd class="col-sm-7 mb-3 text-break">{{ $retur->catatan_mitra ?: '-' }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Alasan Penolakan</dt>
+                        <dd class="col-sm-7 mb-3 text-break">{{ $retur->alasan_penolakan ?: '-' }}</dd>
+                        <dt class="col-sm-5 text-secondary fw-normal mb-3">Instruksi Pengembalian</dt>
+                        <dd class="col-sm-7 mb-3 text-break">{{ $retur->instruksi_pengembalian ?: '-' }}</dd>
                     </dl>
                 </div>
             </div>
@@ -71,7 +84,7 @@
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                                 <div class="min-w-0">
                                     <div class="fw-semibold">Bukti {{ $loop->iteration }} · {{ ucfirst($bukti->jenis_media) }}</div>
-                                    <div class="text-secondary small">{{ $bukti->created_at?->format('d/m/Y H:i') ?? '-' }}</div>
+                                    <div class="text-secondary small">{{ $bukti->created_at?->locale('id')->translatedFormat('j M Y, H:i') ?? '-' }}</div>
                                 </div>
                                 <a class="btn btn-sm btn-outline-primary" href="{{ $downloadUrl }}">
                                     <i class="ti ti-download me-1"></i>Unduh
@@ -140,7 +153,7 @@
                                     <td class="text-center">{{ $detail->jumlah_diminta ?? $detail->jumlah_diretur }}</td>
                                     <td class="text-center">{{ $detail->jumlah_disetujui ?? '-' }}</td>
                                     <td class="text-center">{{ $detail->jumlah_layak_dijual ?? '-' }}</td>
-                                    <td class="text-end text-nowrap">Rp{{ number_format((int) $detail->nominal_refund, 0, ',', '.') }}</td>
+                                    <td class="text-end text-nowrap">Rp {{ number_format((int) $detail->nominal_refund, 0, ',', '.') }}</td>
                                     <td>{{ $detail->alasan_item ?: '-' }}</td>
                                 </tr>
                             @empty
@@ -177,8 +190,8 @@
                             @forelse ($retur->refund as $refund)
                                 <tr>
                                     <td class="fw-semibold">#{{ $refund->id_refund }}</td>
-                                    <td class="text-end text-nowrap">Rp{{ number_format((int) $refund->nominal_refund, 0, ',', '.') }}</td>
-                                    <td>{{ ucfirst(str_replace('_', ' ', $refund->status_refund)) }}</td>
+                                    <td class="text-end text-nowrap">Rp {{ number_format((int) $refund->nominal_refund, 0, ',', '.') }}</td>
+                                    <td><span class="badge {{ $kelasRefund($refund->status_refund) }}">{{ ucwords(str_replace('_', ' ', $refund->status_refund)) }}</span></td>
                                     <td class="text-center">{{ $refund->percobaanRefund->count() }}</td>
                                     <td class="text-end">
                                         <a href="{{ route('admin.refund.show', $refund->id_refund) }}" class="btn btn-sm btn-outline-primary">

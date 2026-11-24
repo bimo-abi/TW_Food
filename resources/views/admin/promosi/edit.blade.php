@@ -4,8 +4,8 @@
 @section('page-title', 'Edit Promosi')
 
 @section('content')
-    <div class="page-header mb-3">
-        <h1>Edit Promosi</h1>
+    <div class="text-secondary mb-4">
+        Ubah detail promosi, lalu simpan. Perubahan langsung berlaku.
     </div>
 
     <form method="POST" action="{{ route('admin.promosi.update', $promosi->id_promosi) }}">

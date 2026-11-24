@@ -4,8 +4,8 @@
 @section('page-title', 'Tambah Promosi')
 
 @section('content')
-    <div class="page-header mb-3">
-        <h1>Tambah Promosi</h1>
+    <div class="text-secondary mb-4">
+        Isi langkah 1 sampai 5. Ringkasan di kanan akan terisi otomatis sebelum kamu menyimpan.
     </div>
 
     <form method="POST" action="{{ route('admin.promosi.store') }}">

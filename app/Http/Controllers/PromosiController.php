@@ -55,6 +55,8 @@ class PromosiController extends Controller
             'tanggalKembar' => $this->tanggalKembar(),
             'daftarVarian' => $this->daftarVarian(),
             'varianTerpilih' => [],
+            'tanggalPilihan' => request('tanggal'),
+            'autoIsi' => true,
         ]);
     }
 
@@ -83,6 +85,8 @@ class PromosiController extends Controller
             'tanggalKembar' => $this->tanggalKembar(),
             'daftarVarian' => $this->daftarVarian(),
             'varianTerpilih' => $promosi->varian->pluck('id_varian')->all(),
+            'tanggalPilihan' => $promosi->tanggal_mulai->toDateString(),
+            'autoIsi' => false,
         ]);
     }
 
@@ -191,32 +195,39 @@ class PromosiController extends Controller
                 'label' => "$m.$m  ·  " . $tgl->locale('id')->translatedFormat('j F Y'),
             ];
         }
+
+        usort($hasil, fn($a, $b) => strcmp($a['tanggal'], $b['tanggal']));
+
         return $hasil;
     }
 
-    /** Kalender 12 kartu untuk halaman index (tahun berjalan). */
+    /** 12 tanggal kembar berikutnya (urut dari yang terdekat) + status promonya. */
     private function kalenderKembar(): array
     {
-        $tahun = today()->year;
         $semua = Promosi::query()
-            ->whereYear('tanggal_selesai', '>=', $tahun)
-            ->whereYear('tanggal_mulai', '<=', $tahun)
+            ->whereDate('tanggal_selesai', '>=', today())
             ->get();
 
         $hasil = [];
         foreach (range(1, 12) as $m) {
-            $tgl = Carbon::create($tahun, $m, $m)->startOfDay();
-            $promo = $semua->first(
-                fn($p) => $tgl->between($p->tanggal_mulai, $p->tanggal_selesai)
-            );
+            $tgl = Carbon::create(today()->year, $m, $m)->startOfDay();
+            if ($tgl->lt(today())) {
+                $tgl = $tgl->addYear();
+            }
+
             $hasil[] = [
                 'kode' => "$m.$m",
                 'tanggal' => $tgl,
-                'lewat' => $tgl->lt(today()),
                 'hariIni' => $tgl->isToday(),
-                'promo' => $promo,
+                'hari' => (int) today()->diffInDays($tgl),
+                'promo' => $semua->first(
+                    fn($p) => $tgl->between($p->tanggal_mulai, $p->tanggal_selesai)
+                ),
             ];
         }
+
+        usort($hasil, fn($a, $b) => $a['tanggal']->timestamp <=> $b['tanggal']->timestamp);
+
         return $hasil;
     }
 }

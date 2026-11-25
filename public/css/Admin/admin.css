@@ -1,3 +1,19 @@
+:root {
+    --tw-or: #FF7A00;
+    --tw-or-d: #D96400;
+    --tw-wa: #1FA855;
+    --tw-bg: #17120D;
+    --tw-sf: #221B14;
+    --tw-tx: #F6EDE2;
+    --tw-mu: #B5A592;
+    --tw-bd: #3A2F24;
+    --tw-cream: #3A3022;
+    --tw-or-l: #41290F;
+    --tw-no: #F0D9A0;
+    --tw-shadow: 0 10px 30px rgba(0, 0, 0, .4)
+}
+
+
 body {
     margin: 0;
     background: #f5f7fb;
@@ -252,5 +268,10 @@ body {
     white-space: nowrap;
 }
 
-.status-switch-label.is-aktif    { color: #2fb344; }
-.status-switch-label.is-nonaktif { color: #d63939; }
+.status-switch-label.is-aktif {
+    color: #2fb344;
+}
+
+.status-switch-label.is-nonaktif {
+    color: #d63939;
+}

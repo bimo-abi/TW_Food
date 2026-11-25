@@ -490,6 +490,22 @@ Route::get('/admin/retur/{id_retur}', [ReturController::class, 'show'])
     ->name('admin.retur.show')
     ->middleware('admin');
 
+Route::patch('/admin/retur/{id_retur}/keputusan', [ReturController::class, 'keputusan'])
+    ->name('admin.retur.keputusan')
+    ->middleware('admin');
+
+Route::patch('/admin/retur/{id_retur}/instruksi-pengembalian', [ReturController::class, 'instruksiPengembalian'])
+    ->name('admin.retur.instruksi')
+    ->middleware('admin');
+
+Route::patch('/admin/retur/{id_retur}/barang-diterima', [ReturController::class, 'barangDiterima'])
+    ->name('admin.retur.barang-diterima')
+    ->middleware('admin');
+
+Route::patch('/admin/retur/{id_retur}/pemeriksaan', [ReturController::class, 'pemeriksaan'])
+    ->name('admin.retur.pemeriksaan')
+    ->middleware('admin');
+
 Route::get('/admin/retur/bukti/{id_bukti_retur}/preview', [ReturController::class, 'previewBukti'])
     ->name('admin.retur.bukti.preview')
     ->middleware('admin');

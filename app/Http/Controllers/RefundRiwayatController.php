@@ -93,6 +93,75 @@ class RefundRiwayatController extends Controller
         ];
     }
 
+
+    /**
+     * Preview bukti refund hanya untuk pelanggan pemilik pesanan.
+     */
+    public function previewBuktiPelanggan(Request $request, int $id_percobaan_refund)
+    {
+        return $this->buktiPelanggan($request, $id_percobaan_refund, true);
+    }
+
+    /**
+     * Download bukti refund hanya untuk pelanggan pemilik pesanan.
+     */
+    public function downloadBuktiPelanggan(Request $request, int $id_percobaan_refund)
+    {
+        return $this->buktiPelanggan($request, $id_percobaan_refund, false);
+    }
+
+    private function buktiPelanggan(Request $request, int $id_percobaan_refund, bool $preview)
+    {
+        $pengguna = $request->user();
+        abort_unless(
+            $pengguna && $pengguna->status_aktif && $pengguna->peran === 'pelanggan',
+            403,
+            'Akses khusus pelanggan aktif.'
+        );
+
+        $percobaan = PercobaanRefund::query()
+            ->whereHas('refund', function ($query) use ($pengguna) {
+                $query->where('jenis_refund', 'retur')
+                    ->whereHas('retur.pesanan', function ($pesanan) use ($pengguna) {
+                        $pesanan->where('id_pengguna', $pengguna->id_pengguna);
+                    });
+            })
+            ->findOrFail($id_percobaan_refund);
+
+        $respons = is_array($percobaan->respons_gateway)
+            ? $percobaan->respons_gateway
+            : [];
+        $path = $respons['bukti_path'] ?? null;
+
+        abort_unless(
+            is_string($path)
+                && str_starts_with($path, 'refund-manual/')
+                && Storage::disk('local')->exists($path),
+            404,
+            'Bukti refund tidak ditemukan.'
+        );
+
+        $disk = Storage::disk('local');
+        $absolutePath = $disk->path($path);
+        $mime = mime_content_type($absolutePath) ?: 'application/octet-stream';
+        abort_unless(
+            in_array($mime, ['image/jpeg', 'image/png', 'application/pdf'], true),
+            415,
+            'Format bukti refund tidak dapat ditampilkan.'
+        );
+
+        if ($preview) {
+            return response()->file($absolutePath, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+                'X-Content-Type-Options' => 'nosniff',
+                'Cache-Control' => 'private, no-store, max-age=0',
+            ]);
+        }
+
+        return response()->download($absolutePath, basename($path));
+    }
+
     /**
      * Daftar riwayat refund untuk Flutter Mitra.
      */

@@ -40,10 +40,63 @@ class RiwayatReturController extends Controller
         $retur = Retur::query()
             ->where('id_retur', $id_retur)
             ->whereHas('pesanan', fn($q) => $q->where('id_pengguna', $pengguna->id_pengguna))
-            ->with(['pesanan:id_pesanan,nomor_pesanan,status_pesanan', 'detailRetur.detailPesanan', 'buktiRetur', 'refund'])
+            ->with([
+                'pesanan:id_pesanan,nomor_pesanan,status_pesanan',
+                'detailRetur.detailPesanan',
+                'buktiRetur',
+                'refund.percobaanRefund',
+            ])
             ->firstOrFail();
 
-        return response()->json(['message' => 'Detail retur berhasil diambil.', 'data' => $retur]);
+        // Jangan mengirim respons gateway atau path penyimpanan privat ke aplikasi.
+        // Pelanggan menerima metadata refund dan URL endpoint yang memeriksa kepemilikan.
+        $riwayatRefund = $retur->refund->map(function ($refund) {
+            return [
+                'id_refund' => $refund->id_refund,
+                'jenis_refund' => $refund->jenis_refund,
+                'nominal_refund' => (int) $refund->nominal_refund,
+                'status_refund' => $refund->status_refund,
+                'alasan' => $refund->alasan,
+                'disetujui_pada' => $refund->disetujui_pada,
+                'diproses_pada' => $refund->diproses_pada,
+                'selesai_pada' => $refund->selesai_pada,
+                'riwayat_percobaan' => $refund->percobaanRefund
+                    ->sortBy('dimulai_pada')
+                    ->values()
+                    ->map(function ($percobaan) {
+                        $respons = is_array($percobaan->respons_gateway)
+                            ? $percobaan->respons_gateway
+                            : [];
+                        $path = $respons['bukti_path'] ?? null;
+                        $tersedia = is_string($path)
+                            && str_starts_with($path, 'refund-manual/')
+                            && \Illuminate\Support\Facades\Storage::disk('local')->exists($path);
+
+                        return [
+                            'id_percobaan_refund' => $percobaan->id_percobaan_refund,
+                            'nominal_refund' => (int) $percobaan->nominal_refund,
+                            'status_percobaan' => $percobaan->status_percobaan,
+                            'referensi_gateway' => $percobaan->referensi_gateway,
+                            'metode_refund' => $respons['metode_refund'] ?? null,
+                            'catatan' => $respons['catatan'] ?? $percobaan->pesan_error,
+                            'bukti_tersedia' => $tersedia,
+                            'url_bukti_preview' => $tersedia
+                                ? route('pelanggan.refund.bukti.preview', ['id_percobaan_refund' => $percobaan->id_percobaan_refund])
+                                : null,
+                            'url_bukti_download' => $tersedia
+                                ? route('pelanggan.refund.bukti', ['id_percobaan_refund' => $percobaan->id_percobaan_refund])
+                                : null,
+                            'dimulai_pada' => $percobaan->dimulai_pada,
+                            'selesai_pada' => $percobaan->selesai_pada,
+                        ];
+                    })->all(),
+            ];
+        })->values()->all();
+
+        $dataRetur = $retur->toArray();
+        $dataRetur['riwayat_refund'] = $riwayatRefund;
+
+        return response()->json(['message' => 'Detail retur berhasil diambil.', 'data' => $dataRetur]);
     }
     /**
      * Bukti retur disimpan privat dan hanya dapat diunduh pemilik pesanan

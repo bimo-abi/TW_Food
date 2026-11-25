@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\BuktiRetur;
 use App\Models\Retur;
 use App\Services\ManualRefundService;
+use App\Http\Controllers\Api\MitraReturController;
+use App\Services\RefundReturCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -67,7 +69,34 @@ class ReturController extends Controller
         return view('admin.retur.show', compact('retur'));
     }
 
-    public function previewBukti(int $id_bukti_retur)
+    /**
+     * Admin Website memakai transisi dan aturan bisnis yang sama dengan Flutter Mitra.
+     */
+    public function keputusan(Request $request, int $id_retur, MitraReturController $workflow)
+    {
+        $response = $workflow->updateKeputusan($request, $id_retur);
+        return redirect()->route('admin.retur.show', $id_retur)->with('success', $response->getData()->message);
+    }
+
+    public function instruksiPengembalian(Request $request, int $id_retur, MitraReturController $workflow)
+    {
+        $response = $workflow->kirimInstruksiPengembalian($request, $id_retur);
+        return redirect()->route('admin.retur.show', $id_retur)->with('success', $response->getData()->message);
+    }
+
+    public function barangDiterima(Request $request, int $id_retur, MitraReturController $workflow)
+    {
+        $response = $workflow->konfirmasiBarangDiterima($request, $id_retur);
+        return redirect()->route('admin.retur.show', $id_retur)->with('success', $response->getData()->message);
+    }
+
+    public function pemeriksaan(Request $request, int $id_retur, MitraReturController $workflow, RefundReturCalculationService $refundService)
+    {
+        $response = $workflow->periksaBarangRetur($request, $id_retur, $refundService);
+        return redirect()->route('admin.retur.show', $id_retur)->with('success', $response->getData()->message);
+    }
+
+    public function previewBukti(Request $request, int $id_bukti_retur)
     {
         $bukti = BuktiRetur::query()
             ->with('retur.pesanan')
@@ -82,7 +111,7 @@ class ReturController extends Controller
         abort_unless($disk->exists($path), 404, 'Bukti retur tidak ditemukan.');
 
         $absolutePath = $disk->path($path);
-        $mime = mime_content_type($absolutePath) ?: 'application/octet-stream';
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($absolutePath) ?: 'application/octet-stream';
         abort_unless(
             str_starts_with($mime, 'image/') || str_starts_with($mime, 'video/'),
             415,
@@ -97,7 +126,7 @@ class ReturController extends Controller
         ]);
     }
 
-    public function downloadBukti(int $id_bukti_retur)
+    public function downloadBukti(Request $request, int $id_bukti_retur)
     {
         $bukti = BuktiRetur::query()
             ->with('retur.pesanan')
@@ -111,7 +140,18 @@ class ReturController extends Controller
         $disk = Storage::disk('local');
         abort_unless($disk->exists($path), 404, 'Bukti retur tidak ditemukan.');
 
-        return response()->download($disk->path($path), basename($path));
+        $absolutePath = $disk->path($path);
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($absolutePath) ?: 'application/octet-stream';
+
+        return response()->download(
+            $absolutePath,
+            basename($path),
+            [
+                'Content-Type' => $mime,
+                'X-Content-Type-Options' => 'nosniff',
+                'Cache-Control' => 'private, no-store, max-age=0',
+            ]
+        );
     }
 
     /**

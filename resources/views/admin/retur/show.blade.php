@@ -32,6 +32,67 @@
         </a>
     </div>
 
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible" role="alert">
+            {{ session('success') }}
+            <a class="btn-close" data-bs-dismiss="alert" aria-label="Close"></a>
+        </div>
+    @endif
+
+    {{-- Seluruh aksi menggunakan transisi status yang sama dengan Flutter Mitra. --}}
+    @if ($retur->status_retur === 'menunggu_persetujuan')
+        <div class="card mb-4">
+            <div class="card-header"><h3 class="card-title">Keputusan Pengajuan Retur</h3></div>
+            <div class="card-body">
+                <form method="POST" action="{{ route('admin.retur.keputusan', $retur->id_retur) }}">
+                    @csrf @method('PATCH')
+                    <input type="hidden" name="keputusan" value="disetujui">
+                    <div class="table-responsive mb-3"><table class="table table-sm">
+                        <thead><tr><th>Produk</th><th>Diminta</th><th>Jumlah Disetujui</th></tr></thead><tbody>
+                        @foreach ($retur->detailRetur as $detail)
+                            <tr>
+                                <td>{{ $detail->detailPesanan?->nama_produk_saat_pesan ?? 'Produk' }}</td>
+                                <td>{{ $detail->jumlah_diminta ?? $detail->jumlah_diretur }}</td>
+                                <td><input class="form-control" type="number" min="0" max="{{ $detail->jumlah_diminta ?? $detail->jumlah_diretur }}" required name="detail_retur[{{ $loop->index }}][jumlah_disetujui]" value="{{ $detail->jumlah_diminta ?? $detail->jumlah_diretur }}"><input type="hidden" name="detail_retur[{{ $loop->index }}][id_detail_retur]" value="{{ $detail->id_detail_retur }}"></td>
+                            </tr>
+                        @endforeach
+                        </tbody></table></div>
+                    <label class="form-label">Catatan Mitra (opsional)</label><textarea class="form-control mb-3" name="catatan_mitra" rows="2"></textarea>
+                    <button class="btn btn-success" type="submit" onclick="return confirm('Setujui pengajuan retur ini?')"><i class="ti ti-check me-1"></i>Setujui Retur</button>
+                </form>
+                <hr>
+                <form method="POST" action="{{ route('admin.retur.keputusan', $retur->id_retur) }}">
+                    @csrf @method('PATCH')<input type="hidden" name="keputusan" value="ditolak">
+                    <label class="form-label">Alasan Penolakan</label><textarea class="form-control mb-2" name="alasan_penolakan" minlength="5" maxlength="2000" required rows="2"></textarea>
+                    <button class="btn btn-danger" type="submit" onclick="return confirm('Tolak pengajuan retur ini?')">Tolak Retur</button>
+                </form>
+            </div>
+        </div>
+    @elseif ($retur->status_retur === 'disetujui')
+        <div class="card mb-4"><div class="card-header"><h3 class="card-title">Instruksi Pengembalian Barang</h3></div><div class="card-body">
+            <form method="POST" action="{{ route('admin.retur.instruksi', $retur->id_retur) }}">@csrf @method('PATCH')
+                <div class="row g-3"><div class="col-md-4"><label class="form-label">Metode Pengembalian</label><select class="form-select" name="metode_pengembalian" required><option value="outlet">Ke Outlet</option><option value="kurir">Melalui Kurir</option></select></div>
+                <div class="col-md-8"><label class="form-label">Instruksi untuk Pelanggan</label><textarea class="form-control" name="instruksi_pengembalian" minlength="5" maxlength="3000" rows="2" required></textarea></div></div>
+                <button class="btn btn-primary mt-3" type="submit">Kirim Instruksi</button>
+            </form></div></div>
+    @elseif ($retur->status_retur === 'menunggu_pengembalian_barang')
+        <div class="card mb-4"><div class="card-body"><h3 class="card-title">Konfirmasi Barang Diterima</h3>
+            <form method="POST" action="{{ route('admin.retur.barang-diterima', $retur->id_retur) }}">@csrf @method('PATCH')
+                <label class="form-label">Catatan Penerimaan (opsional)</label><textarea class="form-control mb-3" name="catatan_penerimaan" maxlength="2000" rows="2"></textarea>
+                <button class="btn btn-primary" type="submit" onclick="return confirm('Konfirmasi barang retur telah diterima secara fisik?')">Konfirmasi Barang Diterima</button>
+            </form></div></div>
+    @elseif ($retur->status_retur === 'barang_diterima')
+        <div class="card mb-4"><div class="card-header"><h3 class="card-title">Pemeriksaan Barang Retur</h3></div><div class="card-body">
+            <form method="POST" action="{{ route('admin.retur.pemeriksaan', $retur->id_retur) }}">@csrf @method('PATCH')
+                <div class="table-responsive"><table class="table"><thead><tr><th>Produk</th><th>Jumlah Disetujui</th><th>Jumlah Layak Dijual</th></tr></thead><tbody>
+                @foreach ($retur->detailRetur as $detail)
+                    <tr><td>{{ $detail->detailPesanan?->nama_produk_saat_pesan ?? 'Produk' }}</td><td>{{ $detail->jumlah_disetujui }}</td><td><input class="form-control" type="number" min="0" max="{{ $detail->jumlah_disetujui }}" required name="detail_inspeksi[{{ $loop->index }}][jumlah_layak_dijual]" value="{{ $detail->jumlah_disetujui }}"><input type="hidden" name="detail_inspeksi[{{ $loop->index }}][id_detail_retur]" value="{{ $detail->id_detail_retur }}"></td></tr>
+                @endforeach</tbody></table></div>
+                <label class="form-label">Catatan Pemeriksaan (opsional)</label><textarea class="form-control mb-3" name="catatan_pemeriksaan" maxlength="2000" rows="2"></textarea>
+                <button class="btn btn-primary" type="submit" onclick="return confirm('Simpan hasil pemeriksaan seluruh barang retur?')">Simpan Hasil Pemeriksaan</button>
+            </form></div></div>
+    @endif
+
     <div class="row row-cards">
         <div class="col-12 col-xl-6">
             <div class="card h-100">

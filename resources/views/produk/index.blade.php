@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#17120D">
+    <script>
+        (() => {
+            try {
+                const saved = localStorage.getItem('twfood-theme');
+                const theme = saved === 'light' || saved === 'dark' ? saved :
+                    (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                document.documentElement.dataset.theme = theme;
+            } catch (_) { document.documentElement.dataset.theme = 'dark'; }
+        })();
+    </script>
     <title>Produk - TWFood</title>
 
     {{-- 1) Gaya bersama: warna, header & footer --}}

@@ -4,7 +4,7 @@
 @section('page-title', 'Produk')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/admin/admin-produk.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Admin/admin-produk.css') }}">
 @endpush
 
 @section('content')

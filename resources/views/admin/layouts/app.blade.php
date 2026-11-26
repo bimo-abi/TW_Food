@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -7,16 +7,36 @@
 
     <title>@yield('title', 'Admin TWFood')</title>
 
+    {{-- Terapkan tema sebelum stylesheet untuk mencegah kilatan tema --}}
+    <script>
+        (() => {
+            try {
+                const saved = localStorage.getItem('twfood-admin-theme') || 'system';
+                const resolved = saved === 'system'
+                    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : saved;
+                document.documentElement.dataset.theme = resolved;
+                document.documentElement.setAttribute('data-bs-theme', resolved);
+                document.documentElement.dataset.themePreference = saved;
+            } catch (_) {
+                document.documentElement.dataset.theme = 'light';
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                document.documentElement.dataset.themePreference = 'system';
+            }
+        })();
+    </script>
+
     {{-- Tabler Core CSS --}}
     <link rel="stylesheet" href="{{ asset('assets/tabler/css/tabler.min.css') }}">
 
     {{-- Tabler Icons --}}
     <link rel="stylesheet" href="{{ asset('assets/tabler/icons/tabler-icons.min.css') }}">
 
-    {{-- Admin layout CSS (pindah css admin ke public/css/admin/admin.css)--}}
-    <link rel="stylesheet" href="{{ asset('css/admin/admin.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin/sidebar.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin/tema.css') }}">
+    {{-- Admin layout CSS (pindah css admin ke public/css/Admin/admin.css)--}}
+    <link rel="stylesheet" href="{{ asset('css/Admin/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Admin/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Admin/tema.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Admin/admin-enhancements.css') }}">
     @stack('styles')
 
 </head>
@@ -25,11 +45,14 @@
     <div class="admin-wrapper">
 
         {{-- SIDEBAR --}}
-        <aside class="sidebar">
+        <aside class="sidebar" id="adminSidebar">
 
-            <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-                <span class="tw-logo">TWfood</span>
-                <span class="tw-logo-teks">TWFood<small>Tewil Food</small></span>
+            <a href="{{ route('admin.dashboard') }}" class="sidebar-brand" aria-label="Dashboard Admin TWFood">
+                <img src="{{ asset('images/logo-twfood.png') }}" alt="Logo TWFood" class="admin-brand-logo">
+                <span class="admin-brand-text">
+                    <strong>TW FOOD</strong>
+                    <small>KULINER &amp; GROSIR SEGAR</small>
+                </span>
             </a>
 
             <div class="sidebar-label">Menu Utama</div>
@@ -138,10 +161,27 @@
         <main class="main-content">
 
             <header class="topbar">
-                <h3>@yield('page-title', 'Dashboard')</h3>
+                <div class="topbar-heading">
+                    <button type="button" class="sidebar-toggle" id="adminSidebarToggle"
+                        aria-label="Buka navigasi" aria-expanded="false" aria-controls="adminSidebar">
+                        <i class="ti ti-menu-2"></i>
+                    </button>
+                    <h3>@yield('page-title', 'Dashboard')</h3>
+                </div>
 
                 <div class="topbar-user">
-                    <span>{{ auth()->user()->nama }}</span>
+                    <div class="theme-switch" role="group" aria-label="Pilihan tema">
+                        <button type="button" class="theme-option" data-theme-choice="light" aria-label="Tema terang" title="Terang">
+                            <i class="ti ti-sun"></i>
+                        </button>
+                        <button type="button" class="theme-option" data-theme-choice="dark" aria-label="Tema gelap" title="Gelap">
+                            <i class="ti ti-moon"></i>
+                        </button>
+                        <button type="button" class="theme-option" data-theme-choice="system" aria-label="Ikuti sistem" title="Sistem">
+                            <i class="ti ti-device-desktop"></i>
+                        </button>
+                    </div>
+                    <span class="topbar-user-name">{{ auth()->user()->nama }}</span>
 
                     <form action="{{ route('admin.logout') }}" method="POST" class="m-0">
                         @csrf
@@ -161,7 +201,9 @@
         </main>
     </div>
 
+    <div class="sidebar-backdrop" id="adminSidebarBackdrop" hidden></div>
     <script src="{{ asset('assets/tabler/js/tabler.min.js') }}"></script>
+    <script src="{{ asset('js/admin-enhancements.js') }}" defer></script>
 
     @stack('scripts')
 

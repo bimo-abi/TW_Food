@@ -1,5 +1,5 @@
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/admin/promosi.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Admin/promosi.css') }}">
 @endpush
 
 @php

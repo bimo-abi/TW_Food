@@ -28,5 +28,5 @@
         </div>
     @endif
 
-    @include('admin.resep._form', ['resep' => null])
+    @include('admin.resep.form', ['resep' => null])
 @endsection

@@ -140,3 +140,50 @@ a.kal-item:hover {
 .ringkas-baris:last-of-type { border-bottom: 0; }
 .ringkas-baris span:first-child { color: #6b7280; }
 .ringkas-baris span:last-child { font-weight: 700; text-align: right; }
+
+/* Warna elemen khusus mengikuti tema Admin */
+:root[data-theme="dark"] .main-content .kal-item {
+    background: var(--admin-surface);
+    border-color: var(--admin-border);
+    color: var(--admin-text);
+}
+:root[data-theme="dark"] .main-content .kal-kode,
+:root[data-theme="dark"] .main-content .promo-nama,
+:root[data-theme="dark"] .main-content .varian-grup-judul strong {
+    color: var(--admin-text) !important;
+}
+:root[data-theme="dark"] .main-content .kal-tgl,
+:root[data-theme="dark"] .main-content .promo-deskripsi,
+:root[data-theme="dark"] .main-content .langkah-ket,
+:root[data-theme="dark"] .main-content .jenis-kotak span,
+:root[data-theme="dark"] .main-content .ringkas-baris span:first-child {
+    color: var(--admin-muted) !important;
+}
+:root[data-theme="dark"] .main-content .kal-sudah {
+    background: #203326;
+    border-color: #365b40;
+}
+:root[data-theme="dark"] .main-content .kal-sekarang {
+    background: #3a2a18;
+    border-color: #76501e;
+}
+:root[data-theme="dark"] .main-content .tw-chip,
+:root[data-theme="dark"] .main-content .jenis-kotak,
+:root[data-theme="dark"] .main-content .varian-box {
+    background: var(--admin-surface);
+    border-color: var(--admin-border);
+    color: var(--admin-text);
+}
+:root[data-theme="dark"] .main-content .tw-chip small {
+    color: var(--admin-muted);
+}
+:root[data-theme="dark"] .main-content .jenis-kotak span {
+    color: var(--admin-muted);
+}
+:root[data-theme="dark"] .main-content .contoh-hasil {
+    background: var(--admin-surface-2);
+    color: var(--admin-text);
+}
+:root[data-theme="dark"] .main-content .varian-grup {
+    border-color: var(--admin-border);
+}

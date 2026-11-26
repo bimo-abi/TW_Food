@@ -28,5 +28,5 @@
         </div>
     @endif
 
-    @include('admin.resep._form', ['resep' => $resep])
+    @include('admin.resep.form', ['resep' => $resep])
 @endsection

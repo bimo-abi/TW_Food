@@ -85,3 +85,15 @@
     font-size: 2.4rem;
     color: #F7941D;
 }
+
+/* Warna teks mengikuti tema Admin */
+:root[data-theme="dark"] .main-content .produk-nama {
+    color: var(--admin-text) !important;
+}
+:root[data-theme="dark"] .main-content .produk-deskripsi {
+    color: var(--admin-muted) !important;
+}
+:root[data-theme="dark"] .main-content .produk-thumb {
+    border-color: var(--admin-border);
+    background: var(--admin-surface-2);
+}

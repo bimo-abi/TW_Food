@@ -33,8 +33,8 @@
             <h4>Belanja</h4>
             <a href="{{ route('produk.public') }}">Daftar Produk</a>
             <a href="{{ url('/grosir') }}">Harga Grosir</a>
-            <a href="https://shopee.co.id/twfood_id" target="_blank" rel="noopener">Shopee: twfood_id</a>
-            <a href="https://www.tokopedia.com/twfood" target="_blank" rel="noopener">Tokopedia: TW Food</a>
+            {{-- <a href="https://shopee.co.id/twfood_id" target="_blank" rel="noopener">Shopee: twfood_id</a>
+            <a href="https://www.tokopedia.com/twfood" target="_blank" rel="noopener">Tokopedia: TW Food</a> --}}
         </div>
 
     </div>

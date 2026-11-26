@@ -27,6 +27,12 @@
             ]) }}
             @if ($value !== null) value="{{ $value }}" @endif
         >
+
+        @if ($type === 'password')
+            <button class="password-toggle" type="button" data-password-toggle="{{ $name }}" aria-label="Tampilkan kata sandi" aria-pressed="false">
+                <i class="ti ti-eye" aria-hidden="true"></i>
+            </button>
+        @endif
     </div>
 
     @if ($hasError)

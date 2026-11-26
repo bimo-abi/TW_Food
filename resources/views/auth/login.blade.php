@@ -11,6 +11,13 @@
         @include('auth.partials.brand-panel')
 
         <section class="form-panel" aria-labelledby="login-title">
+            <div class="login-toolbar">
+                <button class="theme-toggle" type="button" id="login-theme-toggle" aria-label="Aktifkan tema terang" aria-pressed="false">
+                    <i class="ti ti-sun" aria-hidden="true"></i>
+                    <span class="theme-toggle-label">Mode terang</span>
+                </button>
+            </div>
+
             <div class="form-heading">
                 <p class="eyebrow">Portal Admin</p>
                 <h2 id="login-title">Selamat datang</h2>
@@ -64,3 +71,7 @@
         </section>
     </main>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/Admin/admin-login.js') }}" defer></script>
+@endpush

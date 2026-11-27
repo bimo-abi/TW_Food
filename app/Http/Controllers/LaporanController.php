@@ -2,70 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DetailPesanan;
-use App\Models\Pembayaran;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\LaporanFilterRequest;
+use App\Models\Outlet;
+use App\Services\Laporan\LaporanService;
+use Illuminate\View\View;
 
 class LaporanController extends Controller
 {
-    public function index(Request $request)
+    private const REPORTS = [
+        'penjualan' => 'Penjualan',
+        'keuangan' => 'Keuangan',
+        'transaksi' => 'Transaksi',
+        'produk-stok' => 'Produk & Stok',
+        'pelanggan' => 'Pelanggan',
+        'retur-refund' => 'Retur & Refund',
+        'produksi' => 'Produksi',
+    ];
+
+    public function index(LaporanFilterRequest $request, LaporanService $service): View
     {
-        $filter = $request->validate([
-            'tanggal_mulai' => ['nullable', 'date'],
-            'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
-            'jenis_pembayaran' => ['nullable', 'in:penuh,dp,pelunasan,refund'],
+        $filters = $request->filters();
+        return view('admin.laporan.index', [
+            'jenis' => 'ringkasan',
+            'judul' => 'Ringkasan Bisnis',
+            'reports' => self::REPORTS,
+            'filters' => $filters,
+            'outlets' => Outlet::query()->orderBy('nama_outlet')->get(['id_outlet', 'nama_outlet']),
+            'summary' => $service->dashboard($filters),
+            'rows' => collect(),
+            'orders' => collect(),
+            'secondaryRows' => collect(),
+            'outstandingRows' => collect(),
         ]);
+    }
 
-        $tanggalMulai = $filter['tanggal_mulai'] ?? now()->startOfMonth()->toDateString();
-        $tanggalSelesai = $filter['tanggal_selesai'] ?? now()->toDateString();
+    public function show(string $jenis, LaporanFilterRequest $request, LaporanService $service): View
+    {
+        abort_unless(isset(self::REPORTS[$jenis]), 404);
+        $filters = $request->filters();
+        $data = match ($jenis) {
+            'penjualan' => $service->sales($filters),
+            'keuangan' => [
+                'rows' => $service->payments($filters),
+                'secondaryRows' => $service->manualFinancialEntries($filters),
+                'outstandingRows' => $service->outstandingOrders($filters),
+            ],
+            'transaksi' => ['rows' => $service->transactions($filters)],
+            'produk-stok' => ['rows' => $service->products($filters)],
+            'pelanggan' => ['rows' => $service->customers($filters)],
+            'retur-refund' => [
+                'rows' => $service->returns($filters),
+                'secondaryRows' => $service->refunds($filters),
+            ],
+            'produksi' => ['rows' => $service->production($filters)],
+        };
 
-        $query = Pembayaran::query()
-            ->with(['pesanan.pengguna'])
-            ->where('status_pembayaran', 'paid')
-            ->whereBetween('dibayar_pada', [
-                $tanggalMulai . ' 00:00:00',
-                $tanggalSelesai . ' 23:59:59',
-            ]);
-
-        if (!empty($filter['jenis_pembayaran'])) {
-            $query->where('jenis_pembayaran', $filter['jenis_pembayaran']);
-        }
-
-        $pembayaran = (clone $query)
-            ->latest('dibayar_pada')
-            ->paginate(20)
-            ->withQueryString();
-
-        $totalDiterima = (clone $query)->sum('jumlah_pembayaran');
-        $jumlahTransaksi = (clone $query)->count();
-
-        $produkTerlaris = DetailPesanan::query()
-            ->select(
-                'detail_pesanan.nama_produk_saat_pesan',
-                DB::raw('SUM(detail_pesanan.jumlah) as total_terjual')
-            )
-            ->whereHas('pesanan.pembayaran', function ($pembayaranQuery) use ($tanggalMulai, $tanggalSelesai) {
-                $pembayaranQuery
-                    ->where('status_pembayaran', 'paid')
-                    ->whereBetween('dibayar_pada', [
-                        $tanggalMulai . ' 00:00:00',
-                        $tanggalSelesai . ' 23:59:59',
-                    ]);
-            })
-            ->groupBy('detail_pesanan.nama_produk_saat_pesan')
-            ->orderByDesc('total_terjual')
-            ->limit(10)
-            ->get();
-
-        return view('admin.laporan.index', compact(
-            'pembayaran',
-            'produkTerlaris',
-            'totalDiterima',
-            'jumlahTransaksi',
-            'filter',
-            'tanggalMulai',
-            'tanggalSelesai'
-        ));
+        return view('admin.laporan.index', array_merge([
+            'jenis' => $jenis,
+            'judul' => self::REPORTS[$jenis],
+            'reports' => self::REPORTS,
+            'filters' => $filters,
+            'outlets' => Outlet::query()->orderBy('nama_outlet')->get(['id_outlet', 'nama_outlet']),
+            'summary' => $service->dashboard($filters),
+            'rows' => $data['rows'] ?? $data['products'] ?? collect(),
+            'orders' => $data['orders'] ?? collect(),
+            'secondaryRows' => $data['secondaryRows'] ?? collect(),
+        ], $data));
     }
 }

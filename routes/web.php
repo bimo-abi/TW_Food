@@ -26,6 +26,7 @@ use App\Http\Controllers\RefundRiwayatController;
 use App\Http\Controllers\PromosiController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\GrosirController;
+use App\Http\Controllers\Admin\LaporanExportController;
 
 // //Dashboard
 // Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -559,10 +560,19 @@ Route::delete('/admin/promosi/{id}', [PromosiController::class, 'destroy'])
     ->name('admin.promosi.destroy')
     ->middleware('admin');
 
-// Admin Laporan
-Route::get('/admin/laporan', [LaporanController::class, 'index'])
-    ->name('admin.laporan.index')
-    ->middleware('admin');
+// Admin Laporan Bisnis
+Route::prefix('admin/laporan')->name('admin.laporan.')->middleware('admin')->group(function () {
+    Route::get('/', [LaporanController::class, 'index'])->name('index');
+
+    Route::get('/export/{jenis}/{format}', [LaporanExportController::class, 'download'])
+        ->whereIn('jenis', ['ringkasan', 'penjualan', 'keuangan', 'transaksi', 'produk-stok', 'pelanggan', 'retur-refund', 'produksi'])
+        ->whereIn('format', ['xlsx', 'pdf', 'csv'])
+        ->name('export');
+
+    Route::get('/{jenis}', [LaporanController::class, 'show'])
+        ->whereIn('jenis', ['penjualan', 'keuangan', 'transaksi', 'produk-stok', 'pelanggan', 'retur-refund', 'produksi'])
+        ->name('show');
+});
 
 
 //public website

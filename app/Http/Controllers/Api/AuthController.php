@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pengguna;
+use App\Models\DokumenMitra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -37,20 +38,30 @@ class AuthController extends Controller
             'profil_bisnis.alamat_bisnis' =>
             'required_if:jenis_pelanggan,toko,horeca|string',
 
-            'profil_bisnis.kota' =>
-            'required_if:jenis_pelanggan,toko,horeca|string|max:100',
-
-            'profil_bisnis.provinsi' =>
-            'required_if:jenis_pelanggan,toko,horeca|string|max:100',
-
-            'profil_bisnis.kode_pos' =>
-            'required_if:jenis_pelanggan,toko,horeca|string|max:10',
+            'profil_bisnis.kota' => 'required_if:jenis_pelanggan,toko,horeca|string|max:100',
+            'profil_bisnis.provinsi' => 'required_if:jenis_pelanggan,toko,horeca|string|max:100',
+            'profil_bisnis.kode_pos' => 'required_if:jenis_pelanggan,toko,horeca|string|max:10',
+            'profil_bisnis.kode_provinsi' => 'required_if:jenis_pelanggan,toko,horeca|string|regex:/^\d{2}$/',
+            'profil_bisnis.kode_kabupaten_kota' => 'required_if:jenis_pelanggan,toko,horeca|string|regex:/^\d{2}\.\d{2}$/',
+            'profil_bisnis.kode_kecamatan' => 'required_if:jenis_pelanggan,toko,horeca|string|regex:/^\d{2}\.\d{2}\.\d{2}$/',
+            'profil_bisnis.kode_desa_kelurahan' => 'required_if:jenis_pelanggan,toko,horeca|string|regex:/^\d{2}\.\d{2}\.\d{2}\.\d{4}$/',
+            'profil_bisnis.kabupaten_kota' => 'required_if:jenis_pelanggan,toko,horeca|string|max:100',
+            'profil_bisnis.kecamatan' => 'required_if:jenis_pelanggan,toko,horeca|string|max:100',
+            'profil_bisnis.desa_kelurahan' => 'required_if:jenis_pelanggan,toko,horeca|string|max:100',
+            'profil_bisnis.latitude' => 'required_if:jenis_pelanggan,toko,horeca|numeric|between:-90,90',
+            'profil_bisnis.longitude' => 'required_if:jenis_pelanggan,toko,horeca|numeric|between:-180,180',
 
             'profil_bisnis.nib' =>
             'nullable|string|max:100',
 
             'profil_bisnis.npwp' =>
             'nullable|string|max:100',
+
+            // Dokumen wajib untuk pelanggan Toko/Horeca.
+            'dokumen_ktp' => 'required_if:jenis_pelanggan,toko,horeca|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'dokumen_pendukung' => 'required_if:jenis_pelanggan,toko,horeca|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'dokumen_nib' => 'required_with:profil_bisnis.nib|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'dokumen_npwp' => 'required_with:profil_bisnis.npwp|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -60,7 +71,24 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $pengguna = DB::transaction(function () use ($request) {
+        if (in_array($request->jenis_pelanggan, ['toko', 'horeca'], true)) {
+            $business = $request->input('profil_bisnis', []);
+            $province = (string) ($business['kode_provinsi'] ?? '');
+            $regency = (string) ($business['kode_kabupaten_kota'] ?? '');
+            $district = (string) ($business['kode_kecamatan'] ?? '');
+            $village = (string) ($business['kode_desa_kelurahan'] ?? '');
+            if (!str_starts_with($regency, $province . '.') || !str_starts_with($district, $regency . '.') || !str_starts_with($village, $district . '.')) {
+                return response()->json([
+                    'message' => 'Hierarki kode wilayah alamat usaha tidak valid.',
+                    'errors' => ['profil_bisnis.kode_desa_kelurahan' => ['Pilih wilayah administratif secara berurutan sampai desa/kelurahan.']],
+                ], 422);
+            }
+        }
+
+        $storedDocumentPaths = [];
+
+        try {
+            $pengguna = DB::transaction(function () use ($request, &$storedDocumentPaths) {
 
             $pengguna = Pengguna::create([
                 'nama' => $request->nama,
@@ -93,21 +121,88 @@ class AuthController extends Controller
                     $profilBisnis['nomor_telepon_bisnis'],
                     'alamat_bisnis' =>
                     $profilBisnis['alamat_bisnis'],
-                    'kota' =>
-                    $profilBisnis['kota'],
-                    'provinsi' =>
-                    $profilBisnis['provinsi'],
-                    'kode_pos' =>
-                    $profilBisnis['kode_pos'],
+                    'kota' => $profilBisnis['kabupaten_kota'],
+                    'provinsi' => $profilBisnis['provinsi'],
+                    'kode_pos' => $profilBisnis['kode_pos'],
+                    'kode_provinsi' => $profilBisnis['kode_provinsi'],
+                    'kode_kabupaten_kota' => $profilBisnis['kode_kabupaten_kota'],
+                    'kode_kecamatan' => $profilBisnis['kode_kecamatan'],
+                    'kode_desa_kelurahan' => $profilBisnis['kode_desa_kelurahan'],
+                    'kabupaten_kota' => $profilBisnis['kabupaten_kota'],
+                    'kecamatan' => $profilBisnis['kecamatan'],
+                    'desa_kelurahan' => $profilBisnis['desa_kelurahan'],
+                    'latitude' => $profilBisnis['latitude'],
+                    'longitude' => $profilBisnis['longitude'],
                     'nib' =>
                     $profilBisnis['nib'] ?? null,
                     'npwp' =>
                     $profilBisnis['npwp'] ?? null,
                 ]);
+
+                // Alamat usaha otomatis menjadi alamat pelanggan pertama.
+                $pengguna->alamat()->create([
+                    'label' => 'Usaha',
+                    'nama_penerima' => $profilBisnis['nama_pic'],
+                    'nomor_telepon' => $profilBisnis['nomor_telepon_bisnis'],
+                    'alamat_lengkap' => $profilBisnis['alamat_bisnis'],
+                    'kota' => $profilBisnis['kabupaten_kota'],
+                    'provinsi' => $profilBisnis['provinsi'],
+                    'kode_pos' => $profilBisnis['kode_pos'],
+                    'kode_provinsi' => $profilBisnis['kode_provinsi'],
+                    'kode_kabupaten_kota' => $profilBisnis['kode_kabupaten_kota'],
+                    'kode_kecamatan' => $profilBisnis['kode_kecamatan'],
+                    'kode_desa_kelurahan' => $profilBisnis['kode_desa_kelurahan'],
+                    'kabupaten_kota' => $profilBisnis['kabupaten_kota'],
+                    'kecamatan' => $profilBisnis['kecamatan'],
+                    'desa_kelurahan' => $profilBisnis['desa_kelurahan'],
+                    'latitude' => $profilBisnis['latitude'],
+                    'longitude' => $profilBisnis['longitude'],
+                    'alamat_utama' => true,
+                ]);
+
+                $documentInputs = [
+                    'ktp' => 'dokumen_ktp',
+                    'dokumen_pendukung' => 'dokumen_pendukung',
+                    'nib' => 'dokumen_nib',
+                    'npwp' => 'dokumen_npwp',
+                ];
+
+                foreach ($documentInputs as $jenisDokumen => $field) {
+                    if (!$request->hasFile($field)) {
+                        continue;
+                    }
+
+                    $path = $request->file($field)->store(
+                        'dokumen-mitra/' . $pengguna->id_pengguna,
+                        'local'
+                    );
+
+                    if (!$path) {
+                        throw new \RuntimeException('Gagal menyimpan dokumen verifikasi.');
+                    }
+
+                    $storedDocumentPaths[] = $path;
+
+                    DokumenMitra::create([
+                        'id_pengguna' => $pengguna->id_pengguna,
+                        'jenis_dokumen' => $jenisDokumen,
+                        'nomor_dokumen' => $jenisDokumen === 'nib'
+                            ? ($profilBisnis['nib'] ?? null)
+                            : ($jenisDokumen === 'npwp' ? ($profilBisnis['npwp'] ?? null) : null),
+                        'file_dokumen' => $path,
+                        'status_verifikasi' => 'menunggu',
+                    ]);
+                }
             }
 
             return $pengguna;
-        });
+            });
+        } catch (\Throwable $exception) {
+            foreach ($storedDocumentPaths as $path) {
+                Storage::disk('local')->delete($path);
+            }
+            throw $exception;
+        }
 
         return response()->json([
             'message' => 'Registrasi pelanggan berhasil.',

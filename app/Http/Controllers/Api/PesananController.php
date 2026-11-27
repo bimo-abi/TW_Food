@@ -32,6 +32,16 @@ class PesananController extends Controller
             ], 403);
         }
 
+        if (
+            in_array($pengguna->jenis_pelanggan, ['toko', 'horeca'], true)
+            && $pengguna->status_verifikasi !== 'disetujui'
+        ) {
+            return response()->json([
+                'message' => 'Akun Toko/Horeca harus disetujui Admin sebelum dapat membuat pesanan.',
+                'status_verifikasi' => $pengguna->status_verifikasi,
+            ], 403);
+        }
+
         $validated = $request->validate([
             'jenis_pemenuhan' => ['required', 'in:reguler,pre_order'],
             'jenis_pesanan' => ['required', 'in:pickup,delivery'],
@@ -154,6 +164,16 @@ class PesananController extends Controller
                 if (!$daftarHarga) {
                     throw ValidationException::withMessages([
                         "items.$index.id_daftar_harga" => ['Harga tidak aktif atau tidak sesuai dengan varian.'],
+                    ]);
+                }
+
+                $jenisHargaDiizinkan = $pengguna->jenis_pelanggan === 'umum'
+                    ? ['ecer']
+                    : ['ecer', 'grosir'];
+
+                if (!in_array($daftarHarga->jenis_harga, $jenisHargaDiizinkan, true)) {
+                    throw ValidationException::withMessages([
+                        "items.$index.id_daftar_harga" => ['Jenis harga tidak tersedia untuk jenis akun Anda.'],
                     ]);
                 }
 

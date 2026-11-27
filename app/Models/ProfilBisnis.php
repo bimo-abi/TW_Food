@@ -20,8 +20,22 @@ class ProfilBisnis extends Model
         'kota',
         'provinsi',
         'kode_pos',
+        'kode_provinsi',
+        'kode_kabupaten_kota',
+        'kode_kecamatan',
+        'kode_desa_kelurahan',
+        'kabupaten_kota',
+        'kecamatan',
+        'desa_kelurahan',
+        'latitude',
+        'longitude',
         'nib',
         'npwp',
+    ];
+
+    protected $casts = [
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function pengguna()

@@ -70,6 +70,13 @@ Route::get('/admin/verifikasi-pelanggan', [
     ->name('admin.verifikasi-pelanggan.index')
     ->middleware('admin');
 
+Route::get('/admin/verifikasi-pelanggan/{id}/dokumen/{idDokumen}', [
+    AdminVerifikasiPelangganController::class,
+    'downloadDokumen'
+])
+    ->name('admin.verifikasi-pelanggan.dokumen')
+    ->middleware('admin');
+
 Route::get('/admin/verifikasi-pelanggan/{id}', [
     AdminVerifikasiPelangganController::class,
     'show'

@@ -159,6 +159,43 @@
             </div>
         </div>
 
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="card-title">Dokumen Verifikasi</h3>
+            </div>
+            <div class="card-body">
+                @php
+                    $labelDokumen = [
+                        'ktp' => 'KTP',
+                        'dokumen_pendukung' => 'Dokumen Pendukung Usaha',
+                        'nib' => 'NIB',
+                        'npwp' => 'NPWP',
+                    ];
+                @endphp
+                @forelse ($pelanggan->dokumenMitra as $dokumen)
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 border-bottom py-3">
+                        <div>
+                            <div class="fw-bold">{{ $labelDokumen[$dokumen->jenis_dokumen] ?? strtoupper($dokumen->jenis_dokumen) }}</div>
+                            <div class="small text-secondary">
+                                {{ $dokumen->nomor_dokumen ?: 'Tidak ada nomor dokumen' }}
+                                · Status: {{ ucfirst($dokumen->status_verifikasi) }}
+                            </div>
+                            @if ($dokumen->catatan)
+                                <div class="small text-danger">Catatan: {{ $dokumen->catatan }}</div>
+                            @endif
+                        </div>
+                        <a class="btn btn-outline-primary btn-sm"
+                           href="{{ route('admin.verifikasi-pelanggan.dokumen', [$pelanggan->id_pengguna, $dokumen->id_dokumen_mitra]) }}"
+                           target="_blank" rel="noopener">
+                            <i class="ti ti-file-search me-1"></i> Lihat Dokumen
+                        </a>
+                    </div>
+                @empty
+                    <div class="alert alert-warning mb-0">Belum ada dokumen yang diunggah.</div>
+                @endforelse
+            </div>
+        </div>
+
         @if ($pelanggan->status_verifikasi === 'menunggu_verifikasi')
             <div class="card mt-4">
                 <div class="card-header">
@@ -193,6 +230,13 @@
                         >
                             @csrf
                             @method('PUT')
+
+                            <div class="mb-3" style="min-width: 280px;">
+                                <label for="alasan_penolakan" class="form-label">Alasan Penolakan (Wajib)</label>
+                                <textarea id="alasan_penolakan" name="alasan_penolakan"
+                                    class="form-control" rows="3" minlength="5" maxlength="1000"
+                                    required placeholder="Jelaskan alasan dokumen atau data tidak valid.">{{ old('alasan_penolakan') }}</textarea>
+                            </div>
 
                             <button type="submit" class="btn btn-danger">
                                 <i class="ti ti-x me-1"></i>

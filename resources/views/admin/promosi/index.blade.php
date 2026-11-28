@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Promosi - TWFood')
-@section('page-title', 'Promosi')
+@section('title', 'Campaign - TWFood')
+@section('page-title', 'Campaign')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/Admin/promosi.css') }}">
@@ -22,12 +22,12 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div class="text-secondary">
-            Atur diskon dan harga khusus, terutama untuk tanggal kembar (1.1, 2.2 … 12.12).
+            Kelola Campaign diskon produk dan varian berdasarkan periode yang kamu tentukan.
         </div>
 
         <a href="{{ route('admin.promosi.create') }}" class="btn btn-primary">
             <i class="ti ti-plus me-1"></i>
-            Tambah Promosi
+            Tambah Campaign
         </a>
     </div>
 
@@ -37,52 +37,12 @@
         </div>
     @endif
 
-    {{-- ===== Kalender tanggal kembar ===== --}}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h3 class="card-title">
-                <span class="judul-ikon ikon-oranye"><i class="ti ti-calendar-event"></i></span>
-                Tanggal Kembar Mendatang
-            </h3>
-            <div class="card-actions text-secondary small">Klik tanggal yang belum punya promo untuk membuatnya.</div>
-        </div>
-        <div class="card-body">
-            <div class="kal-grid">
-                @foreach ($kalender as $k)
-                    @php
-                        $kelas = $k['promo']
-                            ? ($k['promo']->tanggal_mulai->lte(today()) ? 'kal-sekarang' : 'kal-sudah')
-                            : 'kal-belum';
-                        $url = $k['promo']
-                            ? route('admin.promosi.edit', $k['promo']->id_promosi)
-                            : route('admin.promosi.create', ['tanggal' => $k['tanggal']->toDateString()]);
-                    @endphp
-                    <a href="{{ $url }}" class="kal-item {{ $kelas }} {{ $loop->first ? 'kal-terdekat' : '' }}">
-                        <span class="kal-kode">{{ $k['kode'] }}</span>
-                        <span class="kal-tgl">{{ $k['tanggal']->locale('id')->translatedFormat('j F Y') }}</span>
-                        <span class="kal-info">
-                            @if ($k['promo'])
-                                <i class="ti ti-circle-check"></i>
-                                {{ $k['promo']->tanggal_mulai->lte(today()) ? 'Sedang berlangsung' : 'Promo siap' }}
-                            @else
-                                + Buat promo
-                                <span class="text-secondary fw-normal">
-                                    · {{ $k['hari'] === 0 ? 'hari ini' : $k['hari'] . ' hari lagi' }}
-                                </span>
-                            @endif
-                        </span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </div>
-
     {{-- ===== Filter ===== --}}
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('admin.promosi.index') }}" class="row g-3 align-items-end">
                 <div class="col-md-6">
-                    <label for="q" class="form-label">Cari nama promosi</label>
+                    <label for="q" class="form-label">Cari nama Campaign</label>
                     <input type="search" id="q" name="q" class="form-control"
                         value="{{ $filter['q'] ?? '' }}" maxlength="150" placeholder="Contoh: Promo 11.11">
                 </div>
@@ -106,23 +66,22 @@
         </div>
     </div>
 
-    {{-- ===== Daftar promosi ===== --}}
+    {{-- ===== Daftar Campaign ===== --}}
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Daftar Promosi</h3>
-            <div class="card-actions text-secondary">{{ $promosi->total() }} promosi</div>
+            <h3 class="card-title">Daftar Campaign</h3>
+            <div class="card-actions text-secondary">{{ $promosi->total() }} Campaign</div>
         </div>
 
         @if ($promosi->isEmpty())
             <div class="card-body text-center py-5">
                 <i class="ti ti-discount-2 d-block mb-3" style="font-size: 2.8rem; color: #F7941D;"></i>
-                <h3 class="mb-1">Belum ada promosi</h3>
+                <h3 class="mb-1">Belum ada Campaign</h3>
                 <p class="text-secondary mb-3">
-                    Mulai dengan membuat promo untuk tanggal kembar terdekat,
-                    atau buat promo dengan tanggal bebas.
+                    Mulai dengan membuat Campaign diskon untuk produk dan varian pilihan.
                 </p>
                 <a href="{{ route('admin.promosi.create') }}" class="btn btn-primary">
-                    <i class="ti ti-plus me-1"></i>Buat Promosi Pertama
+                    <i class="ti ti-plus me-1"></i>Buat Campaign Pertama
                 </a>
             </div>
         @else
@@ -130,9 +89,9 @@
                 <table class="table table-vcenter card-table">
                     <thead>
                         <tr>
-                            <th>Promosi</th>
+                            <th>Campaign</th>
                             <th>Potongan</th>
-                            <th>Minimal Beli</th>
+                            <th>Pengaturan</th>
                             <th>Periode</th>
                             <th>Varian</th>
                             <th>Status</th>
@@ -153,7 +112,7 @@
                                 }
 
                                 $potongan = match ($item->jenis_promosi) {
-                                    'diskon_persen' => 'Diskon ' . rtrim(rtrim(number_format((float) $item->nilai_persen, 2, ',', '.'), '0'), ',') . '%',
+                                    'diskon_persen' => $item->varian->contains(fn($v) => $v->nilai_persen !== null) ? 'Diskon per varian' : ('Diskon ' . rtrim(rtrim(number_format((float) $item->nilai_persen, 2, ',', '.'), '0'), ',') . '%'),
                                     'diskon_nominal' => 'Potong Rp ' . number_format((int) $item->nilai_nominal, 0, ',', '.'),
                                     'harga_khusus' => 'Harga Rp ' . number_format((int) $item->nilai_nominal, 0, ',', '.'),
                                     default => '-',
@@ -168,7 +127,7 @@
                                 </td>
                                 <td><span class="promo-potongan">{{ $potongan }}</span></td>
                                 <td class="text-secondary">
-                                    {{ $item->minimal_pembelian !== null ? 'Min. ' . number_format((int) $item->minimal_pembelian, 0, ',', '.') . ' item' : 'Tanpa minimal' }}
+                                    {{ $item->jenis_promosi === 'diskon_persen' && $item->varian->contains(fn($v) => $v->nilai_persen !== null) ? 'Diskon khusus tiap varian' : ($item->minimal_pembelian !== null ? 'Min. ' . number_format((int) $item->minimal_pembelian, 0, ',', '.') . ' item' : 'Data promosi lama') }}
                                 </td>
                                 <td class="text-nowrap">{{ $periode($item->tanggal_mulai, $item->tanggal_selesai) }}</td>
                                 <td>{{ $item->varian_count }} varian</td>
@@ -190,7 +149,7 @@
                                         </form>
 
                                         <form method="POST" action="{{ route('admin.promosi.destroy', $item->id_promosi) }}"
-                                            onsubmit="return confirm('Hapus promosi ini?')">
+                                            onsubmit="return confirm('Hapus Campaign ini?')">
                                             @csrf @method('DELETE')
                                             <button class="btn btn-sm btn-icon btn-outline-danger" title="Hapus" aria-label="Hapus">
                                                 <i class="ti ti-trash"></i>

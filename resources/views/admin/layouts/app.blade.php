@@ -107,11 +107,11 @@
                     <span>Retur</span>
                 </a>
 
-                {{-- 7. Promosi --}}
+                {{-- 7. Campaign --}}
                 <a href="{{ route('admin.promosi.index') }}"
                     class="{{ request()->routeIs('admin.promosi.*') ? 'active' : '' }}">
                     <i class="ti ti-discount-2"></i>
-                    <span>Promosi</span>
+                    <span>Campaign</span>
                 </a>
 
                 {{-- 9. Laporan --}}

@@ -130,6 +130,7 @@ class PesananController extends Controller
             }
 
             $subtotalProduk = 0;
+            $totalDiskon = 0;
             $detailItems = [];
             $estimasiSelesaiPesanan = null;
             $reservasiKadaluarsa = now()->addHours(24);
@@ -265,7 +266,32 @@ class PesananController extends Controller
                 $harga = (int) $daftarHarga->harga;
                 $subtotalItem = $harga * $jumlah;
 
-                if ($subtotalItem > 4294967295) {
+                // Campaign hanya berlaku untuk harga ecer. Persentase dan identitas
+                // campaign selalu dibaca ulang dari database, bukan dari payload Flutter.
+                $campaign = null;
+                $diskonPerUnit = 0;
+                $diskonItem = 0;
+                if ($daftarHarga->jenis_harga === 'ecer') {
+                    $campaign = DB::table('promosi_varian as pv')
+                        ->join('promosi as p', 'p.id_promosi', '=', 'pv.id_promosi')
+                        ->where('pv.id_varian', $varian->id_varian)
+                        ->where('p.status_aktif', true)
+                        ->whereDate('p.tanggal_mulai', '<=', today())
+                        ->whereDate('p.tanggal_selesai', '>=', today())
+                        ->whereNotNull('pv.nilai_persen')
+                        ->orderByDesc('p.id_promosi')
+                        ->lockForUpdate()
+                        ->select('p.id_promosi', 'p.nama_promosi', 'pv.nilai_persen')
+                        ->first();
+                    if ($campaign) {
+                        $diskonPerUnit = (int) round($harga * ((float) $campaign->nilai_persen / 100), 0, PHP_ROUND_HALF_UP);
+                        $diskonItem = $diskonPerUnit * $jumlah;
+                    }
+                }
+                $subtotalSetelahDiskon = $subtotalItem - $diskonItem;
+                $totalDiskon += $diskonItem;
+
+                if ($subtotalItem > 4294967295 || $subtotalSetelahDiskon < 0) {
                     throw ValidationException::withMessages([
                         "items.$index.jumlah" => ['Subtotal item melebihi kapasitas penyimpanan database.'],
                     ]);
@@ -287,17 +313,19 @@ class PesananController extends Controller
                     'jenis_harga_saat_pesan' => $daftarHarga->jenis_harga,
                     'jumlah' => $jumlah,
                     'subtotal' => $subtotalItem,
-                    'diskon_item' => 0,
-                    'subtotal_setelah_diskon' => $subtotalItem,
+                    'diskon_item' => $diskonItem,
+                    'subtotal_setelah_diskon' => $subtotalSetelahDiskon,
+                    'id_promosi_saat_pesan' => $campaign?->id_promosi,
+                    'nama_promosi_saat_pesan' => $campaign?->nama_promosi,
+                    'nilai_persen_diskon_saat_pesan' => $campaign ? $campaign->nilai_persen : null,
                     'estimasi_selesai_pre_order' => $isPreOrder
                         ? $varian->getRawOriginal('estimasi_tersedia')
                         : null,
                 ];
             }
 
-            // Diskon checkout belum dihitung dari modul promosi pada controller
-            // yang tersedia. Nilai awal tetap nol, bukan menerima diskon dari client.
-            $diskon = 0;
+            // Total diskon berasal dari Campaign aktif untuk harga ecer saja.
+            $diskon = $totalDiskon;
             $totalPesanan = $subtotalProduk - $diskon;
 
             $pesanan = Pesanan::create([

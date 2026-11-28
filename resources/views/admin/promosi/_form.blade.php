@@ -1,347 +1,86 @@
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/Admin/promosi.css') }}">
+<link rel="stylesheet" href="{{ asset('css/Admin/promosi.css') }}">
 @endpush
-
 @php
     $terpilih = collect(old('varian', $varianTerpilih))->map(fn($v) => (int) $v)->all();
-    $jenis = old('jenis_promosi', $promosi->jenis_promosi ?? 'diskon_persen');
+    $diskonLama = old('diskon', $diskonVarian ?? []);
     $mulai = old('tanggal_mulai', optional($promosi->tanggal_mulai)->toDateString());
     $selesai = old('tanggal_selesai', optional($promosi->tanggal_selesai)->toDateString());
-    $persen = old('nilai_persen', $promosi->nilai_persen !== null ? (float) $promosi->nilai_persen : null);
     $aktif = old('status_aktif', $promosi->status_aktif ?? true);
-    $tanggalPilihan = $tanggalPilihan ?? null;
-    $autoIsi = $autoIsi ?? false;
 @endphp
-
 @if ($errors->any())
-    <div class="alert alert-danger">
-        <div class="fw-bold mb-1">Periksa kembali isian berikut:</div>
-        <ul class="mb-0">
-            @foreach ($errors->all() as $e)
-                <li>{{ $e }}</li>
-            @endforeach
-        </ul>
-    </div>
+<div class="alert alert-danger"><strong>Periksa kembali:</strong><ul class="mb-0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
 @endif
-
+@if ($legacyReadOnly ?? false)
+<div class="alert alert-warning">Promosi ini menggunakan skema lama (potongan nominal/harga khusus). Data lama dipertahankan dan tidak dikonversi otomatis. Buat Campaign baru dengan skema persentase per varian.</div>
+<div class="card"><div class="card-body"><strong>{{ $promosi->nama_promosi }}</strong><p class="mb-0">Periode: {{ $promosi->tanggal_mulai->format('d-m-Y') }} – {{ $promosi->tanggal_selesai->format('d-m-Y') }}. Edit Campaign lama ini dinonaktifkan untuk mencegah perubahan makna data.</p></div><div class="card-footer"><a class="btn btn-secondary" href="{{ route('admin.promosi.index') }}">Kembali</a></div></div>
+@else
 <div class="row g-4">
-    {{-- ================= KIRI: langkah-langkah ================= --}}
-    <div class="col-lg-8">
-
-        {{-- 1. TANGGAL --}}
-        <div class="card langkah">
-            <div class="card-body">
-                <div class="langkah-judul"><span class="langkah-no">1</span><h3>Pilih tanggal promo</h3></div>
-                <p class="langkah-ket">Pilih tanggal kembar supaya nama dan periode terisi otomatis, atau pilih "Tanggal bebas".</p>
-
-                <div class="chip-wrap" id="chip-tanggal">
-                    @foreach ($tanggalKembar as $t)
-                        <button type="button" class="tw-chip" data-tanggal="{{ $t['tanggal'] }}" data-kode="{{ $t['kode'] }}">
-                            {{ $t['kode'] }}
-                            <small>{{ \Carbon\Carbon::parse($t['tanggal'])->locale('id')->translatedFormat('j M Y') }}</small>
-                        </button>
-                    @endforeach
-                    <button type="button" class="tw-chip bebas" id="chip-bebas">
-                        Tanggal bebas
-                        <small>atur sendiri</small>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        {{-- 2. DETAIL --}}
-        <div class="card langkah">
-            <div class="card-body">
-                <div class="langkah-judul"><span class="langkah-no">2</span><h3>Nama promo</h3></div>
-                <p class="langkah-ket">Nama ini yang akan dilihat pelanggan.</p>
-
-                <div class="mb-3">
-                    <label class="form-label" for="nama_promosi">Nama promosi <span class="text-danger">*</span></label>
-                    <input type="text" id="nama_promosi" name="nama_promosi" maxlength="150" class="form-control"
-                        placeholder="Contoh: Promo Tanggal Kembar 12.12"
-                        value="{{ old('nama_promosi', $promosi->nama_promosi) }}" required>
-                </div>
-
-                <div>
-                    <label class="form-label" for="deskripsi">Deskripsi singkat (opsional)</label>
-                    <textarea id="deskripsi" name="deskripsi" rows="2" maxlength="1000" class="form-control"
-                        placeholder="Contoh: Diskon spesial untuk semua produk jamur krispi">{{ old('deskripsi', $promosi->deskripsi) }}</textarea>
-                </div>
-            </div>
-        </div>
-
-        {{-- 3. POTONGAN --}}
-        <div class="card langkah">
-            <div class="card-body">
-                <div class="langkah-judul"><span class="langkah-no">3</span><h3>Bentuk potongan</h3></div>
-                <p class="langkah-ket">Pilih satu cara memberi promo.</p>
-
-                <div class="jenis-grid mb-3">
-                    <label class="jenis-opsi">
-                        <input type="radio" name="jenis_promosi" value="diskon_persen" @checked($jenis === 'diskon_persen')>
-                        <div class="jenis-kotak"><strong>Diskon persen</strong><span>Harga dipotong sekian %. Contoh: diskon 11%.</span></div>
-                    </label>
-                    <label class="jenis-opsi">
-                        <input type="radio" name="jenis_promosi" value="diskon_nominal" @checked($jenis === 'diskon_nominal')>
-                        <div class="jenis-kotak"><strong>Potongan rupiah</strong><span>Harga dipotong sekian rupiah. Contoh: potong Rp5.000.</span></div>
-                    </label>
-                    <label class="jenis-opsi">
-                        <input type="radio" name="jenis_promosi" value="harga_khusus" @checked($jenis === 'harga_khusus')>
-                        <div class="jenis-kotak"><strong>Harga khusus</strong><span>Harga jadi ditetapkan. Contoh: jadi Rp10.000.</span></div>
-                    </label>
-                </div>
-
-                <div class="row g-3">
-                    <div class="col-md-6" id="box-persen">
-                        <label class="form-label" for="nilai_persen">Besar diskon <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="number" step="0.01" min="0.01" max="100" id="nilai_persen" name="nilai_persen"
-                                class="form-control" value="{{ $persen }}" placeholder="11">
-                            <span class="input-group-text">%</span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6" id="box-nominal">
-                        <label class="form-label" for="nilai_nominal" id="label-nominal">Nilai <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">Rp</span>
-                            <input type="number" min="1" max="16777215" id="nilai_nominal" name="nilai_nominal"
-                                class="form-control" value="{{ old('nilai_nominal', $promosi->nilai_nominal) }}" placeholder="5000">
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" for="minimal_pembelian">Minimal pembelian (opsional)</label>
-                        <div class="input-group">
-                            <input type="number" min="1" max="65535" id="minimal_pembelian" name="minimal_pembelian"
-                                class="form-control" value="{{ old('minimal_pembelian', $promosi->minimal_pembelian) }}"
-                                placeholder="Kosong = tanpa minimal">
-                            <span class="input-group-text">item</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="contoh-hasil" id="contoh-hasil" hidden></div>
-            </div>
-        </div>
-
-        {{-- 4. PERIODE --}}
-        <div class="card langkah">
-            <div class="card-body">
-                <div class="langkah-judul"><span class="langkah-no">4</span><h3>Lama promo berlaku</h3></div>
-                <p class="langkah-ket">Untuk tanggal kembar biasanya 1 hari. Ubah tanggal selesai kalau mau lebih lama.</p>
-
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="tanggal_mulai">Mulai <span class="text-danger">*</span></label>
-                        <input type="date" id="tanggal_mulai" name="tanggal_mulai" class="form-control" value="{{ $mulai }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="tanggal_selesai">Selesai <span class="text-danger">*</span></label>
-                        <input type="date" id="tanggal_selesai" name="tanggal_selesai" class="form-control" value="{{ $selesai }}" required>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- 5. VARIAN --}}
-        <div class="card langkah">
-            <div class="card-body">
-                <div class="langkah-judul"><span class="langkah-no">5</span><h3>Produk yang kena promo</h3></div>
-                <p class="langkah-ket">Centang varian yang ikut promo. Minimal satu.</p>
-
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <input type="search" id="cari-varian" class="form-control" style="max-width: 280px;"
-                        placeholder="Cari produk atau varian…">
-                    <button type="button" class="btn btn-outline-secondary" id="varian-semua">Pilih semua</button>
-                    <button type="button" class="btn btn-outline-secondary" id="varian-kosong">Kosongkan</button>
-                </div>
-
-                <div class="varian-box" id="varian-box">
-                    @forelse ($daftarVarian as $namaProduk => $list)
-                        <div class="varian-grup" data-nama="{{ strtolower($namaProduk) }}">
-                            <div class="varian-grup-judul">
-                                <strong>{{ $namaProduk }}</strong>
-                                <button type="button" class="varian-pilih-semua">Pilih semua</button>
-                            </div>
-                            @foreach ($list as $v)
-                                <label class="form-check form-check-inline varian-item" data-nama="{{ strtolower($v->nama_varian) }}">
-                                    <input type="checkbox" class="form-check-input varian-cek" name="varian[]"
-                                        value="{{ $v->id_varian }}" @checked(in_array($v->id_varian, $terpilih))>
-                                    <span class="form-check-label">{{ $v->nama_varian }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    @empty
-                        <div class="p-3 text-secondary">Belum ada varian aktif. Tambahkan varian produk dulu.</div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
+ <div class="col-lg-8">
+  <div class="card mb-3"><div class="card-body">
+   <h3>1. Informasi Campaign</h3>
+   <div class="mb-3"><label class="form-label">Nama Campaign *</label><input class="form-control" name="nama_promosi" maxlength="150" required value="{{ old('nama_promosi', $promosi->nama_promosi) }}" placeholder="Contoh: Promo Akhir Tahun"></div>
+   <label class="form-label">Deskripsi</label><textarea class="form-control" name="deskripsi" rows="2" maxlength="1000">{{ old('deskripsi', $promosi->deskripsi) }}</textarea>
+  </div></div>
+  <div class="card mb-3"><div class="card-body">
+   <h3>2. Periode Campaign</h3><div class="row"><div class="col-md-6"><label class="form-label">Tanggal mulai *</label><input type="date" class="form-control" name="tanggal_mulai" id="tanggal_mulai" required value="{{ $mulai }}"></div><div class="col-md-6"><label class="form-label">Tanggal selesai *</label><input type="date" class="form-control" name="tanggal_selesai" id="tanggal_selesai" required min="{{ $mulai }}" value="{{ $selesai }}"></div></div>
+  </div></div>
+  <div class="card mb-3"><div class="card-body">
+   <h3>3. Pilih Produk dan Varian</h3><p class="text-secondary">Diskon ditetapkan terpisah untuk setiap varian. Hanya harga ecer yang mendapatkan diskon; harga grosir tidak berubah.</p>
+   <input id="cari-varian" class="form-control mb-3" type="search" placeholder="Cari nama produk atau varian…">
+   <div class="d-flex gap-2 mb-3"><button type="button" class="btn btn-sm btn-outline-secondary" id="pilih-semua">Pilih semua hasil</button><button type="button" class="btn btn-sm btn-outline-secondary" id="hapus-pilihan">Kosongkan pilihan</button></div>
+   @forelse($daftarVarian as $namaProduk => $list)
+    <div class="border rounded p-3 mb-3 grup-varian" data-search="{{ strtolower($namaProduk) }}"><strong>{{ $namaProduk }}</strong>
+     @foreach($list as $v)
+      <label class="d-flex flex-wrap align-items-center gap-2 py-2 border-bottom varian-row" data-search="{{ strtolower($v->nama_produk.' '.$v->nama_varian) }}">
+       <input type="checkbox" class="form-check-input pilih-varian" name="varian[]" value="{{ $v->id_varian }}" data-id="{{ $v->id_varian }}" @checked(in_array((int)$v->id_varian, $terpilih))>
+       <span class="flex-grow-1">{{ $v->nama_varian }}</span>
+       <span class="text-secondary small">Ecer: {{ $v->harga_ecer !== null ? 'Rp '.number_format($v->harga_ecer,0,',','.') : 'Belum ada harga aktif' }}</span>
+       <span class="input-group input-group-sm" style="width:125px"><input type="number" class="form-control input-diskon" name="diskon[{{ $v->id_varian }}]" min="0.01" max="100" step="0.01" placeholder="Diskon" value="{{ $diskonLama[$v->id_varian] ?? '' }}" @disabled(!in_array((int)$v->id_varian, $terpilih)) data-price="{{ $v->harga_ecer ?? 0 }}" data-id="{{ $v->id_varian }}"><span class="input-group-text">%</span></span>
+      </label>
+     @endforeach
     </div>
-
-    {{-- ================= KANAN: ringkasan ================= --}}
-    <div class="col-lg-4">
-        <div class="card ringkas-sticky">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <span class="judul-ikon ikon-merah"><i class="ti ti-receipt"></i></span>
-                    Ringkasan
-                </h3>
-            </div>
-            <div class="card-body">
-                <div class="ringkas-baris"><span>Nama</span><span id="r-nama">-</span></div>
-                <div class="ringkas-baris"><span>Potongan</span><span id="r-potongan">-</span></div>
-                <div class="ringkas-baris"><span>Minimal beli</span><span id="r-minimal">Tanpa minimal</span></div>
-                <div class="ringkas-baris"><span>Berlaku</span><span id="r-periode">-</span></div>
-                <div class="ringkas-baris"><span>Varian</span><span id="r-varian">0 dipilih</span></div>
-
-                <label class="form-check form-switch mt-3 mb-0">
-                    <input type="checkbox" name="status_aktif" value="1" class="form-check-input" @checked($aktif)>
-                    <span class="form-check-label fw-semibold">Promosi aktif</span>
-                </label>
-                <div class="text-secondary small mt-1">Matikan kalau promo belum mau ditayangkan.</div>
-            </div>
-            <div class="card-footer d-flex gap-2">
-                <a href="{{ route('admin.promosi.index') }}" class="btn btn-outline-secondary">Batal</a>
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="ti ti-device-floppy me-1"></i>Simpan Promosi
-                </button>
-            </div>
-        </div>
-    </div>
+   @empty <p class="text-secondary">Belum ada varian aktif dengan produk aktif.</p> @endforelse
+  </div></div>
+  <div class="card"><div class="card-body"><h3>4. Preview Harga</h3><p class="text-secondary">Nominal diskon per unit dibulatkan ke Rupiah terdekat (setengah dibulatkan naik).</p><div class="table-responsive"><table class="table"><thead><tr><th>Produk/Varian</th><th>Harga ecer</th><th>Diskon</th><th>Harga akhir</th></tr></thead><tbody id="preview-campaign"><tr><td colspan="4" class="text-secondary">Pilih varian dan isi diskon untuk melihat preview.</td></tr></tbody></table></div></div></div>
+ </div>
+ <div class="col-lg-4"><div class="card" style="position:sticky;top:1rem"><div class="card-header"><h3 class="card-title">Ringkasan Campaign</h3></div><div class="card-body"><p><strong>Varian dipilih:</strong> <span id="jumlah-varian">0</span></p><p><strong>Periode:</strong><br><span id="ringkas-periode">{{ $mulai ?: '-' }} – {{ $selesai ?: '-' }}</span></p><label class="form-check form-switch"><input type="checkbox" class="form-check-input" name="status_aktif" value="1" @checked($aktif)><span class="form-check-label">Campaign aktif</span></label><small class="text-secondary">Campaign aktif akan diperiksa agar tidak bertabrakan dengan Campaign aktif lain pada varian yang sama.</small></div><div class="card-footer d-flex gap-2"><a href="{{ route('admin.promosi.index') }}" class="btn btn-outline-secondary">Batal</a><button type="submit" class="btn btn-primary flex-fill">Simpan Campaign</button></div></div></div>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var $ = function (id) { return document.getElementById(id); };
-    var bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-    var rupiah = function (n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); };
-    var tgl = function (s) {
-        if (!s) return '';
-        var p = s.split('-');
-        return parseInt(p[2], 10) + ' ' + bulan[parseInt(p[1], 10) - 1] + ' ' + p[0];
-    };
-
-    var nama = $('nama_promosi');
-    var namaOtomatis = false;
-
-    /* ---------- 1. chip tanggal kembar ---------- */
-    var chips = document.querySelectorAll('#chip-tanggal .tw-chip[data-tanggal]');
-    function tandaiChip(aktif) {
-        document.querySelectorAll('#chip-tanggal .tw-chip').forEach(function (c) { c.classList.remove('aktif'); });
-        if (aktif) aktif.classList.add('aktif');
-    }
-    function pilihChip(chip, isiNama) {
-        tandaiChip(chip);
-        $('tanggal_mulai').value = chip.dataset.tanggal;
-        $('tanggal_selesai').value = chip.dataset.tanggal;
-        if (isiNama && (!nama.value.trim() || namaOtomatis)) {
-            nama.value = 'Promo Tanggal Kembar ' + chip.dataset.kode;
-            namaOtomatis = true;
-        }
-        ringkas();
-    }
-    chips.forEach(function (c) { c.addEventListener('click', function () { pilihChip(c, true); }); });
-    $('chip-bebas').addEventListener('click', function () { tandaiChip($('chip-bebas')); });
-    nama.addEventListener('input', function () { namaOtomatis = false; });
-
-    /* ---------- 3. jenis potongan ---------- */
-    function jenisAktif() { return document.querySelector('input[name="jenis_promosi"]:checked').value; }
-    function aturJenis() {
-        var j = jenisAktif();
-        var persen = j === 'diskon_persen';
-        $('box-persen').hidden = !persen;
-        $('box-nominal').hidden = persen;
-        $('nilai_persen').required = persen;
-        $('nilai_nominal').required = !persen;
-        $('label-nominal').innerHTML = (j === 'harga_khusus' ? 'Harga jadi' : 'Potongan') + ' <span class="text-danger">*</span>';
-        ringkas();
-    }
-    document.querySelectorAll('input[name="jenis_promosi"]').forEach(function (r) { r.addEventListener('change', aturJenis); });
-    ['nilai_persen', 'nilai_nominal', 'minimal_pembelian', 'tanggal_mulai', 'tanggal_selesai', 'nama_promosi']
-        .forEach(function (id) { $(id).addEventListener('input', ringkas); });
-
-    /* ---------- 5. varian ---------- */
-    var cek = document.querySelectorAll('.varian-cek');
-    cek.forEach(function (c) { c.addEventListener('change', ringkas); });
-    $('varian-semua').addEventListener('click', function () {
-        document.querySelectorAll('.varian-item:not([hidden]) .varian-cek').forEach(function (c) { c.checked = true; });
-        ringkas();
-    });
-    $('varian-kosong').addEventListener('click', function () { cek.forEach(function (c) { c.checked = false; }); ringkas(); });
-    document.querySelectorAll('.varian-pilih-semua').forEach(function (b) {
-        b.addEventListener('click', function () {
-            b.closest('.varian-grup').querySelectorAll('.varian-cek').forEach(function (c) { c.checked = true; });
-            ringkas();
-        });
-    });
-    $('cari-varian').addEventListener('input', function () {
-        var q = this.value.toLowerCase().trim();
-        document.querySelectorAll('.varian-grup').forEach(function (g) {
-            var adaCocok = false;
-            g.querySelectorAll('.varian-item').forEach(function (v) {
-                var cocok = !q || g.dataset.nama.indexOf(q) > -1 || v.dataset.nama.indexOf(q) > -1;
-                v.hidden = !cocok;
-                if (cocok) adaCocok = true;
-            });
-            g.hidden = !adaCocok;
-        });
-    });
-
-    /* ---------- ringkasan & contoh ---------- */
-    function ringkas() {
-        var j = jenisAktif();
-        var p = parseFloat($('nilai_persen').value);
-        var n = parseInt($('nilai_nominal').value, 10);
-        var potongan = '-';
-        var contoh = '';
-
-        if (j === 'diskon_persen' && p > 0) {
-            potongan = 'Diskon ' + p + '%';
-            contoh = 'Contoh: produk Rp100.000 menjadi ' + rupiah(Math.round(100000 * (1 - p / 100))) + '.';
-        } else if (j === 'diskon_nominal' && n > 0) {
-            potongan = 'Potong ' + rupiah(n);
-            contoh = 'Contoh: produk Rp100.000 menjadi ' + rupiah(Math.max(100000 - n, 0)) + '.';
-        } else if (j === 'harga_khusus' && n > 0) {
-            potongan = 'Harga ' + rupiah(n);
-            contoh = 'Semua varian yang dipilih dijual seharga ' + rupiah(n) + '.';
-        }
-        var kotak = $('contoh-hasil');
-        kotak.hidden = !contoh;
-        kotak.textContent = contoh;
-
-        var m = $('tanggal_mulai').value, s = $('tanggal_selesai').value;
-        var periode = '-';
-        if (m && s) {
-            var hari = Math.round((new Date(s) - new Date(m)) / 86400000) + 1;
-            periode = (m === s ? tgl(m) : tgl(m) + ' – ' + tgl(s)) + (hari > 0 ? ' (' + hari + ' hari)' : '');
-        }
-        var min = parseInt($('minimal_pembelian').value, 10);
-        var jumlah = document.querySelectorAll('.varian-cek:checked').length;
-
-        $('r-nama').textContent = nama.value.trim() || '-';
-        $('r-potongan').textContent = potongan;
-        $('r-minimal').textContent = min > 0 ? 'Min. ' + min + ' item' : 'Tanpa minimal';
-        $('r-periode').textContent = periode;
-        $('r-varian').textContent = jumlah + ' dipilih';
-    }
-
-    /* ---------- keadaan awal ---------- */
-    aturJenis();
-    var awal = @json($tanggalPilihan);
-    var autoIsi = @json($autoIsi);
-    if (awal) {
-        var cocok = Array.prototype.find.call(chips, function (c) { return c.dataset.tanggal === awal; });
-        if (cocok) {
-            if (autoIsi) { pilihChip(cocok, true); } else { tandaiChip(cocok); }
-        } else {
-            tandaiChip($('chip-bebas'));
-            if (autoIsi) { $('tanggal_mulai').value = awal; $('tanggal_selesai').value = awal; }
-        }
-    } else {
-        tandaiChip($('chip-bebas'));
-    }
-    ringkas();
+document.addEventListener('DOMContentLoaded', () => {
+ const rupiah = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+ const rows = [...document.querySelectorAll('.varian-row')];
+ const checks = [...document.querySelectorAll('.pilih-varian')];
+ const inputs = [...document.querySelectorAll('.input-diskon')];
+ const preview = document.getElementById('preview-campaign');
+ function render() {
+  const selected = checks.filter(c => c.checked);
+  document.getElementById('jumlah-varian').textContent = selected.length;
+  preview.replaceChildren();
+  selected.forEach(c => {
+   const row = c.closest('.varian-row'); const input = row.querySelector('.input-diskon');
+   const price = Number(input.dataset.price || 0); const pct = Number(input.value || 0);
+   const label = row.querySelector('.flex-grow-1').textContent.trim();
+   const product = row.closest('.grup-varian').querySelector('strong').textContent;
+   const discount = Math.floor((price * pct / 100) + 0.5);
+   const tr = document.createElement('tr');
+   [product + ' – ' + label, rupiah(price), pct ? pct + '%' : '-', price ? rupiah(price-discount) : 'Harga belum tersedia'].forEach(value => {
+    const td = document.createElement('td'); td.textContent = value; tr.appendChild(td);
+   });
+   preview.appendChild(tr);
+  });
+  if (!selected.length) {
+   const tr = document.createElement('tr'); const td = document.createElement('td');
+   td.colSpan = 4; td.className = 'text-secondary'; td.textContent = 'Pilih varian dan isi diskon untuk melihat preview.';
+   tr.appendChild(td); preview.appendChild(tr);
+  }
+ }
+ checks.forEach(c => c.addEventListener('change', () => { c.closest('.varian-row').querySelector('.input-diskon').disabled = !c.checked; render(); })); inputs.forEach(i => i.addEventListener('input', render));
+ document.getElementById('cari-varian').addEventListener('input', e => { const q=e.target.value.toLowerCase(); rows.forEach(r => r.hidden=!r.dataset.search.includes(q)); document.querySelectorAll('.grup-varian').forEach(g=>g.hidden=!g.querySelector('.varian-row:not([hidden])')); });
+ document.getElementById('pilih-semua').addEventListener('click',()=>{checks.forEach(c=>{if(!c.closest('.varian-row').hidden){c.checked=true;c.closest('.varian-row').querySelector('.input-diskon').disabled=false;}});render();});
+ document.getElementById('hapus-pilihan').addEventListener('click',()=>{checks.forEach(c=>{c.checked=false;c.closest('.varian-row').querySelector('.input-diskon').disabled=true;});render();});
+ ['tanggal_mulai','tanggal_selesai'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{document.getElementById('ringkas-periode').textContent=document.getElementById('tanggal_mulai').value+' – '+document.getElementById('tanggal_selesai').value;}));
+ render();
 });
 </script>
+@endif

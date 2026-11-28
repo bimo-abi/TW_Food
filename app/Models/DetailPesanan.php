@@ -24,6 +24,9 @@ class DetailPesanan extends Model
         'subtotal',
         'diskon_item',
         'subtotal_setelah_diskon',
+        'id_promosi_saat_pesan',
+        'nama_promosi_saat_pesan',
+        'nilai_persen_diskon_saat_pesan',
     ];
 
     protected function casts(): array
@@ -34,6 +37,8 @@ class DetailPesanan extends Model
             'subtotal' => 'integer',
             'diskon_item' => 'integer',
             'subtotal_setelah_diskon' => 'integer',
+            'id_promosi_saat_pesan' => 'integer',
+            'nilai_persen_diskon_saat_pesan' => 'decimal:2',
         ];
     }
 

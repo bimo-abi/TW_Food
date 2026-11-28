@@ -13,7 +13,10 @@ class PromosiVarian extends Model
     protected $fillable = [
         'id_promosi',
         'id_varian',
+        'nilai_persen',
     ];
+
+    protected $casts = ['nilai_persen' => 'decimal:2'];
 
     public function promosi()
     {

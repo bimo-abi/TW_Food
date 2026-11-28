@@ -41,54 +41,40 @@ class ManualRefundService
                 // Urutan lock dibuat konsisten: retur -> pesanan -> refund.
                 // Ini mencegah dua refund untuk satu retur/pesanan diproses
                 // bersamaan dengan snapshot status yang sudah kedaluwarsa.
-                $idRetur = Refund::query()->where('id_refund', $idRefund)->value('id_retur');
-                if (!$idRetur) {
-                    throw ValidationException::withMessages([
-                        'refund' => ['Refund retur tidak ditemukan.'],
-                    ]);
-                }
-
-                $retur = Retur::query()->where('id_retur', $idRetur)
-                    ->lockForUpdate()->firstOrFail();
-                $pesanan = Pesanan::query()->where('id_pesanan', $retur->id_pesanan)
-                    ->lockForUpdate()->firstOrFail();
                 $refund = Refund::query()->where('id_refund', $idRefund)
                     ->lockForUpdate()->firstOrFail();
-
-                if ($refund->jenis_refund !== 'retur' || !$refund->id_retur || (int) $refund->id_retur !== (int) $retur->id_retur) {
-                    throw ValidationException::withMessages([
-                        'refund' => ['Pencatatan manual ini hanya berlaku untuk refund yang berasal dari retur.'],
-                    ]);
+                $retur = null;
+                $pesanan = null;
+                if ($refund->jenis_refund === 'retur') {
+                    if (!$refund->id_retur) {
+                        throw ValidationException::withMessages(['refund' => ['Data retur untuk refund ini tidak ditemukan.']]);
+                    }
+                    $retur = Retur::query()->where('id_retur', $refund->id_retur)
+                        ->lockForUpdate()->firstOrFail();
+                    if ($retur->status_retur !== 'sedang_diperiksa') {
+                        throw ValidationException::withMessages(['status_retur' => ['Refund retur hanya dapat dicatat setelah pemeriksaan barang.']]);
+                    }
+                    $semuaRefundRetur = Refund::query()->where('id_retur', $refund->id_retur)->lockForUpdate()->get();
+                    if ($semuaRefundRetur->isEmpty()
+                        || (int) $semuaRefundRetur->sum('nominal_refund') !== (int) $retur->nominal_pengembalian
+                        || $semuaRefundRetur->contains(fn (Refund $item) => (int) $item->id_pesanan !== (int) $refund->id_pesanan || !$item->id_pembayaran)) {
+                        throw ValidationException::withMessages(['refund' => ['Data alokasi refund tidak konsisten dengan nominal pengembalian pada retur.']]);
+                    }
+                } elseif ($refund->jenis_refund === 'pembatalan_operasional') {
+                    $pesanan = Pesanan::query()->where('id_pesanan', $refund->id_pesanan)->lockForUpdate()->firstOrFail();
+                    if ($pesanan->status_pesanan !== 'dibatalkan') {
+                        throw ValidationException::withMessages(['pesanan' => ['Refund operasional hanya dapat dicatat setelah pesanan dibatalkan.']]);
+                    }
+                } else {
+                    throw ValidationException::withMessages(['refund' => ['Jenis refund tidak dikenali.']]);
                 }
 
-                // Refund retur baru boleh diproses setelah pemeriksaan barang selesai.
-                if ($retur->status_retur !== 'sedang_diperiksa') {
-                    throw ValidationException::withMessages([
-                        'status_retur' => ['Refund hanya dapat dicatat setelah pemeriksaan barang retur selesai.'],
-                    ]);
-                }
-
-                $semuaRefundRetur = Refund::query()
-                    ->where('id_retur', $refund->id_retur)
-                    ->lockForUpdate()
-                    ->get();
-
-                $nominalSeluruhRefund = (int) $semuaRefundRetur->sum('nominal_refund');
-                if ($semuaRefundRetur->isEmpty()
-                    || $nominalSeluruhRefund !== (int) $retur->nominal_pengembalian
-                    || $semuaRefundRetur->contains(fn (Refund $item) =>
-                        (int) $item->id_pesanan !== (int) $refund->id_pesanan
-                        || !$item->id_pembayaran
-                    )) {
-                    throw ValidationException::withMessages([
-                        'refund' => ['Data alokasi refund tidak konsisten dengan nominal pengembalian pada retur.'],
-                    ]);
-                }
+                $pesanan = $pesanan ?? Pesanan::query()->where('id_pesanan', $refund->id_pesanan)->lockForUpdate()->firstOrFail();
 
                 $pembayaranSumber = Pembayaran::query()
                     ->where('id_pembayaran', $refund->id_pembayaran)
                     ->where('id_pesanan', $refund->id_pesanan)
-                    ->where('status_pembayaran', 'paid')
+                    ->whereIn('status_pembayaran', ['paid', 'refunded'])
                     ->lockForUpdate()
                     ->first();
 
@@ -185,46 +171,39 @@ class ManualRefundService
                 $refund->selesai_pada = $berhasil ? $waktuSekarang : null;
                 $refund->save();
 
-                $semuaRefundRetur = Refund::query()
-                    ->where('id_retur', $retur->id_retur)
-                    ->get();
-
-                $semuaBerhasil = $semuaRefundRetur->isNotEmpty()
-                    && $semuaRefundRetur->every(
-                        fn (Refund $item) => $item->status_refund === 'berhasil'
-                    );
-
-                if ($semuaBerhasil) {
-                    $retur->status_pengembalian_dana = 'selesai';
-                    $retur->status_retur = 'selesai';
-                    $retur->selesai_pada = $waktuSekarang;
-                } else {
-                    $statusRefund = $semuaRefundRetur->pluck('status_refund');
-                    $adaAktif = $statusRefund->contains(fn ($status) => in_array(
-                        $status,
-                        ['belum_diajukan', 'menunggu_diproses', 'diproses', 'perlu_diproses_ulang'],
-                        true
-                    ));
-                    $adaGagal = $statusRefund->contains('gagal');
-
-                    if ($adaAktif && $adaGagal) {
-                        $retur->status_pengembalian_dana = 'diproses';
-                    } elseif ($adaAktif && $statusRefund->every(fn ($status) => $status === 'menunggu_diproses')) {
-                        $retur->status_pengembalian_dana = 'menunggu';
-                    } elseif ($adaAktif) {
-                        $retur->status_pengembalian_dana = 'diproses';
+                $semuaBerhasil = false;
+                if ($retur) {
+                    $semuaRefundRetur = Refund::query()->where('id_retur', $retur->id_retur)->get();
+                    $semuaBerhasil = $semuaRefundRetur->isNotEmpty()
+                        && $semuaRefundRetur->every(fn (Refund $item) => $item->status_refund === 'berhasil');
+                    if ($semuaBerhasil) {
+                        $retur->status_pengembalian_dana = 'selesai';
+                        $retur->status_retur = 'selesai';
+                        $retur->selesai_pada = $waktuSekarang;
                     } else {
-                        $retur->status_pengembalian_dana = 'gagal';
+                        $statusRefund = $semuaRefundRetur->pluck('status_refund');
+                        $adaAktif = $statusRefund->contains(fn ($status) => in_array($status, ['belum_diajukan', 'menunggu_diproses', 'diproses', 'perlu_diproses_ulang'], true));
+                        $adaGagal = $statusRefund->contains('gagal');
+                        if ($adaAktif && $adaGagal) {
+                            $retur->status_pengembalian_dana = 'diproses';
+                        } elseif ($adaAktif && $statusRefund->every(fn ($status) => $status === 'menunggu_diproses')) {
+                            $retur->status_pengembalian_dana = 'menunggu';
+                        } elseif ($adaAktif) {
+                            $retur->status_pengembalian_dana = 'diproses';
+                        } else {
+                            $retur->status_pengembalian_dana = 'gagal';
+                        }
                     }
+                    $retur->save();
                 }
-                $retur->save();
 
                 // Status pembayaran pesanan hanya menjadi dikembalikan apabila
                 // seluruh dana pada seluruh transaksi pembayaran sudah berhasil
                 // dikembalikan. Status transaksi pembayaran asli tidak diubah.
                 $seluruhPembayaran = Pembayaran::query()
                     ->where('id_pesanan', $refund->id_pesanan)
-                    ->where('status_pembayaran', 'paid')
+                    ->whereIn('jenis_pembayaran', ['penuh', 'dp', 'pelunasan'])
+                    ->whereIn('status_pembayaran', ['paid', 'refunded'])
                     ->lockForUpdate()
                     ->get();
 
@@ -256,34 +235,32 @@ class ManualRefundService
                     'status_sebelum' => $statusSebelum,
                     'status_sesudah' => $refund->status_refund,
                     'deskripsi' => ($berhasil ? 'Refund manual berhasil dicatat' : 'Percobaan refund manual gagal')
-                        . ' untuk retur ' . $retur->nomor_retur
+                        . ($retur ? ' untuk retur ' . $retur->nomor_retur : ' untuk pembatalan operasional pesanan ' . $pesanan->nomor_pesanan)
                         . ' sebesar Rp' . number_format((int) $refund->nominal_refund, 0, ',', '.')
                         . ' oleh ' . $aktor->nama . '.',
                     'created_at' => $waktuSekarang,
                 ]);
 
-                $judul = $berhasil ? 'Pengembalian dana retur berhasil' : 'Pengembalian dana retur belum berhasil';
+                $subjekRefund = $retur ? 'retur ' . $retur->nomor_retur : 'pembatalan pesanan ' . $pesanan->nomor_pesanan;
+                $judul = $berhasil ? 'Pengembalian dana berhasil' : 'Pengembalian dana belum berhasil';
                 $pesan = $berhasil
-                    ? 'Pengembalian dana untuk retur ' . $retur->nomor_retur
-                        . ' sebesar Rp' . number_format((int) $refund->nominal_refund, 0, ',', '.')
-                        . ' telah dicatat berhasil.'
-                    : 'Percobaan pengembalian dana untuk retur ' . $retur->nomor_retur
-                        . ' belum berhasil. Pengembalian dana dapat ditindaklanjuti atau dicoba kembali.';
+                    ? 'Pengembalian dana untuk ' . $subjekRefund . ' sebesar Rp' . number_format((int) $refund->nominal_refund, 0, ',', '.') . ' telah dicatat berhasil.'
+                    : 'Percobaan pengembalian dana untuk ' . $subjekRefund . ' belum berhasil. Pengembalian dana dapat ditindaklanjuti atau dicoba kembali.';
 
                 Notifikasi::create([
                     'id_pengguna' => $pesanan->id_pengguna,
                     'judul' => $judul,
                     'pesan' => $pesan,
-                    'jenis' => 'retur',
-                    'jenis_referensi' => 'retur',
-                    'id_referensi' => $retur->id_retur,
+                    'jenis' => $retur ? 'retur' : 'pesanan',
+                    'jenis_referensi' => $retur ? 'retur' : 'pesanan',
+                    'id_referensi' => $retur?->id_retur ?? $pesanan->id_pesanan,
                     'sudah_dibaca' => false,
                     'created_at' => $waktuSekarang,
                 ]);
 
                 return [
                     'refund' => $refund->fresh(['pembayaran', 'percobaanRefund']),
-                    'retur' => $retur->fresh(['pesanan']),
+                    'retur' => $retur?->fresh(['pesanan']),
                     'percobaan' => $percobaan,
                     'semua_refund_retur_berhasil' => $semuaBerhasil,
                     'seluruh_dana_pesanan_dikembalikan' => $seluruhDanaSudahKembali,

@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\MitraProdukController;
 use App\Http\Controllers\Api\MitraVarianProdukController;
 use App\Http\Controllers\Api\MitraReturController;
 use App\Http\Controllers\RefundRiwayatController;
+use App\Http\Controllers\RefundController;
 
 /*
 |--------------------------------------------------------------------------
@@ -158,6 +159,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/mitra/retur/{id_retur}/instruksi-pengembalian', [MitraReturController::class, 'kirimInstruksiPengembalian']);
     Route::patch('/mitra/retur/{id_retur}/barang-diterima', [MitraReturController::class, 'konfirmasiBarangDiterima']);
     Route::patch('/mitra/retur/{id_retur}/pemeriksaan', [MitraReturController::class, 'periksaBarangRetur']);
+    Route::post('/mitra/refund/{id_refund}/otomatis', [RefundController::class, 'prosesOtomatis']);
     Route::post('/mitra/refund/{id_refund}/manual', [MitraReturController::class, 'catatRefundManual']);
     Route::get('/mitra/refund', [RefundRiwayatController::class, 'indexMitra'])->name('mitra.refund.index');
     Route::get('/mitra/refund/{id_refund}', [RefundRiwayatController::class, 'showMitra'])->name('mitra.refund.show');

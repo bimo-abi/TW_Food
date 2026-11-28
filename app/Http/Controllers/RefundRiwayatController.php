@@ -175,7 +175,6 @@ class RefundRiwayatController extends Controller
         ]);
 
         $query = Refund::query()
-            ->where('jenis_refund', 'retur')
             ->with(['retur', 'pesanan.pengguna', 'pembayaran', 'percobaanRefund'])
             ->latest('created_at');
 
@@ -203,7 +202,6 @@ class RefundRiwayatController extends Controller
         $this->pastikanMitra($request);
 
         $refund = Refund::query()
-            ->where('jenis_refund', 'retur')
             ->findOrFail($id_refund);
 
         return response()->json([
@@ -224,7 +222,6 @@ class RefundRiwayatController extends Controller
         ]);
 
         $query = Refund::query()
-            ->where('jenis_refund', 'retur')
             ->with(['retur', 'pesanan.pengguna', 'pembayaran', 'percobaanRefund'])
             ->latest('created_at');
 
@@ -260,7 +257,6 @@ class RefundRiwayatController extends Controller
     public function showAdmin(int $id_refund)
     {
         $refund = Refund::query()
-            ->where('jenis_refund', 'retur')
             ->with([
                 'pesanan.pengguna',
                 'pembayaran',
@@ -295,9 +291,6 @@ class RefundRiwayatController extends Controller
     private function downloadBukti(int $id_percobaan_refund)
     {
         $percobaan = PercobaanRefund::query()
-            ->whereHas('refund', function ($query) {
-                $query->where('jenis_refund', 'retur');
-            })
             ->findOrFail($id_percobaan_refund);
 
         $respons = is_array($percobaan->respons_gateway)

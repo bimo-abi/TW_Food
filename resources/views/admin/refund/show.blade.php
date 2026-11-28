@@ -137,6 +137,21 @@
             </div>
         </div>
 
+        @if (in_array($refund->status_refund, ['menunggu_diproses', 'gagal', 'perlu_diproses_ulang'], true)
+            && $refund->pembayaran?->penyedia_pembayaran === 'Midtrans'
+            && $refund->pembayaran?->status_pembayaran === 'paid')
+            <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <strong>Refund otomatis Midtrans tersedia.</strong>
+                    <div class="small">Permintaan akan diverifikasi melalui Status API terlebih dahulu. Status berhasil hanya dicatat setelah konfirmasi bank.</div>
+                </div>
+                <form method="POST" action="{{ route('admin.refund.otomatis', $refund->id_refund) }}" onsubmit="return confirm('Ajukan refund otomatis ke Midtrans? Pastikan nominal dan pembayaran sumber sudah benar.');">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">Proses Refund Otomatis</button>
+                </form>
+            </div>
+        @endif
+
         <div class="row g-3 mb-3">
             <div class="col-12 col-xl-6">
                 <div class="card refund-info-card">
@@ -242,7 +257,7 @@
             </div>
         </div>
 
-        @if ($refund->retur && $refund->retur->status_retur === 'sedang_diperiksa' && in_array($refund->status_refund, ['menunggu_diproses', 'gagal', 'perlu_diproses_ulang'], true))
+        @if ((($refund->jenis_refund === 'retur' && $refund->retur?->status_retur === 'sedang_diperiksa') || $refund->jenis_refund === 'pembatalan_operasional') && in_array($refund->status_refund, ['menunggu_diproses', 'gagal', 'perlu_diproses_ulang'], true))
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Catat Hasil Refund Manual</h3>

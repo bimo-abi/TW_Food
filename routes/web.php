@@ -23,6 +23,7 @@ use App\Http\Controllers\AdminVerifikasiPelangganController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\ReturController;
 use App\Http\Controllers\RefundRiwayatController;
+use App\Http\Controllers\RefundController;
 use App\Http\Controllers\PromosiController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\GrosirController;
@@ -520,6 +521,10 @@ Route::get('/admin/retur/bukti/{id_bukti_retur}/preview', [ReturController::clas
 
 Route::get('/admin/retur/bukti/{id_bukti_retur}', [ReturController::class, 'downloadBukti'])
     ->name('admin.retur.bukti')
+    ->middleware('admin');
+
+Route::post('/admin/refund/{id_refund}/otomatis', [RefundController::class, 'prosesOtomatis'])
+    ->name('admin.refund.otomatis')
     ->middleware('admin');
 
 Route::post('/admin/refund/{id_refund}/manual', [ReturController::class, 'catatRefundManual'])

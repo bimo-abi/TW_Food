@@ -8,6 +8,7 @@ use App\Models\PercobaanRefund;
 use App\Models\Pesanan;
 use App\Models\ProduksiPreOrder;
 use App\Models\Refund;
+use App\Models\Retur;
 use App\Models\ReservasiStok;
 use App\Models\RiwayatAktivitasTransaksi;
 use App\Models\VarianProduk;
@@ -392,6 +393,24 @@ class TransaksiIntegrasiService
                 $refund->status_refund = 'berhasil';
                 $refund->selesai_pada = now();
                 $refund->save();
+
+                // Sinkronkan status retur setelah seluruh alokasi refund retur
+                // benar-benar dikonfirmasi oleh bank/payment provider.
+                if ($refund->id_retur) {
+                    $retur = Retur::query()->where('id_retur', $refund->id_retur)
+                        ->lockForUpdate()->first();
+                    if ($retur) {
+                        $refundRetur = Refund::query()->where('id_retur', $retur->id_retur)->get();
+                        if ($refundRetur->isNotEmpty() && $refundRetur->every(fn (Refund $item) => $item->status_refund === 'berhasil')) {
+                            $retur->status_pengembalian_dana = 'selesai';
+                            $retur->status_retur = 'selesai';
+                            $retur->selesai_pada = now();
+                        } else {
+                            $retur->status_pengembalian_dana = 'diproses';
+                        }
+                        $retur->save();
+                    }
+                }
 
                 $pesanan = Pesanan::where(
                     'id_pesanan',
